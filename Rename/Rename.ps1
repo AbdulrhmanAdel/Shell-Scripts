@@ -26,9 +26,14 @@ function ReplaceText {
     $newFileName = $fileName;
     switch ($operation) {
         "Replace" { $newFileName = $fileName -replace $removedText, $replaceText; }
-        "Remove" { $newFileName = $fileName -replace $removedText; }
+        "Remove" { 
+            $newFileName = $fileName -replace ([System.Text.RegularExpressions.Regex]::Escape($removedText)); 
+        }
     }
-    Rename-Item -LiteralPath $path -NewName $newFileName -Force
+
+    if ($fileName -ne $newFileName) {
+        Rename-Item -LiteralPath $path -NewName $newFileName -Force
+    }
 }
 
 $pathItem = Get-Item -LiteralPath $folderPath -Force;

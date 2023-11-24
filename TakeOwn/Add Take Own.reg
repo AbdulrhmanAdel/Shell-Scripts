@@ -1,0 +1,37 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts]
+"MUIVerb"="Scripts"
+"SubCommands"=""
+
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\TakeOwn]
+"MUIVerb"="TakeOwn"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\TakeOwn\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\TakeOwn\shell\Git]
+@="Git"
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\TakeOwn\shell\Git\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\TakeOwn\\takeown.ps1\" \"%1\" \"git\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\TakeOwn\shell\Normal]
+@="Normal"
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\TakeOwn\shell\Normal\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\TakeOwn\\takeown.ps1\" \"%1\""
+
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\TakeOwn]
+@="TakeOwn"
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\TakeOwn\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\TakeOwn\\takeown.ps1\" \"%1\""

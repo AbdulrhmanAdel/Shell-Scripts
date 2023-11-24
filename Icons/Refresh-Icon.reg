@@ -1,0 +1,20 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+"MUIVerb"="Scripts"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons]
+"MUIVerb"="Icons"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Refresh Icon]
+@="Refresh Icon"
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Refresh Icon\command]
+@="powershell.exe -file \"D:\\Programs\\OS\\Windows\\Shell-Scripts\\Icons\\Refresh-Icon.ps1\" \"%1\""

@@ -1,0 +1,43 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+"MUIVerb"="Scripts"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons]
+"MUIVerb"="Icons"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Set Icon From]
+"MUIVerb"="Set Icon From"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Set Icon From\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Set Icon From\shell\Open Browser]
+@="Open Browser"
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Set Icon From\shell\Open Browser\command]
+@="D:\\Programs\\OS\\Windows\\Shell-Scripts\\Icons\\IcoConverter\\IcoConverter.exe \"%1\" 0"
+
+
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Set Icon From\shell\Image URL]
+@="Image URL"
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Set Icon From\shell\Image URL\command]
+@="D:\\Programs\\OS\\Windows\\Shell-Scripts\\Icons\\IcoConverter\\IcoConverter.exe \"%1\" 1"
+
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Set Icon From\shell\Image Link]
+@="Image Link"
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Set Icon From\shell\Image Link\command]
+@="D:\\Programs\\OS\\Windows\\Shell-Scripts\\Icons\\IcoConverter\\IcoConverter.exe \"%1\" 2"

@@ -1,0 +1,43 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+"MUIVerb"="Scripts"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media]
+"MUIVerb"="Media"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Remove All Subs Except Ar, En]
+@="Remove All Subs Except Ar, En"
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Remove All Subs Except Ar, En\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\Set Arabic Sub as Default and Move it to be first sub\\Set Arabic Sub as Default and Move it to be first sub.ps1\" \"%1\""
+
+
+
+
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts]
+"MUIVerb"="Scripts"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media]
+"MUIVerb"="Media"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell]
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Remove All Subs Except Ar, En]
+@="Remove All Subs Except Ar, En"
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Remove All Subs Except Ar, En\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\Set Arabic Sub as Default and Move it to be first sub\\Set Arabic Sub as Default and Move it to be first sub.ps1\" \"%1\""
