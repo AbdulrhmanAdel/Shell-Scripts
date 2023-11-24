@@ -74,6 +74,7 @@ if ($prefix) {
     $outputPath = "$prefix\$outputPath";
 }
 
+
 if (!$outputPath) {
     $outputPath = "$inputPath\Out";
 }
@@ -94,7 +95,7 @@ if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
         -arLangId $arLangId `
         -audio $audio;
 
-    # Remove-Item "$inputPath";
+    Remove-Item "$inputPath";
 }
 else {
     
@@ -118,9 +119,9 @@ else {
             -audio $audio;
     }
 
-    # Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
-    #     Remove-Item "$inputPath/$_";
-    # }
+    Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
+        Remove-Item "$inputPath/$_";
+    }
 }
 
 
