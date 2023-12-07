@@ -1,0 +1,55 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+"MUIVerb"="Scripts"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media]
+"MUIVerb"="Media"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell]
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Encode]
+"MUIVerb"="Encode"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Encode\shell]
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses]
+@="Courses"
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\HandBrake\\HandBrake.ps1\" \"%1\" "
+
+# Files
+
+[   \Scripts]
+"MUIVerb"="Scripts"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media]
+"MUIVerb"="Media"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell]
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode]
+"MUIVerb"="Encode"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell]
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses]
+@="Courses"
+
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\HandBrake\\HandBrake.ps1\" \"%1\" "

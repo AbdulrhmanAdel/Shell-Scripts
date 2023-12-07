@@ -23,9 +23,6 @@ if ($to) {
     $to = " --playlist-end $to";
 }
 
-if (!$format -or $format -le 5) {
-    $format = 2;
-}
 switch ($format) {
     1 { $yt += " -f 'ba' -x --audio-format mp3 --audio-quality 160K  --yes-playlist $from $to -o '$destinitionPath\\%(playlist_index)s - %(title)s' $url;" }
     2 { $yt += " -f 'ba' -x --audio-format m4a --audio-quality 160K  --yes-playlist $from $to -o '$destinitionPath\\%(playlist_index)s - %(title)s' $url;" }

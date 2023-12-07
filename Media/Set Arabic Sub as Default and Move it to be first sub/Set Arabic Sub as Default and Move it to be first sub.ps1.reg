@@ -47,7 +47,7 @@ Windows Registry Editor Version 5.00
 
 # Files
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts]
+[   \Scripts]
 "MUIVerb"="Scripts"
 "SubCommands"=""
 
