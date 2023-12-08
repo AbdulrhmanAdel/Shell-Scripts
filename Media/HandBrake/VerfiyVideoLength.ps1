@@ -35,7 +35,8 @@ function CheckFile {
     $sourceLength = GetDuration -videoPath $sourceFilePath;
     $destinitionLength = GetDuration -videoPath $destinitionFilePath;
 
-    if ($sourceLength -ne $destinitionLength) {
+    $diff = ($sourceLength - $destinitionLength);
+    if ($sourceLength -ne $destinitionLength -and $diff -ne 1 -and $diff -ne -1) {
         Write-Output  "ERROR SOURCE $sourceFilePath length is $sourceLength ===> DES $destinitionFilePath length is $destinitionLength";
         return;
     }
