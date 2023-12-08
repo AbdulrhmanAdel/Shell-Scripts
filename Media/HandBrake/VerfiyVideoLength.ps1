@@ -6,6 +6,10 @@ function GetDuration {
         $videoPath
     )
 
+    if (!(Test-Path -LiteralPath $videoPath)) {
+        Write-Output -Debug "FILE $videoPath DOESN'T EXITS";
+    }
+    
     $windowsMediaPlayer = New-Object -ComObject WMPlayer.OCX
     $mediaItem = $windowsMediaPlayer.newMedia($videoPath)
     $length = $mediaItem.duration  # Duration is in seconds
@@ -27,6 +31,12 @@ function CheckFile {
         $sourceFilePath,
         $destinitionFilePath
     )
+
+    if (!(Test-Path -LiteralPath $destinitionFilePath)) {
+        Write-Output -Debug "FILE $destinitionFilePath DOESN'T EXITS";
+        return;
+    }
+    
     $isSoruceVideo = IsVideo -videoPath $sourceFilePath;
     if (!$isSoruceVideo) {
         return;
