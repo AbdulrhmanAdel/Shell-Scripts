@@ -16,6 +16,26 @@ function GetDuration {
     return $length;
 }
 
+
+function CalculateFileCount {
+    param (
+        $folderPath
+    )
+
+    $count = 0;
+    $files = Get-ChildItem  -LiteralPath $folderPath;
+    foreach ($file in $files) {
+        if ($file -is [System.IO.DirectoryInfo]) {
+            $count += CalculateFileCount -folderPath  $file.FullName;
+            continue;
+        }
+    
+        $count += 1;
+    }
+
+    return $count;
+}
+
 $videoExtensions = @(".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".m4v", ".webm");
 function IsVideo {
     param (
@@ -65,6 +85,9 @@ function CheckDirectory {
     }
 }
 
+$soruceFileCount = CalculateFileCount -folderPath $source;
+$destinitionFileCount = CalculateFileCount -folderPath $destinition;
+Write-Output "SOURCE: $soruceFileCount => DESTINITION: $destinitionFileCount"
 $childern = Get-ChildItem -LiteralPath $source;
 foreach ($child in $childern) {
     $ouputChildDirectory = "$destinition/" + $child.Name;
