@@ -7,7 +7,7 @@ function GetDuration {
     )
 
     if (!(Test-Path -LiteralPath $videoPath)) {
-        Write-Output -Debug "FILE $videoPath DOESN'T EXITS";
+        Write-Output "FILE $videoPath DOESN'T EXITS";
     }
     
     $windowsMediaPlayer = New-Object -ComObject WMPlayer.OCX
@@ -52,10 +52,10 @@ function CheckFile {
         $destinitionFilePath
     )
 
-    if (!(Test-Path -LiteralPath $destinitionFilePath)) {
-        Write-Output -Debug "FILE $destinitionFilePath DOESN'T EXITS";
-        return;
-    }
+    # if (!(Test-Path -LiteralPath $destinitionFilePath)) {
+    #     Write-Output -Debug "FILE $destinitionFilePath DOESN'T EXITS";
+    #     return;
+    # }
     
     $isSoruceVideo = IsVideo -videoPath $sourceFilePath;
     if (!$isSoruceVideo) {
