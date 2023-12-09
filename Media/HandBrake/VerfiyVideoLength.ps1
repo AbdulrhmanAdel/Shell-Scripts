@@ -1,3 +1,4 @@
+$mediaInfo = "D:\Programs\Media\Tools\MediaInfo\MediaInfo.exe";
 $source = $args[0];
 $destinition = "$source (Converted)";
 Write-Output $source;
@@ -10,10 +11,21 @@ function GetDuration {
         Write-Output "FILE $videoPath DOESN'T EXITS";
     }
     
-    $windowsMediaPlayer = New-Object -ComObject WMPlayer.OCX
-    $mediaItem = $windowsMediaPlayer.newMedia($videoPath)
-    $length = $mediaItem.duration  # Duration is in seconds
-    return $length;
+    $json = &$mediaInfo  --Output=JSON "D:\Education\Courses\Mosh Hamedani\React\React Native\The Ultimate React Native Series - Part 1\1. Getting Started\11- Logging.mp4" | ConvertFrom-Json;
+    foreach ($track in $json.media.track) {
+        $trackType = $track.'@type'; 
+        if ($trackType -eq "Video") {
+            $duration = [int]$track.'Duration';
+            return $duration;
+        }
+
+        if ($trackType -eq "Audio") {
+            $duration = [int]$track.'Duration';
+            return $duration;
+        }
+    }
+
+    return 0
 }
 
 
