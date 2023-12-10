@@ -1,6 +1,5 @@
 $handbrakeCli = "D:\Programs\Media\Tools\HandBrake\HandBrake CLI\HandBrakeCLI.exe";
-$global:currentFileNumber = 1;
-$global:allFilesCount = 0;
+
 function Encode {
     param (
         $inputPath,
@@ -90,28 +89,35 @@ function EncodeDirectory {
 }
 
 $coursePath = $args[0];
-$global:allFilesCount = CalculateFileCount -folderPath $coursePath;
-$directoryInfo = Get-Item -LiteralPath $coursePath;
-$convertedCoursePath = $directoryInfo.FullName.Replace($directoryInfo.Name, $directoryInfo.Name + " (Converted)");
-CreateDirectoryIfNotExist -path $convertedCoursePath;
-$childern = Get-ChildItem -LiteralPath $coursePath;
-
-
-foreach ($child in $childern) {
-    if ($child -is [System.IO.DirectoryInfo]) {
-        $ouputChildDirectory = "$convertedCoursePath/" + $child.Name;
-        EncodeDirectory -sourcePath $child.FullName -outputPath  $ouputChildDirectory
-        continue;
+$coursePathInfo = Get-Item -LiteralPath $coursePath;
+if ($coursePathInfo -is [System.IO.DirectoryInfo]) {
+    $global:currentFileNumber = 1;
+    $global:allFilesCount = CalculateFileCount -folderPath $coursePath;
+    $convertedCoursePath = $coursePathInfo.FullName.Replace($coursePathInfo.Name, $coursePathInfo.Name + " (Converted)");
+    CreateDirectoryIfNotExist -path $convertedCoursePath;
+    $childern = Get-ChildItem -LiteralPath $coursePath;
+    
+    foreach ($child in $childern) {
+        if ($child -is [System.IO.DirectoryInfo]) {
+            $ouputChildDirectory = "$convertedCoursePath/" + $child.Name;
+            EncodeDirectory -sourcePath $child.FullName -outputPath  $ouputChildDirectory
+            continue;
+        }
+    
+        HandleFile -fileInfo $child -outputPath $convertedCoursePath;
     }
-
-    HandleFile -fileInfo $child -outputPath $convertedCoursePath;
+    
+    [System.Console]::Clear();
+    Write-Host "HANDLED $global:currentFileNumber / $global:allFilesCount" -ForegroundColor red;
+    Write-Output "DONE CONVERTING";
+    Write-Output "Checking video's Lengths";
+    Write-Output "START Checking";
+    powershell.exe -File "D:\Programs\Shell-Scripts\Media\HandBrake\VerfiyVideoLength.ps1" $coursePath;
+    Write-Output "DONE Checking";
+}
+else {
+    $convertedCoursePath = $coursePathInfo.FullName.Replace($coursePathInfo.Extension, ' (Converted)' + $coursePathInfo.Extension)
+    Encode -inputPath $coursePathInfo.FullName -outputPath $convertedCoursePath;
 }
 
-[System.Console]::Clear();
-Write-Host "HANDLED $global:currentFileNumber / $global:allFilesCount" -ForegroundColor red;
-Write-Output "DONE CONVERTING";
-Write-Output "Checking video's Lengths";
-Write-Output "START Checking";
-powershell.exe -File "D:\Programs\Shell-Scripts\Media\HandBrake\VerfiyVideoLength.ps1" $coursePath;
-Write-Output "DONE Checking";
 Read-Host "Press Any key to exit.";
