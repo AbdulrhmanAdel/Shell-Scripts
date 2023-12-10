@@ -58,7 +58,8 @@ function HandleFile {
         $outputPath
     )
     [System.Console]::Clear();
-    Write-Output "HANDLING $global:currentFileNumber / $global:allFilesCount";
+
+    Write-Host "HANDLING $global:currentFileNumber / $global:allFilesCount" -ForegroundColor red;
     
     $global:currentFileNumber += 1;
     $fileOutputPath = "$outputPath/" + $fileInfo.Name;
