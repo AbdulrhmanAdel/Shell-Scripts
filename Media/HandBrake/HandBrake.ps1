@@ -108,6 +108,7 @@ foreach ($child in $childern) {
 }
 
 [System.Console]::Clear();
+Write-Host "HANDLED $global:currentFileNumber / $global:allFilesCount" -ForegroundColor red;
 Write-Output "DONE CONVERTING";
 Write-Output "Checking video's Lengths";
 Write-Output "START Checking";
