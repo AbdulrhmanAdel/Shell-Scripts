@@ -11,6 +11,7 @@ function Encode {
         --encoder "x264" `
         -q 23 `
         -T `
+        --optimize `
         --width 1280 `
         --height 720 `
         --encoder-preset "Veryfast" `
