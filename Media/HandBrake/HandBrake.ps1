@@ -58,9 +58,9 @@ function HandleFile {
         $outputPath
     )
     [System.Console]::Clear();
-    Write-Output "HANDLING $currentFileNumber / $allFilesCount";
+    Write-Output "HANDLING $global:currentFileNumber / $global:allFilesCount";
     
-    $currentFileNumber += 1;
+    $global:currentFileNumber += 1;
     $fileOutputPath = "$outputPath/" + $fileInfo.Name;
     if (Test-Path $fileOutputPath) {
         return;
@@ -89,7 +89,7 @@ function EncodeDirectory {
 }
 
 $coursePath = $args[0];
-$allFilesCount = CalculateFileCount -folderPath $coursePath;
+$global:allFilesCount = CalculateFileCount -folderPath $coursePath;
 $directoryInfo = Get-Item -LiteralPath $coursePath;
 $convertedCoursePath = $directoryInfo.FullName.Replace($directoryInfo.Name, $directoryInfo.Name + " (Converted)");
 CreateDirectoryIfNotExist -path $convertedCoursePath;
