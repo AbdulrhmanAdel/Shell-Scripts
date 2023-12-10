@@ -1,6 +1,6 @@
 $handbrakeCli = "D:\Programs\Media\Tools\HandBrake\HandBrake CLI\HandBrakeCLI.exe";
-$currentFileNumber = 0;
-$allFilesCount = 0;
+$global:currentFileNumber = 0;
+$global:allFilesCount = 0;
 function Encode {
     param (
         $inputPath,
@@ -108,8 +108,7 @@ foreach ($child in $childern) {
 
 [System.Console]::Clear();
 Write-Output "DONE CONVERTING";
-Write-Output "Checking video's Lengths in 10 Secondes";
-Start-Sleep 10;
+Write-Output "Checking video's Lengths";
 Write-Output "START Checking";
 powershell.exe -File "D:\Programs\Shell-Scripts\Media\HandBrake\VerfiyVideoLength.ps1" $coursePath;
 Write-Output "DONE Checking";

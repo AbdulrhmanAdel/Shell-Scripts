@@ -1,5 +1,5 @@
 $mediaInfo = "D:\Programs\Media\Tools\MediaInfo\MediaInfo.exe";
-$source = $args[0];
+$source = $args[0]
 $destinition = "$source (Converted)";
 Write-Output $source;
 function GetDuration {
@@ -63,11 +63,6 @@ function CheckFile {
         $sourceFilePath,
         $destinitionFilePath
     )
-
-    # if (!(Test-Path -LiteralPath $destinitionFilePath)) {
-    #     Write-Output -Debug "FILE $destinitionFilePath DOESN'T EXITS";
-    #     return;
-    # }
     
     $isSoruceVideo = IsVideo -videoPath $sourceFilePath;
     if (!$isSoruceVideo) {
@@ -108,7 +103,7 @@ foreach ($child in $childern) {
         continue;
     }
 
-    CheckFile -sourceFilePath $child.FullName -outputPath $ouputChildDirectory;
+    CheckFile -sourceFilePath $child.FullName -destinitionFilePath $ouputChildDirectory;
 }
 
 Write-Output "DONE";
