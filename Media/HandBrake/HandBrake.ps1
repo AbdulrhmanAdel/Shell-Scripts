@@ -1,5 +1,5 @@
 $handbrakeCli = "D:\Programs\Media\Tools\HandBrake\HandBrake CLI\HandBrakeCLI.exe";
-$global:currentFileNumber = 0;
+$global:currentFileNumber = 1;
 $global:allFilesCount = 0;
 function Encode {
     param (
