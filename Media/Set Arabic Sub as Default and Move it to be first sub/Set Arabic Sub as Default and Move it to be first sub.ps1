@@ -11,7 +11,6 @@ switch ($videoType) {
     "Series" { $prefix = "D:\Watch\Series"; break; }
 }
 
-
 function GetIds($filePath) {
     $enLangId = 0;
     $arLangId = 0;
@@ -68,17 +67,11 @@ if (!$inputPath) {
     $inputPath = Read-Host Please Enter Video Path?;
 }
 
-$outputPath = Read-Host Please Enter output Path?;
-
-if ($prefix) {
-    $outputPath = "$prefix\$outputPath";
+if (!$prefix) {
+    $prefix = "D:\Watch";
 }
-
-
-if (!$outputPath) {
-    $outputPath = "$inputPath\Out";
-}
-
+$outputPath = (& "D:\Programs\Shell-Scripts\Shared\Show File Selector.ps1" $prefix)[-1];
+Write-Output "Output folder will be $outputPath"
 $pathAsAfile = Get-Item $inputPath;
 if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
     $enLangId, $arLangId, $audio = GetIds -filePath "$inputPath";
@@ -124,5 +117,5 @@ else {
     }
 }
 
-
-Start-Sleep -Seconds 15;
+Write-Output "CLOSING IN 3 SEC";
+Start-Sleep -Seconds 3;

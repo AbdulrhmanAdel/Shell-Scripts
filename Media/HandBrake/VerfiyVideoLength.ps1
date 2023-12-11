@@ -64,8 +64,19 @@ function CheckFile {
         $destinitionFilePath
     )
     
+    if (!(Test-Path -LiteralPath $destinitionFilePath)) {
+        Write-Output  "Destinition $destinitionFilePath Does't exist";
+        return;
+    }
+
     $isSoruceVideo = IsVideo -videoPath $sourceFilePath;
     if (!$isSoruceVideo) {
+        return;
+    }
+
+    $isDestVideo = IsVideo -videoPath $destinitionFilePath;
+    if (!$isDestVideo) {
+        Write-Output  "Destinition $destinitionFilePath Is't a video";
         return;
     }
 
