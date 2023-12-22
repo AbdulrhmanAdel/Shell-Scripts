@@ -1,0 +1,33 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+"MUIVerb"="Scripts"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media]
+"MUIVerb"="Media"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\000 Subtitles]
+"MUIVerb"="Subtitles"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\000 Subtitles\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\000 Subtitles\shell\Rename Subtitles(Custom Sort)]
+@="Rename Subtitles(Custom Sort)"
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\000 Subtitles\shell\Rename Subtitles(Custom Sort)\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\Subtitles\\Rename-Subtitle.ps1\" \"%1\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\000 Subtitles\shell\Rename Subtitles(Default Sort)]
+@="Rename Subtitles(Default Sort)"
+"Icon"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\000 Subtitles\shell\Rename Subtitles(Default Sort)\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\Subtitles\\Default-Rename-Subtitle.ps1\" \"%1\""

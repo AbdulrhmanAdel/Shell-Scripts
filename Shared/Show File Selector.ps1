@@ -50,13 +50,16 @@ $listBox.Add_Click({
         
         if ($selectedItem -eq "New Folder") {
             $form.Hide();
-            $form.Close();
+            # $form.Close();
             $folderName = Read-Host "Please enter folder Name";
             if (!$folderName) {
                 $folderName = "New Folder";
             }
             $global:directoryName = "$global:path/$folderName";
+            $global:path = $global:directoryName;
             CreateDirectoryIfNotExist -path $global:directoryName;
+            RenderOptions;
+            $form.Show();
             return;
         }
 

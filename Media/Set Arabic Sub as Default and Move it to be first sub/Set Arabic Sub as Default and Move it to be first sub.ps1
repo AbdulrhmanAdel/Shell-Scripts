@@ -4,7 +4,8 @@ $inputPath = $args[0];
 $videoType = $args[1];
 $prefix = $null;
 
-$removeSent = Read-Host "Do you want to remove any char from video file?";
+# $removeSent = Read-Host "Do you want to remove any char from video file?";
+$removeSent = "-PSA";
 switch ($videoType) {
     "Anime" { $prefix = "D:\Watch\Anime"; break; }
     "Movie" { $prefix = "D:\Watch\Movies"; break; }

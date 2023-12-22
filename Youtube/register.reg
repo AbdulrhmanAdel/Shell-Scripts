@@ -6,23 +6,23 @@ Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Youtube]
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube]
 "MUIVerb"="Youtube"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Youtube\shell]
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Youtube\shell\Download Single Video]
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Single Video]
 @="Download Single Video"
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Youtube\shell\Download Single Video\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Youtube\\yt-downloader-single-video.ps1\" \"%1\" \"Remove\"" 
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Single Video\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Youtube\\yt-downloader-single-video.ps1\" \"%1\"" 
 
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Youtube\shell\Download Playlist]
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Playlist]
 @="Download Playlist"
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Youtube\shell\Download Playlist\command]
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Playlist\command]
 @="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Youtube\\yt-downloader-playlist.ps1\" \"%1\""

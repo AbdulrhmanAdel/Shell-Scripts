@@ -1,7 +1,8 @@
-$folders = Get-ChildItem -LiteralPath "D:\New folder\AtomicHeart\Content\Localization" -Recurse;
+param(
+  [Parameter(Mandatory = $true)]
+  [string[]]$FilePaths
+)
 
-foreach ($folder in $folders) {
-    if ($folder.Name -eq "en" -or $folder.Name -eq "en-US") {
-        Rename-Item -LiteralPath $folder.FullName "it-IT";
-    }
+foreach ($filePath in $FilePaths) {
+  # Your script logic here, using $filePath variable
 }
