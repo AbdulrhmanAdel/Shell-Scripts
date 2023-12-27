@@ -48,8 +48,8 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell]
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses]
-@="Courses"
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell\001 compress]
+@="Compress"
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\HandBrake\\HandBrake.ps1\" \"%1\" "
+[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell\001 compress\command]
+@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\HandBrake\\Compress.ps1\" \"%1\" "
