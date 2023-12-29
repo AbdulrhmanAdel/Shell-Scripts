@@ -72,6 +72,10 @@ if (!$prefix) {
     $prefix = "D:\Watch";
 }
 $outputPath = (& "D:\Programs\Shell-Scripts\Shared\Show File Selector.ps1" $prefix)[-1];
+if (!$outputPath) {
+    return;
+} 
+
 Write-Output "Output folder will be $outputPath"
 $pathAsAfile = Get-Item $inputPath;
 if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
