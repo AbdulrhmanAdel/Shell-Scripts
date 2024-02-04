@@ -1,17 +1,25 @@
 $folderName = $args[0];
-$git = $args[1] -eq 'git';
-
-$processInfo = New-Object System.Diagnostics.ProcessStartInfo
-$processInfo.FileName = "powershell"
-
-if ($git) {
-    $processInfo.Arguments = "-File ""D:\Programs\Shell-Scripts\TakeOwn\fix-git-owner-ship.ps1"" ""$folderName""";
-} 
-else {
-    $processInfo.Arguments = "-File ""D:\Programs\Shell-Scripts\TakeOwn\normal-take.ps1"" ""$folderName""";
+$runningFilePath = $PSCommandPath;
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Read-Host "PRESS any key to continue."
+    Start-Process Powershell -Verb RunAs "-File $runningFilePath ""$folderName""";
+    exit;
 }
 
-$processInfo.Verb = "RunAs"
+$fileInfo = Get-Item -LiteralPath $folderName;
+$takeOwn = "TakeOwn";
+if ($fileInfo -is [System.IO.FileInfo]) {
+    &$takeOwn /f "$folderName"
+}
+else {
+    $gitPath = "$folderName\.git";
+    if (Test-Path -LiteralPath $gitPath) {
+        &$takeOwn /f "$folderName"
+        $folderName = $gitPath;
+    }
+    &$takeOwn /f "$folderName" /r /d y
+}
 
-# Start the new process
-[System.Diagnostics.Process]::Start($processInfo)
+Write-Output "TakeDown finished for $folderName"
+Write-Output "EXITING IN 5S"
+Start-Sleep -Seconds 5

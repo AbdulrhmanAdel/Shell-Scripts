@@ -17,4 +17,4 @@ Windows Registry Editor Version 5.00
 "Icon"=""
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Refresh Icon\command]
-@="powershell.exe -file \"D:\\Programs\\OS\\Windows\\Shell-Scripts\\Icons\\Refresh-Icon.ps1\" \"%1\""
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\OS\\Windows\\Shell-Scripts\\Icons\\Refresh-Icon.ps1\" \"%1\""

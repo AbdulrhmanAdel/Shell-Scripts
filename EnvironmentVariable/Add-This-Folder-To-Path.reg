@@ -10,4 +10,4 @@ Windows Registry Editor Version 5.00
 @="Add This Folder To Path"
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\900 Add This Folder To Path\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\EnvironmentVariable\\Add-This-Folder-To-Path.ps1\" \"%1\" "
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\EnvironmentVariable\\Add-This-Folder-To-Path.ps1\" \"%1\" "

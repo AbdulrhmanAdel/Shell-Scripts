@@ -1,9 +1,0 @@
-Windows Registry Editor Version 5.00
-
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell]
-
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Runner]
-@="Runner"
-
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Runner\command]
-@="D:\\Programs\\Shell-Scripts\\runner.bat \"%1\""

@@ -24,7 +24,7 @@ Windows Registry Editor Version 5.00
 @="Courses"
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\HandBrake\\HandBrake.ps1\" \"%1\" "
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\Media\\HandBrake\\HandBrake.ps1\" \"%1\" "
 
 # Files
 
@@ -52,4 +52,4 @@ Windows Registry Editor Version 5.00
 @="Compress"
 
 [HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell\001 compress\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\HandBrake\\Compress.ps1\" \"%1\" "
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\Media\\HandBrake\\Compress.ps1\" \"%1\" "

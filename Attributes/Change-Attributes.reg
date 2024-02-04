@@ -17,18 +17,18 @@ Windows Registry Editor Version 5.00
 @="Hide & System"
 
 [HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell\Hide & System\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\""
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\""
 
 
 [HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell\Hide Only]
 @="Hide Only"
 
 [HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell\Hide Only\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\" \"HideOnly\""
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\" \"HideOnly\""
 
 
 [HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell\Reset All]
 @="Reset All"
 
 [HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell\Reset All\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\" \"Reset\""
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\" \"Reset\""

@@ -17,7 +17,7 @@ Windows Registry Editor Version 5.00
 "Icon"=""
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Extract_Tracks\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\Extract\\extract-track.ps1\" \"%1\""
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\Media\\Extract\\extract-track.ps1\" \"%1\""
 
 
 
@@ -40,4 +40,4 @@ Windows Registry Editor Version 5.00
 @="Extract Tracks"
 
 [HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Extract_Tracks\command]
-@="powershell.exe -file \"D:\\Programs\\Shell-Scripts\\Media\\Extract\\extract-track.ps1\" \"%1\""
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\Media\\Extract\\extract-track.ps1\" \"%1\""

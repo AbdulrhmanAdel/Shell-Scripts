@@ -17,7 +17,7 @@ Windows Registry Editor Version 5.00
 "Icon"=""
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Rename\shell\Remove Text\command]
-@="powershell.exe -file \"D:\\Programs\\OS\\Windows\\Shell-Scripts\\Rename\\Rename.ps1\" \"%1\" \"Remove\"" 
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\OS\\Windows\\Shell-Scripts\\FileNames\\Rename\\Rename.ps1\" \"%1\" \"Remove\"" 
 
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Rename\shell\Replace Text]
@@ -25,5 +25,4 @@ Windows Registry Editor Version 5.00
 "Icon"=""
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Rename\shell\Replace Text\command]
-@="powershell.exe -file \"D:\\Programs\\OS\\Windows\\Shell-Scripts\\Rename\\Rename.ps1\" \"%1\"  \"Replace\""
-
+@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\OS\\Windows\\Shell-Scripts\\FileNames\\Rename\\Rename.ps1\" \"%1\"  \"Replace\""

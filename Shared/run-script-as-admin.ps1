@@ -7,4 +7,5 @@ $processInfo.Verb = "RunAs"
 # Start the new process
 $process = [System.Diagnostics.Process]::Start($processInfo)
 $process.WaitForExit();
+
 Write-Host "Press any key to exit..."

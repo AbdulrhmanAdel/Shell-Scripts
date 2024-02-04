@@ -1,0 +1,21 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+"MUIVerb"="Scripts"
+"SubCommands"=""
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\999 TakeOwn]
+@="TakeOwn"
+
+[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\999 TakeOwn\command]
+@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\TakeOwn\\Takeown.ps1\" \"%1\""
+
+;[HKEY_CLASSES_ROOT\*\shell\Scripts\shell]
+
+;[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\999 TakeOwn]
+;@="TakeOwn"
+
+;[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\999 TakeOwn\command]
+;@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\TakeOwn\\Takeown.ps1\" \"%1\""
