@@ -25,21 +25,28 @@ function RemoveFlagIfExits {
     }
 }
 
+function ToggleFlag {
+    param (
+        $flag
+    )
+    
+    if ($file.Attributes.HasFlag([System.IO.FileAttributes]$flag)) {
+        $file.Attributes -= $flag;
+    }
+    else {
+        $file.Attributes += $flag;
+    }
+}
+
 
 switch ($operationType) {
-    'HideOnly' { 
-        RemoveFlagIfExits -flag 'System'; 
+    'System' { 
+        ToggleFlag -flag 'System'; 
         AddFlagIfNotExits -flag 'Hidden'; 
         break;
     }
-    'Reset' {
-        RemoveFlagIfExits -flag 'System';
-        RemoveFlagIfExits -flag 'Hidden'; 
-        break;
-    }
-    Default {
-        AddFlagIfNotExits -flag 'System';
-        AddFlagIfNotExits -flag 'Hidden';
+    'Hidden' {
+        ToggleFlag -flag 'Hidden';
         break;
     }
 }
