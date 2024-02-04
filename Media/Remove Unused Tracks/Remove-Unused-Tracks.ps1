@@ -101,7 +101,6 @@ else {
     if (!$filter) { $filter = ""; }
 
     Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
-        echo "Proccessing $inputPath/$_";
         $enLangId, $arLangId, $audio = GetIds -filePath "$inputPath/$_";
         $outputFilePath = "$outputPath/$_";
         if ($removeSent) {
