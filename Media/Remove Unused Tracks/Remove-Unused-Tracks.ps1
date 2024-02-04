@@ -1,16 +1,15 @@
 ﻿$mkvmerge = "D:\Programs\Media\Tools\mkvtoolnix\mkvmerge.exe";
 $mediaInfo = "D:\Programs\Media\Tools\MediaInfo\MediaInfo.exe";
 $inputPath = $args[0];
-$videoType = $args[1];
 $prefix = $null;
 
 # $removeSent = Read-Host "Do you want to remove any char from video file?";
 $removeSent = "-PSA";
-switch ($videoType) {
-    "Anime" { $prefix = "D:\Watch\Anime"; break; }
-    "Movie" { $prefix = "D:\Watch\Movies"; break; }
-    "Series" { $prefix = "D:\Watch\Series"; break; }
-}
+# switch ($videoType) {
+#     "Anime" { $prefix = "D:\Watch\Anime"; break; }
+#     "Movie" { $prefix = "D:\Watch\Movies"; break; }
+#     "Series" { $prefix = "D:\Watch\Series"; break; }
+# }
 
 function GetIds($filePath) {
     $enLangId = 0;
@@ -71,7 +70,7 @@ if (!$inputPath) {
 if (!$prefix) {
     $prefix = "D:\Watch";
 }
-$outputPath = (& "D:\Programs\Shell-Scripts\Shared\Show File Selector.ps1" $prefix)[-1];
+$outputPath = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Show File Selector.ps1" $prefix)[-1];
 if (!$outputPath) {
     return;
 } 
