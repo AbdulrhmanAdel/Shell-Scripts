@@ -39,8 +39,11 @@ $form.Controls.Add($listBox)
 # Add an event handler for item click
 $listBox.Add_Click({
         $selectedItem = $listBox.SelectedItem
-        $listBox.Items.Clear();
+        if ($selectedItem -eq $null) {
+            return;
+        }
 
+        $listBox.Items.Clear();
         if ($selectedItem -eq "/") {
             $form.Hide();
             $form.Close()
