@@ -17,7 +17,7 @@ Windows Registry Editor Version 5.00
 "Icon"=""
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Single Video\command]
-@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\Youtube\\yt-downloader-single-video.ps1\" \"%1\"" 
+@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Youtube\\yt-downloader-single-video.ps1\" \"%1\"" 
 
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Playlist]
@@ -25,4 +25,4 @@ Windows Registry Editor Version 5.00
 "Icon"=""
 
 [HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Playlist\command]
-@="powershell.exe -file \"D:\\Education\\Projects\MyProjects\\Shell-Scripts\\Youtube\\yt-downloader-playlist.ps1\" \"%1\""
+@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Youtube\\yt-downloader-playlist.ps1\" \"%1\""
