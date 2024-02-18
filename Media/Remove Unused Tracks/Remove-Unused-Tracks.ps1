@@ -1,15 +1,23 @@
-﻿$mkvmerge = "D:\Programs\Media\Tools\mkvtoolnix\mkvmerge.exe";
+$mkvmerge = "D:\Programs\Media\Tools\mkvtoolnix\mkvmerge.exe";
 $mediaInfo = "D:\Programs\Media\Tools\MediaInfo\MediaInfo.exe";
+Write-Host $args;
 $inputPath = $args[0];
-$prefix = $null;
-
+$prefix = "D:\Watch";
+$inputFiles = ($inputPath);
+$isMultiFilesMode = $args.Contains("--multi");
+if ($isMultiFilesMode) {
+    $inputFiles = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Ensure-One-Instance.ps1" $inputPath);
+    if ($null -eq $inputFiles) {
+        exit;
+    }
+}
+$outputPath = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Show File Selector.ps1" $prefix)[-1];
+if (!$outputPath) {
+    return;
+} 
 # $removeSent = Read-Host "Do you want to remove any char from video file?";
 $removeSent = "-PSA";
-# switch ($videoType) {
-#     "Anime" { $prefix = "D:\Watch\Anime"; break; }
-#     "Movie" { $prefix = "D:\Watch\Movies"; break; }
-#     "Series" { $prefix = "D:\Watch\Series"; break; }
-# }
+
 
 function GetIds($filePath) {
     $enLangId = 0;
@@ -63,60 +71,49 @@ function Start-Convert-Video($inputPath, $outputPath, $enLangId, $arLangId, $aud
         --track-order "0:0,0:1,0:$audio,0:$arLangId,0:$enLangId";
 }
 
-if (!$inputPath) {
-    $inputPath = Read-Host Please Enter Video Path?;
-}
-
-if (!$prefix) {
-    $prefix = "D:\Watch";
-}
-$outputPath = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Show File Selector.ps1" $prefix)[-1];
-if (!$outputPath) {
-    return;
-} 
-
-Write-Output "Output folder will be $outputPath"
-$pathAsAfile = Get-Item $inputPath;
-if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
-    $enLangId, $arLangId, $audio = GetIds -filePath "$inputPath";
-
-    $outputFilePath = "$outputPath/$($pathAsAfile.Name)";
-    if ($removeSent) {
-        $outputFilePath = "$outputPath/" + $pathAsAfile.Name -replace $removeSent;
-    }
-
-    Start-Convert-Video `
-        -inputPath "$inputPath" `
-        -outputPath $outputFilePath `
-        -enLangId $enLangId `
-        -arLangId $arLangId `
-        -audio $audio;
-
-    Remove-Item "$inputPath";
-}
-else {
+foreach ($inputPath in $inputFiles) {
+    $pathAsAfile = Get-Item $inputPath;
+    if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
+        $enLangId, $arLangId, $audio = GetIds -filePath "$inputPath";
     
-    $filter = Read-Host "Start with?";
-
-    if (!$filter) { $filter = ""; }
-
-    Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
-        $enLangId, $arLangId, $audio = GetIds -filePath "$inputPath/$_";
-        $outputFilePath = "$outputPath/$_";
+        $outputFilePath = "$outputPath/$($pathAsAfile.Name)";
         if ($removeSent) {
-            $outputFilePath = "$outputPath/" + $_ -replace $removeSent;
+            $outputFilePath = "$outputPath/" + $pathAsAfile.Name -replace $removeSent;
         }
-
+    
         Start-Convert-Video `
-            -inputPath "$inputPath/$_" `
+            -inputPath "$inputPath" `
             -outputPath $outputFilePath `
             -enLangId $enLangId `
             -arLangId $arLangId `
             -audio $audio;
+    
+        Remove-Item "$inputPath";
     }
-
-    Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
-        Remove-Item "$inputPath/$_";
+    else {
+        
+        $filter = Read-Host "Start with?";
+    
+        if (!$filter) { $filter = ""; }
+    
+        Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
+            $enLangId, $arLangId, $audio = GetIds -filePath "$inputPath/$_";
+            $outputFilePath = "$outputPath/$_";
+            if ($removeSent) {
+                $outputFilePath = "$outputPath/" + $_ -replace $removeSent;
+            }
+    
+            Start-Convert-Video `
+                -inputPath "$inputPath/$_" `
+                -outputPath $outputFilePath `
+                -enLangId $enLangId `
+                -arLangId $arLangId `
+                -audio $audio;
+        }
+    
+        Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
+            Remove-Item "$inputPath/$_";
+        }
     }
 }
 
