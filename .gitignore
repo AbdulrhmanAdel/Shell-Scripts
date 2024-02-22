@@ -1,4 +1,5 @@
 .vscode
 .idea
 # Local Testing file
-test.ps1
+playground.ps1
+playground.bat

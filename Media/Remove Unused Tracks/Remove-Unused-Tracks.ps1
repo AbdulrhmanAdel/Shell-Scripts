@@ -59,7 +59,7 @@ function GetIds($filePath) {
 
 function Start-Convert-Video($inputPath, $outputPath, $enLangId, $arLangId, $audio) {
 
-    &$mkvmerge `
+    $result = &$mkvmerge `
         --output "$outputPath" `
         --audio-tracks "$audio" `
         --subtitle-tracks "$enLangId,$arLangId" `
@@ -69,6 +69,15 @@ function Start-Convert-Video($inputPath, $outputPath, $enLangId, $arLangId, $aud
         --forced-display-flag "$($arLangId):yes" `
         "$inputPath" `
         --track-order "0:0,0:1,0:$audio,0:$arLangId,0:$enLangId";
+
+    $isSuccess = $result[-1].StartsWith("Multiplexing took");
+    if ($isSuccess) {
+        Write-Host "Success: $inputPath"
+        Remove-Item "$inputPath";
+    }
+    else {
+        Write-Host "Error: $inputPath"
+    }
 }
 
 foreach ($inputPath in $inputFiles) {
@@ -87,8 +96,6 @@ foreach ($inputPath in $inputFiles) {
             -enLangId $enLangId `
             -arLangId $arLangId `
             -audio $audio;
-    
-        Remove-Item "$inputPath";
     }
     else {
         
@@ -109,10 +116,6 @@ foreach ($inputPath in $inputFiles) {
                 -enLangId $enLangId `
                 -arLangId $arLangId `
                 -audio $audio;
-        }
-    
-        Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
-            Remove-Item "$inputPath/$_";
         }
     }
 }
