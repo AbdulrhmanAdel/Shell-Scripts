@@ -1,11 +1,9 @@
-$folderName = $args[0];
-$runningFilePath = $PSCommandPath;
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Read-Host "PRESS any key to continue."
-    Start-Process Powershell -Verb RunAs "-File $runningFilePath ""$folderName""";
+    Start-Process Powershell -Verb RunAs "-Command ""$($MyInvocation.Line)""";
     exit;
 }
 
+$folderName = $args[0];
 $fileInfo = Get-Item -LiteralPath $folderName;
 $takeOwn = "TakeOwn";
 if ($fileInfo -is [System.IO.FileInfo]) {

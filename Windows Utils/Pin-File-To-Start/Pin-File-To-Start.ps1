@@ -1,9 +1,4 @@
 $filePath = $args[0];
-$runningFilePath = $PSCommandPath;
-# if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-#     Start-Process Powershell -Verb RunAs "-File $runningFilePath ""$filePath""";
-#     exit;
-# }
 
 $fileInfo = Get-Item -LiteralPath $filePath;
 $shortcutName = $fileInfo.Name.Replace($fileInfo.Extension, ".lnk");
