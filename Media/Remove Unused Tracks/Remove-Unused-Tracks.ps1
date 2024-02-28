@@ -6,7 +6,7 @@ $prefix = "D:\Watch";
 $inputFiles = ($inputPath);
 $isMultiFilesMode = $args.Contains("--multi");
 if ($isMultiFilesMode) {
-    $inputFiles = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Ensure-One-Instance.ps1" $inputPath);
+    $inputFiles = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Ensure-One-Instance.ps1" $inputPath "media.txt");
     if ($null -eq $inputFiles) {
         exit;
     }

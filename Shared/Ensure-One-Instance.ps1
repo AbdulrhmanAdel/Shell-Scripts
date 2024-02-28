@@ -1,6 +1,11 @@
 # $lockFilePath = ($PSScriptRoot + "/" + $MyInvocation.MyCommand.Name).Replace('.ps1', '.lock');
-$textFilePath = ($PSScriptRoot + "/" + $MyInvocation.MyCommand.Name).Replace('.ps1', '.txt');
+$fileName = $args[1];
+if (!$fileName) {
+    $fileName = $MyInvocation.MyCommand.Name.Replace('.ps1', '.txt')
+}
+$textFilePath = $PSScriptRoot + "/" + $fileName;
 $arg = $args[0];
+
 if (
     Test-Path $textFilePath) { 
     Add-Content -Path "$textFilePath" -Value "$($arg)";
