@@ -44,3 +44,4 @@ Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\*\shell\Scripts\shell\001 Media\shell\Remove Unused Tracks (Multi Files)\command]
 @="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Media\\Remove Unused Tracks\\Remove-Unused-Tracks.ps1\" \"%1\" \"--multi\""
+# @="wscript /"D://RUNNER.vbs/" "" "text" \"%1\" \"--multi\""

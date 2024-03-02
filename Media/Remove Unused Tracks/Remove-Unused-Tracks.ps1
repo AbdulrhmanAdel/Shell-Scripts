@@ -1,23 +1,13 @@
 $mkvmerge = "D:\Programs\Media\Tools\mkvtoolnix\mkvmerge.exe";
 $mediaInfo = "D:\Programs\Media\Tools\MediaInfo\MediaInfo.exe";
-Write-Host $args;
-$inputPath = $args[0];
 $prefix = "D:\Watch";
-$inputFiles = ($inputPath);
-$isMultiFilesMode = $args.Contains("--multi");
-if ($isMultiFilesMode) {
-    $inputFiles = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Ensure-One-Instance.ps1" $inputPath "media.txt");
-    if ($null -eq $inputFiles) {
-        exit;
-    }
-}
+$inputFiles = $args;
 $outputPath = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Show File Selector.ps1" $prefix)[-1];
 if (!$outputPath) {
     return;
 } 
 # $removeSent = Read-Host "Do you want to remove any char from video file?";
 $removeSent = "-PSA";
-
 
 function GetIds($filePath) {
     $enLangId = 0;

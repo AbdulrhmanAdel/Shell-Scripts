@@ -1,4 +1,4 @@
-$inputFiles = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Ensure-One-Instance.ps1" $($args[0]) "subtitle-renamer.txt");
+$inputFiles = $args;
 if ($inputFiles.Length -le 0) { Exit; };
 $subtitles = $inputFiles | Where-Object {
     return $_.EndsWith(".ass") -or $_.EndsWith(".srt");
@@ -57,9 +57,14 @@ function PromptForYes {
 }
 PromptForYes
 
+function Remove-Text($text) {
+    $text = $text.Replace("-PSA", "");
+    $text = $text.Replace("(Hi10)", "");
+    return $text;
+}
 foreach ($files in $dic) {
     $video = $files[0];
-    $newVideoName = $video.FileName.Replace("-PSA", "");
+    $newVideoName = Remove-Text($video.FileName);
     Rename-Item -LiteralPath "$folderPath/$($video.FileName)" -NewName "$newVideoName";
     $subtitle = $files[1];
     $videoExt = [System.IO.Path]::GetExtension($newVideoName);
