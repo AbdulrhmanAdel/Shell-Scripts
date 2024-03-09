@@ -14,7 +14,7 @@ if ($subtitles.Length -eq 0 -or $subtitles.Length -ne $videos.Length) {
 }
 $folderPath = (Get-Item -LiteralPath $videos[0]).DirectoryName;
 function Get-EpisodeNumber($fileName) {
-    $match = $fileName -match "(?i:(Episode *(\d+))|(E(\d+))|(E *(\d+))|(E *\((\d+)\)))";
+    $match = $fileName -match "(?i:(Episode *(\d+))|(E(\d+))|(E *(\d+))|(E *\((\d+)\)))|(-(\d+))|(- *(\d+))";
     $outNumber = $null;
     foreach ($match in $Matches.Values) {
         if ([Int32]::TryParse($match, [ref] $outNumber)) {
