@@ -5,107 +5,84 @@ $inputFiles = $args;
 $outputPath = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Show File Selector.ps1" $prefix)[-1];
 if (!$outputPath) {
     return;
-} 
+}
 # $removeSent = Read-Host "Do you want to remove any char from video file?";
 $removeSent = "-PSA";
+function RemoveUnusedTracks(
+    $inputPath,
+    $outputPath
+) {
+    $command = "--output ""$outputPath""";
+    $json = &$mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json;
+    $audioTracks = $json.media.track | Where-Object { $_.'@type' -eq 'Audio' };
+    $subtitleTracks = $json.media.track | Where-Object { $_.'@type' -eq 'Text' };
+    $trackOrder = "0:0,0:1";
 
-function GetIds($filePath) {
-    $enLangId = 0;
-    $arLangId = 0;
-    $nonEnglishAudioId = 0;
-    $englishAudioId = 0;
-    $json = &$mediaInfo  --Output=JSON "$filePath" | ConvertFrom-Json;
-    foreach ($track in $json.media.track) {
-        $trackType = $track.'@type';
-
-        switch ($trackType) {
-            'Text' {  
-                if ($track.Language -eq "en" -or $track.Language -eq "eng" -or $track.Title -eq "English") {
-                    $enLangId = [int]$track.ID - 1;
-                }
-    
-                if ($track.Language -eq "ara" -or $track.Language -eq "ar" -or $track.Title -contains "Arabic") {
-                    $arLangId = [int]$track.ID - 1;
-                }
-            }
-            'Audio' {
-                if ($track.Language -eq "en" -or $track.Language -eq "eng" -or $track.Title -eq "English") {
-                    $englishAudioId = [int]$track.ID - 1;
-                }
-                else {
-                    $nonEnglishAudioId = [int]$track.ID - 1;
-                }
-            }
-            Default {}
+    $audioId = $null;
+    if ($audioTracks.Length -gt 1) {
+        $nonEnglishTrack = $audioTracks | Where-Object { $_.Language -ne "en" -and $_.Language -ne "eng" -and $_.Title -ne "English" };
+        if ($nonEnglishTrack) {
+            $audioId = [int]$nonEnglishTrack.ID - 1;
         }
     }
+    if (!$audioId) {
+        $audioId = [int]$audioTracks[0].ID - 1
+    }
+    
+    $command += " --audio-tracks ""$audioId""";
+    $trackOrder += ",0:$audioId"
 
-    if (!$nonEnglishAudioId) {
-        $nonEnglishAudioId = $englishAudioId;
+    $subTracks = "";
+    $arSubTrack = $subtitleTracks | Where-Object { $_.Language -eq "ara" -or $_.Language -eq "ar" -or $_.Title -contains "Arabic" };
+    if ($arSubTrack) {
+        $arSubTrackId = [int]$arSubTrack.ID - 1;
+        $subTracks = "$arSubTrackId";
+        $trackOrder += ",0:$arSubTrackId"
+        $command += " --default-track-flag ""$($arSubTrackId):yes"""
+        $command += " --forced-display-flag ""$($arSubTrackId):yes"""
+    }
+    $engSubTrack = $subtitleTracks | Where-Object { $_.Language -eq "en" -or $_.Language -eq "eng" -or $_.Title -eq "English" };
+    if ($engSubTrack) {
+        $engSubTrackId = [int]$engSubTrack.ID - 1;
+        if ($subTracks.Length -gt 0) {
+            $subTracks += ",$engSubTrackId";
+        }
+        else {
+            $subTracks = "$engSubTrackId";
+        }
+        $trackOrder += ",0:$engSubTrackId"
     }
 
-    return $enLangId, $arLangId, $nonEnglishAudioId;
-}
-
-function Start-Convert-Video($inputPath, $outputPath, $enLangId, $arLangId, $audio) {
-
-    $result = &$mkvmerge `
-        --output "$outputPath" `
-        --audio-tracks "$audio" `
-        --subtitle-tracks "$enLangId,$arLangId" `
-        --default-track-flag "$($arLangId):yes" `
-        --forced-display-flag "$($audio):yes" `
-        --default-track-flag "$($audio):yes" `
-        --forced-display-flag "$($arLangId):yes" `
-        "$inputPath" `
-        --track-order "0:0,0:1,0:$audio,0:$arLangId,0:$enLangId";
-
-    $isSuccess = $result[-1].StartsWith("Multiplexing took");
-    if ($isSuccess) {
-        Write-Host "Success: $inputPath"
-        Remove-Item "$inputPath";
+    if ($subTracks.Length -gt 0) {
+        $command += " --subtitle-tracks ""$subTracks""";
     }
-    else {
-        Write-Host "Error: $inputPath"
-    }
+
+    $command += " ""$inputPath"" --track-order ""$trackOrder"""
+
+    $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
+    $processInfo.FileName = "powershell";
+    $processInfo.Arguments = "-Command $mkvmerge $command";
+    $processInfo.UseShellExecute = $false;
+    [System.Diagnostics.Process]::Start($processInfo)
 }
 
 foreach ($inputPath in $inputFiles) {
     $pathAsAfile = Get-Item $inputPath;
     if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
-        $enLangId, $arLangId, $audio = GetIds -filePath "$inputPath";
-    
-        $outputFilePath = "$outputPath/$($pathAsAfile.Name)";
-        if ($removeSent) {
-            $outputFilePath = "$outputPath/" + $pathAsAfile.Name -replace $removeSent;
-        }
-    
-        Start-Convert-Video `
-            -inputPath "$inputPath" `
-            -outputPath $outputFilePath `
-            -enLangId $enLangId `
-            -arLangId $arLangId `
-            -audio $audio;
+        $newName = $pathAsAfile.Name.Replace($removeSent, "");
+        $outputFilePath = "$outputPath/$newName";
+        RemoveUnusedTracks -inputPath $inputPath -outputPath $outputFilePath;
     }
     else {
-        
         $filter = Read-Host "Start with?";
-    
         if (!$filter) { $filter = ""; }
-    
         Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
-            $enLangId, $arLangId, $audio = GetIds -filePath "$inputPath/$_";
             $outputFilePath = "$outputPath/$_";
             if ($removeSent) {
-                $outputFilePath = "$outputPath/" + $_ -replace $removeSent;
+                $outputFilePath = "$outputPath/" + $_.Name.Replace($removeSent, "");
             }
     
-            Start-Convert-Video `
-                -inputPath "$inputPath/$_" `
-                -outputPath $outputFilePath `
-                -enLangId $enLangId `
-                -arLangId $arLangId `
-                -audio $audio;
+            RemoveUnusedTracks -inputPath $_.FullName -outputPath $outputFilePath;
         }
     }
 }
