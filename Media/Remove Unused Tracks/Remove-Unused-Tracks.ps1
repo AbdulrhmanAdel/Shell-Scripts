@@ -88,7 +88,7 @@ function RemoveUnusedTracks(
 }
 
 foreach ($inputPath in $inputFiles) {
-    $pathAsAfile = Get-Item $inputPath;
+    $pathAsAfile = Get-Item -LiteralPath $inputPath;
     if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
         $newName = $pathAsAfile.Name.Replace($removeSent, "");
         $outputFilePath = "$outputPath/$newName";
