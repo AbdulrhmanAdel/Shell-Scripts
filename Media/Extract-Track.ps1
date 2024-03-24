@@ -7,7 +7,7 @@ function ExtractTrack {
         $trackInfo
     )
     $fileDirectoryName = $fileInfo.DirectoryName;
-    $fileName = $fileInfo.Name.replace($fileInfo.Extension, "- Extracted.$($trackInfo["extension"])");
+    $fileName = $fileInfo.Name.replace($fileInfo.Extension, ".$($trackInfo["extension"])");
     $output = "$fileDirectoryName\$fileName";
 
     $processInfo = New-Object System.Diagnostics.ProcessStartInfo
@@ -22,7 +22,7 @@ function GetTrackInfo($inputPath) {
     $json = &$mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json;
     $tracks = $json.media.track | Where-Object { $_.'@type' -eq "Text" -or $_.'@type' -eq "Audio" }
     foreach ($track in $tracks) {
-        Write-Host "$($track.ID) => $($track.'@type') - $($track.Language)";
+        Write-Host "$($track.ID) =>  $($track.Title) - $($track.'@type') - $($track.Language)";
     }
     $trackId = (Read-Host "Please Enter TrackId") -as [int];
     $selectedTrack = $tracks | Where-Object { $_.ID -eq $trackId };
@@ -32,8 +32,9 @@ function GetTrackInfo($inputPath) {
     };
 }
 
-
-foreach ($folderPath in $args) {
+$trackInfo = $null;
+$files = $args | Where-Object { $_.EndsWith(".mkv") }
+foreach ($folderPath in $files) {
     $pathInfo = Get-Item -LiteralPath $folderPath;
     if ($pathInfo -is [System.IO.DirectoryInfo]) {
         $files = Get-ChildItem -LiteralPath $pathInfo.FullName -Filter "*.mkv";
@@ -43,7 +44,9 @@ foreach ($folderPath in $args) {
         }
     }
     else {
-        $trackInfo = GetTrackInfo($pathInfo.FullName);
+        if (!$trackInfo) {
+            $trackInfo = GetTrackInfo($pathInfo.FullName);
+        }
         ExtractTrack -fileInfo $pathInfo -trackInfo $trackInfo;
     }
 }
