@@ -9,6 +9,7 @@ function Get-Period() {
     return $period;
 }
 $delayMilliseconds = (Get-Period) * 1000;
+Write-Host "The Delay Will Be $delayMilliseconds Milliseconds"
 # Function to adjust time
 $handlers = @{
     ".ass" = "$($PSScriptRoot)/handlers/Ass-Subtitle-Shifter.ps1";
