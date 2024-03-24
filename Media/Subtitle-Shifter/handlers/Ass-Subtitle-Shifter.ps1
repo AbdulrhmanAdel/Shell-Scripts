@@ -17,20 +17,20 @@ function Adjust-Time {
     return $newTimeSpan.ToString("hh\:mm\:ss\.ff")
 }
 
-Write-Host "Start Handling $file";
+
 $content = Get-Content -LiteralPath $file;
 # Adjust the timestamps in the file
 $adjustedContent = $content | ForEach-Object {
-    if ($_ -match "Dialogue: (\d),(\d:\d\d:\d\d\.\d\d),(\d:\d\d:\d\d\.\d\d),") {
-        $startTime = Adjust-Time -time $Matches[2] -delay $delayMilliseconds
-        $endTime = Adjust-Time -time $Matches[3] -delay $delayMilliseconds
-        $_ -replace $Matches[2], $startTime -replace $Matches[3], $endTime
+    if ($_ -match "Dialogue: (\d+),(\d+:\d\d:\d\d\.\d\d),(\d+:\d\d:\d\d\.\d\d),") {
+        $originalStartTime = $Matches[2];
+        $startTime = Adjust-Time -time $originalStartTime -delay $delayMilliseconds;
+        $originalEndTime = $Matches[3];
+        $endTime = Adjust-Time -time $originalEndTime  -delay $delayMilliseconds
+        return $_ -replace $originalStartTime, $startTime -replace $originalEndTime, $endTime
     }
-    else { 
-        $_
-    }
+    
+    return $_
 }
         
 # Save the adjusted subtitles to a new file
 $adjustedContent | Set-Content -LiteralPath $file -Encoding UTF8;
-Write-Host "Finish Handling $file";

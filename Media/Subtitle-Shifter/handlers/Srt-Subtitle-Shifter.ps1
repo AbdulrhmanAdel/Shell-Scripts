@@ -10,7 +10,11 @@ function Adjust-Time {
     
     # Convert the time string to TimeSpan
     $hours, $minutes, $seconds, $milliseconds = $time -split '[:,]' | ForEach-Object { [int]$_ }
-    $timeSpan = New-Object TimeSpan -ArgumentList $hours, $minutes, $seconds, $milliseconds
+    $timeSpan = [timespan]::FromMilliseconds($milliseconds);
+    $timespan += [timespan]::FromHours($hours);
+    $timespan += [timespan]::FromMinutes($minutes);
+    $timespan += [timespan]::FromSeconds($seconds);
+        
     # Convert delay from milliseconds to TimeSpan
     $delayTimeSpan = [timespan]::FromMilliseconds($delay)
     # Adjust the time
@@ -19,21 +23,20 @@ function Adjust-Time {
     return '{0:00}:{1:00}:{2:00},{3:000}' -f $newTimeSpan.Hours, $newTimeSpan.Minutes, $newTimeSpan.Seconds, $newTimeSpan.Milliseconds
 }
 
-# Ensure UTF-8 encoding without BOM
-$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
-
 # Read the original subtitle file with UTF-8 encoding
 $content = Get-Content -LiteralPath $file -Encoding UTF8
 
 # Adjust the timestamps in the file
 $adjustedContent = $content | ForEach-Object {
-    if ($_ -match "(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})") {
-        $startTime = Adjust-Time -time $Matches[1] -delay $delayMilliseconds
-        $endTime = Adjust-Time -time $Matches[2] -delay $delayMilliseconds
-        $_ -replace $Matches[1], $startTime -replace $Matches[2], $endTime
-    } else {
-        $_
-    }
+    if ($_ -match "(\d+:\d+:\d+,\d+) --> (\d+:\d+:\d+,\d+)") {
+        $originalStartTime = $Matches[1];
+        $startTime = Adjust-Time -time $originalStartTime -delay $delayMilliseconds;
+        $originalEndTime = $Matches[2];
+        $endTime = Adjust-Time -time $originalEndTime  -delay $delayMilliseconds
+        return $_ -replace $originalStartTime, $startTime -replace $originalEndTime, $endTime
+    } 
+
+    return $_;
 }
 
 # Save the adjusted subtitles to a new file with UTF-8 encoding
