@@ -14,6 +14,12 @@ function RemoveUnusedTracks(
     $outputPath
 ) {
     try {
+        if (Test-Path -LiteralPath $outputPath) {
+            Write-Output "File Already Exists"
+            $outputFile = Get-Item -LiteralPath $outputPath;
+            $outputPath = $outputPath -replace "$($outputFile.Extension)", " - Converted$($outputFile.Extension)"
+        }
+
         $command = "--output ""$outputPath""";
         $json = &$mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json;
         $audioTracks = @($json.media.track | Where-Object { $_.'@type' -eq 'Audio' });
@@ -63,6 +69,8 @@ function RemoveUnusedTracks(
 
         $command += " ""$inputPath"" --track-order ""$trackOrder"""
 
+
+
         $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
         $processInfo.FileName = $mkvmerge;
         $processInfo.Arguments = "$command";
@@ -73,9 +81,9 @@ function RemoveUnusedTracks(
         $p.StartInfo = $processInfo;
         $p.Start();
         $p.WaitForExit();
-        $stdout = $p.StandardOutput.ReadToEnd();
+        $stdout = $p.StandardOutput.ReadToEnd().ToLower();
         Write-Output $stdout;
-        $hasError = $stdout.Contains("Error:");
+        $hasError = $stdout.Contains("error:") -or $stdout.Contains("cannot") -or $stdout.Contains("exception");
         if (!$hasError) {
             Remove-Item -LiteralPath $inputPath -Force;
         }
