@@ -113,4 +113,4 @@ foreach ($inputPath in $inputFiles) {
     }
 }
 
-timeout.exe -Seconds 5;
+timeout.exe 5;
