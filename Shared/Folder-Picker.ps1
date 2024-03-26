@@ -1,11 +1,14 @@
 Add-Type -AssemblyName System.Windows.Forms;
 
-$foldername = New-Object System.Windows.Forms.FolderBrowserDialog
-$foldername.Description = "Select a folder"
-$foldername.rootfolder = "MyComputer"
-$foldername.SelectedPath = $initialDirectory
-
-if ($foldername.ShowDialog() -eq "OK") {
-    $folder += $foldername.SelectedPath
+$intialDirectory = $args[0];
+if (!$intialDirectory) {
+    $intialDirectory = [Environment]::GetFolderPath('MyDocuments');
 }
-return $folder
+
+$foldername = New-Object System.Windows.Forms.FolderBrowserDialog
+$foldername.InitialDirectory = $intialDirectory;
+if ($foldername.ShowDialog() -eq "OK") {
+    return "$($foldername.SelectedPath)";
+}
+
+return $null;

@@ -3,7 +3,7 @@ $mkvmerge = "D:\Programs\Media\Tools\mkvtoolnix\mkvmerge.exe";
 $mediaInfo = "D:\Programs\Media\Tools\MediaInfo\MediaInfo.exe";
 $prefix = "D:\Watch";
 $inputFiles = $args;
-$outputPath = (& "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Show File Selector.ps1" $prefix)[-1];
+$outputPath = & "D:\Education\Projects\MyProjects\Shell-Scripts\Shared\Folder-Picker.ps1" $prefix;
 if (!$outputPath) {
     return;
 }
