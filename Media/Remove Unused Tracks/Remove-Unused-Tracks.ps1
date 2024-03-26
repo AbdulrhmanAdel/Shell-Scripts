@@ -14,9 +14,11 @@ function RemoveUnusedTracks(
     $outputPath
 ) {
     try {
+        $oldName = $null;
         if (Test-Path -LiteralPath $outputPath) {
             Write-Output "File Already Exists"
             $outputFile = Get-Item -LiteralPath $outputPath;
+            $oldName = $outputFile.Name;
             $outputPath = $outputPath -replace "$($outputFile.Extension)", " - Converted$($outputFile.Extension)"
         }
 
@@ -69,8 +71,6 @@ function RemoveUnusedTracks(
 
         $command += " ""$inputPath"" --track-order ""$trackOrder"""
 
-
-
         $processInfo = New-Object System.Diagnostics.ProcessStartInfo;
         $processInfo.FileName = $mkvmerge;
         $processInfo.Arguments = "$command";
@@ -86,6 +86,9 @@ function RemoveUnusedTracks(
         $hasError = $stdout.Contains("error:") -or $stdout.Contains("cannot") -or $stdout.Contains("exception");
         if (!$hasError) {
             Remove-Item -LiteralPath $inputPath -Force;
+            if ( $oldName) {
+                Rename-Item -LiteralPath $outputPath -NewName $oldName;
+            }
         }
     }
     catch {
