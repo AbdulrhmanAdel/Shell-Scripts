@@ -11,13 +11,16 @@ if ($fileInfo.Extension -in (".bat", ".ps1")) {
 if (!(Test-Path -LiteralPath $startmenuPath)) {
     New-Item -Path $startmenuPath -ItemType Directory -Force;
 }
+
 $ShortcutPath = "$startmenuPath\$shortcutName";
-Remove-Item -LiteralPath $ShortcutPath;
+if (Test-Path -LiteralPath $ShortcutPath) {
+    Remove-Item -LiteralPath $ShortcutPath;
+}
 $WshShell = New-Object -comObject "WScript.Shell";
 $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
 $Shortcut.TargetPath = $filePath;
-$Shortcut.Save()
-Write-Host "done";
+$Shortcut.Save();
+timeout.exe 10;
 # $appName = $fileInfo.Name.Replace($fileInfo.Extension, "");
 # $apps = Get-StartApps | Where-Object { $_.Name -eq $appName } ;
 
