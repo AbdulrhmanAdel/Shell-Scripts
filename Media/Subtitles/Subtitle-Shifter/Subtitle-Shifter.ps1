@@ -1,3 +1,12 @@
+$handlers = @{
+    ".ass" = "$($PSScriptRoot)/handlers/Ass-Subtitle-Shifter.ps1";
+    ".srt" = "$($PSScriptRoot)/handlers/Srt-Subtitle-Shifter.ps1";
+};
+
+$global:cutFrom = $null;
+$global:cutTo = $null;
+$global:startAtWord = $null;
+
 function Get-Period() {
     $period = Read-Host "Please type delay period in seconds?";
     $period = $period -as [double]
@@ -5,22 +14,19 @@ function Get-Period() {
         return Get-Period;
     }
     
-
     return $period;
 }
+
 $delayMilliseconds = (Get-Period) * 1000;
 Write-Host "The Delay Will Be $delayMilliseconds Milliseconds"
 # Function to adjust time
-$handlers = @{
-    ".ass" = "$($PSScriptRoot)/handlers/Ass-Subtitle-Shifter.ps1";
-    ".srt" = "$($PSScriptRoot)/handlers/Srt-Subtitle-Shifter.ps1";
-};
+
 
 function HandleFiles {
     param (
         $files
     )
- 
+
     foreach ($file in $files) {
         $fileInfo = Get-Item -LiteralPath $file;
         if ($fileInfo -is [System.IO.DirectoryInfo]) {
@@ -37,15 +43,32 @@ function HandleFiles {
 
         Write-Host "USING MODULE $extension => $handler";
         Write-Host "Start Handling $file";
-        & $handler ""$file"" $delayMilliseconds;
+        & $handler `
+            "file=$file" `
+            "delayMilliseconds=$delayMilliseconds" `
+            $global:startAtWord `
+            $global:cutFrom `
+            $global:cutTo;
+
         Write-Host "Finish Handling $file";
     }
-    
 }
 
 
-$files = $args | Where-Object { $_.EndsWith(".ass") }
-HandleFiles -files $args;
+$mode = ($args | Where-Object { $null -ne $_ -and $_.StartsWith("mode=") }) -replace "mode=", ""
+switch ($mode) {
+    "StartAtWord" {
+        $global:startAtWord = "startAtWord=$(Read-Host 'Please enter startAtWord')";
+        break;
+    }
 
+    "Range" {  
+        $global:cutFrom = "cutFrom=$(Read-Host 'Please enter cutFrom')";
+        $global:cutTo = "cutTo=$(Read-Host 'Please enter cutTo')";
+        break;
+    }
+}
+$files = $args | Where-Object { $_.EndsWith(".ass") -or $_.EndsWith(".srt") }
+HandleFiles -files $files;
 Write-Host "Subtitles adjusted."
-timeout.exe 5;
+timeout.exe 15;

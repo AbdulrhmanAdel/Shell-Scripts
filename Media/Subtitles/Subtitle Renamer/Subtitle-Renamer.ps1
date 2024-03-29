@@ -14,16 +14,14 @@ if ($subtitles.Length -eq 0 -or $subtitles.Length -ne $videos.Length) {
 }
 $folderPath = (Get-Item -LiteralPath $videos[0]).DirectoryName;
 function Get-EpisodeNumber($fileName) {
-    $match = $fileName -match "(?i:(Episode *(\d+))|(E(\d+))|(E *(\d+))|(E *\((\d+)\)))|(-(\d+))|(- *(\d+))";
-    $outNumber = $null;
-    foreach ($match in $Matches.Values) {
-        if ([Int32]::TryParse($match, [ref] $outNumber)) {
-            break;
-        }
+    $matched = $fileName -match "(?i)(Episode|E|[-,|,_,*,#]| ) *(\d+)";
+    if (!$matched) {
+        Write-Host "Can't Extract Episode Number From $fileName";
+        return; 
     }
-
-    return $outNumber;
+    return [int]($Matches[$Matches.Count - 1]); 
 }
+
 $videos = $videos | Foreach-Object { return } {
     $fileName = (Get-Item -LiteralPath $_).Name;
     $obj = New-Object PSObject -Property @{
@@ -57,14 +55,10 @@ function PromptForYes {
 }
 PromptForYes
 
-function Remove-Text($text) {
-    $text = $text.Replace("-PSA", "");
-    $text = $text.Replace("(Hi10)", "");
-    return $text;
-}
+$replaceRegex = "(?i)-PSA|\(Hi10\)(_| )*|\[AniDL\] *";
 foreach ($files in $dic) {
     $video = $files[0];
-    $newVideoName = Remove-Text($video.FileName);
+    $newVideoName = $video.FileName -replace $replaceRegex,"";
     Rename-Item -LiteralPath "$folderPath/$($video.FileName)" -NewName "$newVideoName";
     $subtitle = $files[1];
     $videoExt = [System.IO.Path]::GetExtension($newVideoName);
