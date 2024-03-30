@@ -14,12 +14,19 @@ if ($subtitles.Length -eq 0 -or $subtitles.Length -ne $videos.Length) {
 }
 $folderPath = (Get-Item -LiteralPath $videos[0]).DirectoryName;
 function Get-EpisodeNumber($fileName) {
-    $matched = $fileName -match "(?i)(Episode|E|[-,|,_,*,#]|\[| ) *(\d+)(\])?";
+    $matched = $fileName -match "(?i)(Episode|E|[-,|,_,*,#]|\[| ) *(?<EpisodeNumber>\d+)(\]|)? *";
     if (!$matched) {
         Write-Host "Can't Extract Episode Number From $fileName";
         return; 
     }
-    return [int]($Matches[$Matches.Count - 1]); 
+    $episodeNumber = [int]($Matches["EpisodeNumber"]);
+    if (!$episodeNumber) {
+        Write-Host "Can't Get EpisodeNumber for $fileName, GOT $episodeNumber"
+        timeout.exe 15
+        exit;
+    }
+
+    return $episodeNumber;
 }
 
 $videos = $videos | Foreach-Object { return } {
