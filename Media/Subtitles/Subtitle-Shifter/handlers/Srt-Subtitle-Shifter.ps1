@@ -1,43 +1,119 @@
-$file = $args[1];
-$delayMilliseconds = $args[2];
+function ParseArgs {
+    param ($list, [string]$key)
+    $value = $list | Where-Object { $null -ne $_ -and $_.StartsWith("$key=") };
+    if (!$value) { return $null; }
+    return $value -replace "$key=", ""
+}
 
-# Function to adjust time
-function Adjust-Time {
+$file = ParseArgs -list $args -key "file";
+$file = "D:\Watch\Anime\3-GATSU NO LION\Season 2\3-gatsu no Lion II - 22 (BD 720p) (Commie) (A0E57FC8).srt"
+$delayMilliseconds = [int](ParseArgs -list $args -key "delayMilliseconds");
+$delayMilliseconds = 500;
+$startFromSecond = [double](ParseArgs -list $args -key "startFromSecond");
+
+$delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds)
+#region Functions
+function ParseTimeSpan {
     param (
-        [string]$time,
-        [int]$delay
+        $time
     )
     
-    # Convert the time string to TimeSpan
     $hours, $minutes, $seconds, $milliseconds = $time -split '[:,]' | ForEach-Object { [int]$_ }
     $timeSpan = [timespan]::FromMilliseconds($milliseconds);
     $timespan += [timespan]::FromHours($hours);
     $timespan += [timespan]::FromMinutes($minutes);
     $timespan += [timespan]::FromSeconds($seconds);
-        
-    # Convert delay from milliseconds to TimeSpan
-    $delayTimeSpan = [timespan]::FromMilliseconds($delay)
-    # Adjust the time
-    $newTimeSpan = $timeSpan.Add($delayTimeSpan)
-    # Format the new time back to string
-    return '{0:00}:{1:00}:{2:00},{3:000}' -f $newTimeSpan.Hours, $newTimeSpan.Minutes, $newTimeSpan.Seconds, $newTimeSpan.Milliseconds
+    return $timeSpan;
 }
 
-# Read the original subtitle file with UTF-8 encoding
-$content = Get-Content -LiteralPath $file -Encoding UTF8
-
-# Adjust the timestamps in the file
-$adjustedContent = $content | ForEach-Object {
-    if ($_ -match "(\d+:\d+:\d+,\d+) --> (\d+:\d+:\d+,\d+)") {
-        $originalStartTime = $Matches[1];
-        $startTime = Adjust-Time -time $originalStartTime -delay $delayMilliseconds;
-        $originalEndTime = $Matches[2];
-        $endTime = Adjust-Time -time $originalEndTime  -delay $delayMilliseconds
-        return $_ -replace $originalStartTime, $startTime -replace $originalEndTime, $endTime
-    } 
-
-    return $_;
+function SerializeTimeSpan ($timeSpan) {
+    return '{0:00}:{1:00}:{2:00},{3:000}' -f $timeSpan.Hours, $timeSpan.Minutes, $timeSpan.Seconds, $timeSpan.Milliseconds
 }
 
-# Save the adjusted subtitles to a new file with UTF-8 encoding
-$adjustedContent | Set-Content -LiteralPath $file -Encoding UTF8
+function ParseDialogue {
+    param ($line)
+    return @{
+        StartTime       = ParseTimeSpan -time $Matches["StartTime"]
+        EndTime         = ParseTimeSpan -time $Matches["EndTime"]
+        OriginalContent = $line
+    }
+    
+}
+
+function SerializeDialogue {
+    param (
+        $dialogue
+    )
+    
+    $dialogue.OriginalContent[0] = "$(SerializeTimeSpan -timeSpan $dialogue.StartTime) --> $(SerializeTimeSpan -timeSpan $dialogue.EndTime)";
+    return $dialogue;
+}
+
+function AddDialogue {
+    param (
+        $adjustedContent,
+        $dialogue
+    )
+    $dialogue = SerializeDialogue -dialogue $dialogue;
+    AddOriginalDialogue -adjustedContent $adjustedContent -dialogue $dialogue;
+}
+
+
+$global:currenetSubIndex = 1;
+function AddOriginalDialogue {
+    param (
+        $adjustedContent,
+        $dialogue
+    )
+    $adjustedContent.Add($global:currenetSubIndex) | Out-Null;
+    $sub = $dialogue.OriginalContent;
+    for ($i = 0; $i -lt $sub.Count; $i++) {
+        $adjustedContent.Add($sub[$i]) | Out-Null;
+    }
+    $adjustedContent.Add("") | Out-Null;
+    $global:currenetSubIndex += 1; ;
+}
+
+#endregion
+
+$timeRegex = "(?<StartTime>\d+:\d+:\d+,\d+) --> (?<EndTime>\d+:\d+:\d+,\d+)"
+$dialogues = New-Object System.Collections.Generic.List[System.Object];
+$content = (Get-Content -LiteralPath $file);
+for ($i = 0; $i -lt $content.Count; $i++) {
+    if ($content[$i] -eq "") {
+        continue;
+    }
+
+    $endTextIndex = [Array]::IndexOf($content, "", $i);
+    $line = $content[($i + 1)..($endTextIndex - 1)];
+    $line[0] -match $timeRegex | Out-Null;
+    $dialogues.Add((ParseDialogue -line $line))
+    $i = $endTextIndex;
+}
+
+$adjustedContent = New-Object System.Collections.Generic.List[System.Object] -ArgumentList @($dialogues.Count * 3);
+$dialogues | Sort-Object -Property StartTime | ForEach-Object {
+    $dialogue = $_;
+    $startTime = $dialogue.StartTime;
+    $newStartTime = $startTime.Add($delayTimeSpan);
+    if ($startFromSecond) {
+        if ($startTime.TotalSeconds -lt $startFromSecond) {
+            AddOriginalDialogue($adjustedContent, $dialogue);
+            return;
+        }
+
+        if ($newStartTime.TotalSeconds -lt $startFromSecond) {
+            return;
+        }
+    }
+    
+    if ($newStartTime.TotalMilliseconds -le 0) {
+        return;
+    }
+
+    $dialogue.StartTime = $newStartTime;
+    $dialogue.EndTime = $dialogue.EndTime.Add($delayTimeSpan);
+    AddDialogue -adjustedContent $adjustedContent -dialogue $dialogue;
+}
+
+$adjustedContent | Set-Content -LiteralPath $file; 
