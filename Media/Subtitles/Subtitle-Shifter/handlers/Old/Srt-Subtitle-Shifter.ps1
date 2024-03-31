@@ -7,85 +7,107 @@ function ParseArgs {
 
 $file = ParseArgs -list $args -key "file";
 $delayMilliseconds = [int](ParseArgs -list $args -key "delayMilliseconds");
-$startAtTime = [double](ParseArgs -list $args -key "startAtTime");
-
-
-function ParseFile() {
-    $text = Get-Content -LiteralPath $file;
-    $newContent = New-Object System.Collections.Generic.List[System.Object];
-    $part = New-Object System.Collections.Generic.List[System.Object];
-    for ($i = 0; $i -lt $text.Count; $i++) {
-        $line = $text[$i];
-        if ($line -eq "") {
-            if ($part.Count -gt 0) {
-                $newContent.Add($part) | Out-Null;
-                $part = New-Object System.Collections.Generic.List[System.Object];
-            }
-            continue;
-        }
-        $part.Add($line) | Out-Null;
-    }
-
-    return $newContent | Sort-Object {
-        return [int]($_[0])
-    };   
-}
+$startFromSecond = [double](ParseArgs -list $args -key "startFromSecond");
 
 $delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds)
-$delayMilliseconds = [System.Math]::Abs($delayMilliseconds);
-# Function to adjust time
-function Adjust-Time {
+#region Functions
+function ParseTimeSpan {
     param (
-        [string]$time
+        $time
     )
     
-    # Convert the time string to TimeSpan
     $hours, $minutes, $seconds, $milliseconds = $time -split '[:,]' | ForEach-Object { [int]$_ }
     $timeSpan = [timespan]::FromMilliseconds($milliseconds);
     $timespan += [timespan]::FromHours($hours);
     $timespan += [timespan]::FromMinutes($minutes);
     $timespan += [timespan]::FromSeconds($seconds);
-    $newTimeSpan = $timeSpan.Add($delayTimeSpan);
-    if ($startAtTime) {
-        if ($timeSpan.TotalSeconds -lt $startAtTime) {
-            return $time;
-        }
-        if ($newTimeSpan.TotalSeconds -lt $startAtTime) {
-            return -1;
-        }
-    }
-
-    if ($newTimeSpan.TotalMilliseconds -le 0) {
-        return -1
-    }
-    
-    # Format the new time back to string
-    return '{0:00}:{1:00}:{2:00},{3:000}' -f $newTimeSpan.Hours, $newTimeSpan.Minutes, $newTimeSpan.Seconds, $newTimeSpan.Milliseconds
+    return $timeSpan;
 }
+
+function SerializeTimeSpan ($timeSpan) {
+    return '{0:00}:{1:00}:{2:00},{3:000}' -f $timeSpan.Hours, $timeSpan.Minutes, $timeSpan.Seconds, $timeSpan.Milliseconds
+}
+
+function ParseDialogue {
+    param (
+        $dialogue
+    )
+    
+    $content.OriginalContent[0] = "$(SerializeTimeSpan -timeSpan $dialogue.StartTime) --> $(SerializeTimeSpan -timeSpan $dialogue.EndTime)";
+    return $content.OriginalContent[0];
+}
+
+function SerializeDialogue {
+    param ($line)
+    return @{
+        StartTime    = ParseTimeSpan -time $Matches["StartTime"]
+        EndTime      = ParseTimeSpan -time $Matches["EndTime"]
+        Text         = $Matches["Text"]
+        OriginalLine = $line
+    }
+}
+
+
+$currenetSubIndex = 1;
+function AddDialogue {
+    param (
+        $adjustedContent,
+        $dialogue
+    )
+    ParseDialogue -dialogue $dialogue;
+    AddOriginalDialogue -adjustedContent $adjustedContent -dialogue $dialogue;
+}
+
+function AddOriginalDialogue {
+    param (
+        $adjustedContent,
+        $dialogue
+    )
+    $adjustedContent.Add($currenetSubIndex) | Out-Null;
+    $sub = $dialogue.OriginalContent;
+    for ($i = 0; $i -lt $sub.Count; $i++) {
+        $adjustedContent.Add($sub[$i]) | Out-Null;
+    }
+    $adjustedContent.Add("") | Out-Null;
+    $currenetSubIndex++;
+}
+
+#endregion
 
 $timeRegex = "(?<StartTime>\d+:\d+:\d+,\d+) --> (?<EndTime>\d+:\d+:\d+,\d+)"
-$content = ParseFile;
-$currentSubEntry = 1;
-$finalContent = New-Object System.Collections.Generic.List[System.Object];
-foreach ($sub in $content) {
-    $times = $sub[1]
-    $times -match $timeRegex  | Out-Null;
-    $originalStartTime = $Matches["StartTime"];
-    $startTime = Adjust-Time -time $originalStartTime -delay $delayMilliseconds;
-    $originalEndTime = $Matches["EndTime"];
-    $endTime = Adjust-Time -time $originalEndTime  -delay $delayMilliseconds;
-    if ($startTime -eq -1 -or $endTime -eq -1) {
+$dialogues = New-Object System.Collections.Generic.List[System.Object];
+$content = (Get-Content -LiteralPath $file);
+for ($i = 0; $i -lt $text.Count; $i++) {
+    if ($line -eq "") {
         continue;
     }
-    $newTime = $times -replace $originalStartTime, $startTime -replace $originalEndTime, $endTime
     
-    $finalContent.Add($currentSubEntry) | Out-Null;
-    $finalContent.Add($newTime) | Out-Null;
-    for ($i = 2; $i -lt $sub.Count; $i++) {
-        $finalContent.Add($sub[$i]) | Out-Null;
-    }
-    $finalContent.Add("") | Out-Null;
-    $currentSubEntry++;
+
 }
 
-$finalContent | Set-Content -LiteralPath $file -Encoding UTF8
+$adjustedContent = New-Object System.Collections.Generic.List[System.Object] -ArgumentList @($dialogues.Count * 3);
+$dialogues | Sort-Object -Property StartTime | ForEach-Object {
+    $dialogue = $_;
+    $startTime = $dialogue.StartTime;
+    $newStartTime = $startTime.Add($delayTimeSpan);
+    if ($startFromSecond) {
+        if ($startTime.TotalSeconds -lt $startFromSecond) {
+            AddOriginalDialogue($adjustedContent, $dialogue);
+            return;
+        }
+
+        if ($newStartTime.TotalSeconds -lt $startFromSecond) {
+            return;
+        }
+    }
+    
+    if ($newStartTime.TotalMilliseconds -le 0) {
+        return;
+    }
+
+    $dialogue.StartTime = $newStartTime;
+    $dialogue.EndTime = $dialogue.EndTime.Add($delayTimeSpan);
+    AddDialogue -adjustedContent $adjustedContent -dialogue $dialogue;
+}
+
+$adjustedContent | Set-Content -LiteralPath $file; 

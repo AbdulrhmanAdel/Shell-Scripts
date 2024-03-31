@@ -1,5 +1,11 @@
-$items = Get-ChildItem -LiteralPath "$($PSScriptRoot)" -File;
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process Powershell -Verb RunAs "-Command ""$($MyInvocation.MyCommand.Path)""";
+    exit;
+}
 
+$items = Get-ChildItem -LiteralPath "$($PSScriptRoot)" -File;
+$sendToMenuFolder = "$($env:APPDATA)\Microsoft\Windows\SendTo";
+Remove-Item $sendToMenuFolder -Include "*.lnk" -Force;
 foreach ($item in $items) {
     if ($item.Name -eq $MyInvocation.MyCommand.Name) {
         continue;
@@ -7,6 +13,6 @@ foreach ($item in $items) {
 
     Copy-Item `
         -LiteralPath $item.FullName `
-        -Destination "$($env:APPDATA)\Microsoft\Windows\SendTo" -Force;
+        -Destination $sendToMenuFolder -Force;
 }
-timeout.exe 5;
+timeout.exe 15;

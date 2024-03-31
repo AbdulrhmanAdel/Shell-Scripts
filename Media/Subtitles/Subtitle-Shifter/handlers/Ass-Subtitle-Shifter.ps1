@@ -7,92 +7,108 @@ function ParseArgs {
 
 $file = ParseArgs -list $args -key "file";
 $delayMilliseconds = [int](ParseArgs -list $args -key "delayMilliseconds");
-$cutFrom = ParseArgs -list $args -key "cutFrom";
-$cutTo = ParseArgs -list $args -key "cutTo";
-$startAtWord = ParseArgs -list $args -key "startAtWord";
+$startFromSecond = [double](ParseArgs -list $args -key "startFromSecond");
 
-$handleAction = {
-    param ($line)
-    $newContent.Add((ShiftLine -line $line)) | Out-Null;
-}
-
-if ($cutFrom -and $cutTo) {
-    $handleAction = {
-        $script:lastTime = $null;
-        return {
-            param ($line)
-            $lineContent = $Matches[3];
-            if ($lineContent -eq $startAtWord) {
-                Write-Output "Line Found $line"
-                $script:startAtWordEncountered = $true;
-            }
-
-            if ($script:startAtWordEncountered) {
-                $newContent.Add((ShiftLine -line $line)) | Out-Null;
-                return;
-            }
-
-            $newContent.Add($line) | Out-Null; 
-        }
-    }.Invoke();
-}
-
-if ($startAtWord) {
-    $handleAction = {
-        $script:startAtWordEncountered = $false;
-        return {
-            param ($line)
-            $lineContent = $Matches[3];
-            if ($lineContent -eq $startAtWord) {
-                Write-Output "Line Found $line"
-                $script:startAtWordEncountered = $true;
-            }
-
-            if ($script:startAtWordEncountered) {
-                $newContent.Add((ShiftLine -line $line)) | Out-Null;
-                return;
-            }
-
-            $newContent.Add($line) | Out-Null; 
-        }
-    }.Invoke();
-}
-
-
-function AdjustTime {
+$delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds)
+#region Functions
+function ParseTimeSpan {
     param (
-        [string]$time,
-        [int]$delay
+        $time
     )
     
-    # Parse the time string and convert it to TimeSpan
-    $timeSpan = [timespan]::ParseExact($time, "h\:mm\:ss\.ff", $null)
-    # Convert delay from milliseconds to TimeSpan
-    $delayTimeSpan = [timespan]::FromMilliseconds($delay)
-    # Adjust the time
-    $newTimeSpan = $timeSpan.Add($delayTimeSpan)
-    # Format the new time back to string
-    return $newTimeSpan.ToString("hh\:mm\:ss\.ff")
+    return [timespan]::ParseExact($time, "h\:mm\:ss\.ff", $null)
 }
 
-function ShiftLine {
-    param ([string]$line)
-    $originalStartTime = $Matches[1];
-    $startTime = AdjustTime -time $originalStartTime -delay $delayMilliseconds;
-    $originalEndTime = $Matches[2];
-    $endTime = AdjustTime -time $originalEndTime  -delay $delayMilliseconds
-    return $line -replace $originalStartTime, $startTime -replace $originalEndTime, $endTime
+function SerializeTimeSpan ($timeSpan) {
+    return $timeSpan.ToString("hh\:mm\:ss\.ff");
 }
 
-$content = Get-Content -LiteralPath $file;
-$newContent = New-Object System.Collections.Generic.List[System.Object];
-foreach ($line in $content) {
-    if ($line -match "Dialogue: \d+,(\d+:\d\d:\d\d\.\d\d),(\d+:\d\d:\d\d\.\d\d),.*,(.*)") {
-        $handleAction.Invoke($line);
+function ParseDialogue {
+    param (
+        $dialogue
+    )
+    
+    return "Dialogue: $($dialogue.Layer),$(SerializeTimeSpan($dialogue.StartTime)),$(SerializeTimeSpan($dialogue.EndTime)),$($dialogue.Style),$($dialogue.Name),$($dialogue.MarginL),$($dialogue.MarginR),$($dialogue.MarginV),$($dialogue.Effect),$($dialogue.Text)"
+}
+
+function SerializeDialogue {
+    param ($line)
+    return @{
+        Layer           = $Matches["Layer"]
+        StartTime       = ParseTimeSpan -time $Matches["StartTime"]
+        EndTime         = ParseTimeSpan -time $Matches["EndTime"]
+        Style           = $Matches["Style"]
+        Name            = $Matches["Name"]
+        MarginL         = $Matches["MarginL"]
+        MarginR         = $Matches["MarginR"]
+        MarginV         = $Matches["MarginV"]
+        Effect          = $Matches["Effect"]
+        Text            = $Matches["Text"]
+        OriginalContent = $line
+    }
+}
+
+
+function AddDialogue {
+    param (
+        $adjustedContent,
+        $dialogue
+    )
+    $sub = ParseDialogue -dialogue $dialogue;
+    $adjustedContent.Add($sub) | Out-Null;
+}
+
+function AddOriginalDialogue {
+    param (
+        $adjustedContent,
+        $dialogue
+    )
+
+    $adjustedContent.Add($dialogue.OriginalContent) | Out-Null;
+}
+
+#endregion
+
+$dialogues = New-Object System.Collections.Generic.List[System.Object];
+$content = Get-Content -LiteralPath $file | ForEach-Object {
+    if ($_ -match "Dialogue: (?<Layer>\d+),(?<StartTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<EndTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<Style>[^,]*),(?<Name>[^,]*),(?<MarginL>\d+),(?<MarginR>\d+),(?<MarginV>\d+),(?<Effect>[^,]*),(?<Text>.+)") {
+        $dialogues.Add((SerializeDialogue -line $_)) | Out-Null | Out-Null;
     }
     else {
-        $newContent.Add($line) | Out-Null;
+        return $_;
     }
 }
-# Save the adjusted subtitles to a new file
-$newContent | Set-Content -LiteralPath $file -Encoding UTF8;
+
+$dialogues = $dialogues | Sort-Object -Property StartTime;
+$adjustedContent = New-Object System.Collections.Generic.List[System.Object] -ArgumentList @($content.Count + $dialogues.Count);
+$content | ForEach-Object {
+    $adjustedContent.Add($_) | Out-Null;
+    if ($_ -ne "[Events]") {
+        return;
+    }
+
+    foreach ($dialogue in $dialogues) {
+        $startTime = $dialogue.StartTime;
+        $newStartTime = $startTime.Add($delayTimeSpan);
+        if ($startFromSecond) {
+            if ($startTime.TotalSeconds -lt $startFromSecond) {
+                AddOriginalDialogue($adjustedContent, $dialogue);
+                continue;
+            }
+
+            if ($newStartTime.TotalSeconds -lt $startFromSecond) {
+                continue;
+            }
+        }
+    
+        if ($newStartTime.TotalMilliseconds -le 0) {
+            continue;
+        }
+
+        $dialogue.StartTime = $newStartTime;
+        $dialogue.EndTime = $dialogue.EndTime.Add($delayTimeSpan);
+        AddDialogue -adjustedContent $adjustedContent -dialogue $dialogue;
+    }
+}
+
+$adjustedContent | Set-Content -LiteralPath $file; 
