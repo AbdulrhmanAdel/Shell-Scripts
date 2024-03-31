@@ -1,15 +1,16 @@
 function ParseArgs {
     param ($list, [string]$key)
-    $value = $list | Where-Object { $null -ne $_ -and $_.StartsWith("$key=") };
+    $value = $list | Where-Object { $null -ne $_ -and $_.ToString().StartsWith("$key=") };
     if (!$value) { return $null; }
     return $value -replace "$key=", ""
 }
 
 $file = ParseArgs -list $args -key "file";
-$delayMilliseconds = [int](ParseArgs -list $args -key "delayMilliseconds");
+$delayMilliseconds = [double](ParseArgs -list $args -key "delayMilliseconds");
 $startFromSecond = [double](ParseArgs -list $args -key "startFromSecond");
 
-$delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds)
+$delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds);
+Write-Output "Start Delaying By $delayTimeSpan $($delayTimeSpan.TotalMilliseconds) To File: $file";
 #region Functions
 function ParseTimeSpan {
     param (
@@ -92,7 +93,7 @@ $content | ForEach-Object {
         $newStartTime = $startTime.Add($delayTimeSpan);
         if ($startFromSecond) {
             if ($startTime.TotalSeconds -lt $startFromSecond) {
-                AddOriginalDialogue($adjustedContent, $dialogue);
+                AddOriginalDialogue -adjustedContent $adjustedContent -dialogue $dialogue;
                 continue;
             }
 

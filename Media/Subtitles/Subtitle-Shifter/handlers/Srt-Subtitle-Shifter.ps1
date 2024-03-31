@@ -6,9 +6,7 @@ function ParseArgs {
 }
 
 $file = ParseArgs -list $args -key "file";
-$file = "D:\Watch\Anime\3-GATSU NO LION\Season 2\3-gatsu no Lion II - 22 (BD 720p) (Commie) (A0E57FC8).srt"
 $delayMilliseconds = [int](ParseArgs -list $args -key "delayMilliseconds");
-$delayMilliseconds = 500;
 $startFromSecond = [double](ParseArgs -list $args -key "startFromSecond");
 
 $delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds)
@@ -98,7 +96,7 @@ $dialogues | Sort-Object -Property StartTime | ForEach-Object {
     $newStartTime = $startTime.Add($delayTimeSpan);
     if ($startFromSecond) {
         if ($startTime.TotalSeconds -lt $startFromSecond) {
-            AddOriginalDialogue($adjustedContent, $dialogue);
+            AddOriginalDialogue -adjustedContent $adjustedContent -dialogue $dialogue;
             return;
         }
 
