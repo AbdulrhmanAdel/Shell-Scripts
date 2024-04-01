@@ -2,14 +2,13 @@
 
 function GetChapters {
     param($path)
-    $ffmpegOutput = & $ffmpegPath -loglevel error -i $path -f ffmetadata -; 
+    $ffmpegOutput = & $ffmpegPath -loglevel error -i $path -f ffmetadata -;
     $chapters = @()
     for ($i = 0; $i -lt $ffmpegOutput.Length; $i++) {
         if ($ffmpegOutput[$i] -match "\[CHAPTER\]") {
             $timebase = [int64]($ffmpegOutput[++$i] -replace "TIMEBASE=1/", "")
             $start = [int64]($ffmpegOutput[++$i] -replace "START=", "") / $timebase;
             $end = [int64]($ffmpegOutput[++$i] -replace "END=", "") / $timebase;
-            $lenght
             $chapter = @{
                 Start  = $start
                 End    = $end
@@ -20,10 +19,49 @@ function GetChapters {
         }
     }
 
-    # Output the chapters array
-    return $chapters
+    return $chapters;
 }
 
+function ParseChapters {
+    param (
+        $chapters
+    )
+    
+    $openeingChapter = $chapters | Where-Object { $_.Title -match "(?i)(^Op\d+ - )|(Opening)" }
+    if (!$openeingChapter) {
+        return @{
+            OpeneingChapter = $null
+            EpisodeChapter = $null
+        };
+    }
+    
+    $chapters = $chapters | Where-Object {
+        !($_ -eq $openeingChapter -or $_.Title -match "(?i)(^ED\d+ - )|(Ending)")
+    } | Sort-Object -Property Start, End, Length
+
+    $episodeChapter = $chapters | Where-Object { $_.Title -in $startFromChapterNames }
+    if ($episodeChapter) {
+        return @{
+            OpeneingChapter = $openeingChapter
+            EpisodeChapter = $episodeChapter
+        };
+    }
+
+    $intoChapter = $chapters | Where-Object { $_.Title -in $startAtTheEndOfChapterNames }
+    $index = [Array]::IndexOf($chapters, $intoChapter);
+    $episodeChapter = $chapters[$index + 1];
+    if ($episodeChapter) {
+        return @{
+            OpeneingChapter = $openeingChapter
+            EpisodeChapter = $episodeChapter
+        };
+    }
+
+    return @{
+        OpeneingChapter = $openeingChapter
+        EpisodeChapter = $null
+    };
+}
 #endregion
 
 $colors = @(
@@ -38,77 +76,41 @@ $colors = @(
     [System.ConsoleColor]::Blue,
     [System.ConsoleColor]::Green,
     [System.ConsoleColor]::Cyan,
-    [System.ConsoleColor]::Magenta,
-    [System.ConsoleColor]::Yellow
+    [System.ConsoleColor]::Magenta
 );
 
 $ffmpegPath = "D:\Programs\Media\Tools\yt\ffmpeg.exe"
-$chapterNames = @("Intro");
 $handlers = @{
     ".ass" = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Subtitles\Subtitle-Shifter/handlers/Ass-Subtitle-Shifter.ps1";
     ".srt" = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Subtitles\Subtitle-Shifter/handlers/Srt-Subtitle-Shifter.ps1";
 };
 
-$startFromChapterNames = @("Episode");
-$chapterNames = Read-Host "Please enter chapter names to start delaying from its start?";
-if ($chapterNames) {
-    $startFromChapterNames = $startFromChapterNames + ($chapterNames -split "," | ForEach-Object { return $_.Trim() })
-}
+$startFromChapterNames = @("Episode") + ((Read-Host "Please enter chapter names to start delaying from its start?") -split ",") | ForEach-Object { if ($_) { return $_.Trim() } };
+$startAtTheEndOfChapterNames = @("Intro") + ((Read-Host "Please enter chapter names to start delaying from its end?") -split ",") | ForEach-Object { if ($_) { return $_.Trim() } };
+$global:delayIfIntroFound = [double](Read-Host "delay If Intro Found?");
+$global:delayIfEpisodeFound = [double](Read-Host "delay If Episode Found?");
 
-$startAtTheEndOfChapterNames = @("Intro");
-$chapterNames = Read-Host "Please enter chapter names to start delaying from its end?";
-if ($chapterNames) {
-    $startAtTheEndOfChapterNames = $startAtTheEndOfChapterNames + ($chapterNames -split "," | ForEach-Object { return $_.Trim() })
-}
-
-
-$global:customDelay = [double](Read-Host "Custom Delay?");
-# $global:additionalDelayInMiliSeconds = [double](Read-Host "Please enter additional Delay In Seconds?") * 1000;
-$global:manualDelayInMiliSeconds = $null;
 function Handle {
     param ($videoFile, $subFile, $handler)
     $chapters = GetChapters -path $videoFile;
     Write-Host ($chapters.Title) -Separator ", "
+    $chapters = ParseChapters -chapters $chapters
     $startFromSecond = 0;
-    $openeingChapter = $chapters | Where-Object { $_.Title -match "(?i)(^Op - )|(Opening)" }
+    $delayMilliseconds = 0;
+    $openeingChapter = $chapters.OpeneingChapter
     if (!$openeingChapter) {
         Write-Host "Can't find Opening chapter for $videoFile" -ForegroundColor Red -BackgroundColor White;
         return;
-        if ($null -eq $global:manualDelayInMiliSeconds) {
-            $global:manualDelayInMiliSeconds = [double](Read-Host "Please Enter Delay in seconds?");
-            if (!$global:manualDelayInMiliSeconds) {
-                return;
-            }
-        }
-        $delayMilliseconds = $global:manualDelayInMiliSeconds;
     }
     else {
         $delayMilliseconds = $openeingChapter.Length * 1000 * -1;
     }
 
-    $episodeChapter = $chapters | Where-Object { $startFromChapterNames -contains $_.Title }
+    $episodeChapter = $chapters.EpisodeChapter;
     if ($episodeChapter) {
         $startFromSecond = $episodeChapter.Start;
     }
-    else {
-        Write-Host "Can't Find Chapters to Start From ts Start Search By $startFromChapterNames" -ForegroundColor Red;
-        $introChapter = $chapters | Where-Object { $startAtTheEndOfChapterNames -contains $_.Title }
-        if ($introChapter) {
-            $startFromSecond = $introChapter.End
-            if ($introChapter.End -lt $openeingChapter.End) {
-                # $delayMilliseconds += 1000;
-            }
-        }
-        else {
-            Write-Host "Can't Find Chapters to Start From Its End Search By $startAtTheEndOfChapterNames" -ForegroundColor Red;
-        }
-    }
-    
-    $delayMilliseconds += $global:additionalDelayInMiliSeconds;
-    
-    if ($global:customDelay) {
-        $delayMilliseconds = $global:customDelay;
-    }
+
     if ($startFromSecond) {
         $startFromSecond = "startFromSecond=$($startFromSecond)";
         & $handler  "file=$subFile" $startFromSecond "delayMilliseconds=$delayMilliseconds";

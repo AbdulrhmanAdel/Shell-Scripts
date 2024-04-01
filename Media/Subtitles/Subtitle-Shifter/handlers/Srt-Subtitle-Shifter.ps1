@@ -10,6 +10,7 @@ $delayMilliseconds = [int](ParseArgs -list $args -key "delayMilliseconds");
 $startFromSecond = [double](ParseArgs -list $args -key "startFromSecond");
 
 $delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds)
+Write-Output "Start Delaying By $delayTimeSpan $($delayTimeSpan.TotalMilliseconds), Start From $startFromSecond To File: $file";
 #region Functions
 function ParseTimeSpan {
     param (
