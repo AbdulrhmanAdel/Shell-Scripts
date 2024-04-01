@@ -39,7 +39,8 @@ function Sync {
             break;
         }
         Default {
-            exit
+            Sync
+            return;
         }
     }
 
