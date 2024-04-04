@@ -9,12 +9,16 @@ $videos = $inputFiles | Where-Object {
 }
 
 if ($subtitles.Length -eq 0 -or $subtitles.Length -ne $videos.Length) {
-    Read-Host "subtitles $($subtitles.Length), videos $($videos.Length)"
-    Exit;
+    Write-Host "Missmatch Numbers: Subtitles Count $($subtitles.Length), Videos Count $($videos.Length)" -ForegroundColor Red
+    if ((Read-Host "Continue?").ToUpper() -eq "N"){
+        exit;
+    }
 }
+
 $folderPath = (Get-Item -LiteralPath $videos[0]).DirectoryName;
+$episodeNumberRegex = "(?i)(Episode|E|[-,|,_,*,#,\.]|\[| )(?<EpisodeNumber>\d+)(\.|\]| )";
 function Get-EpisodeNumber($fileName) {
-    $matched = $fileName -match "(?i)(Episode|E|[-,|,_,*,#]|\[| ) *(?<EpisodeNumber>\d+)(\]|)? *";
+    $matched = $fileName -match $episodeNumberRegex;
     if (!$matched) {
         Write-Host "Can't Extract Episode Number From $fileName";
         return; 
@@ -48,12 +52,22 @@ $subtitles = $subtitles | Foreach-Object { return } {
     # Output the custom object
     return $obj
 };
-
+$isSomeEpisodeMissSubtitle = $false;
 $dic = New-Object System.Collections.ArrayList;
 foreach ($video in $videos) {
     $subtitle = $subtitles | Where-Object { $_.EpisodeNumber -eq $video.EpisodeNumber } | Select-Object -First 1
+    if (!$subtitle) {
+        $isSomeEpisodeMissSubtitle  = $true;
+        Write-Host "$($video.EpisodeNumber)-$($video.FileName) => Not-Sub found" -ForegroundColor Red
+        continue;
+    }
     Write-Host "$($video.EpisodeNumber)-$($video.FileName) => $($subtitle.EpisodeNumber)-$($subtitle.FileName)"
     $dic.Add($($video, $subtitle)) | Out-Null;
+}
+
+if ($isSomeEpisodeMissSubtitle) {
+    timeout 15;
+    exit;
 }
 
 function PromptForYes {
