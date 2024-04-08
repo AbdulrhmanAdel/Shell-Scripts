@@ -9,13 +9,14 @@ function ExtractTrack {
     $fileDirectoryName = $fileInfo.DirectoryName;
     $fileName = $fileInfo.Name.replace($fileInfo.Extension, ".$($trackInfo["extension"])");
     $output = "$fileDirectoryName\$fileName";
-
-    $processInfo = New-Object System.Diagnostics.ProcessStartInfo
-    $processInfo.FileName = $mkvExtractPath;
-    $processInfo.UseShellExecute = $false;
-    $processInfo.Arguments = "tracks ""$($fileInfo.FullName)"" $($trackInfo["index"]):""$output"""
-    $process = [System.Diagnostics.Process]::Start($processInfo)
-    $process.WaitForExit();
+    
+    $processArgs = @(
+        "tracks",
+        """$($fileInfo.FullName)""",
+        "$($trackInfo["index"]):""$output"""
+    );
+    Start-Process -FilePath $mkvExtractPath -NoNewWindow -Wait `
+        -ArgumentList $processArgs;
 }
 
 function GetTrackInfo($inputPath) {
