@@ -1,4 +1,4 @@
-$continue = Read-Host "Are you sure you want to continue?";
+$continue = Read-Host "Are you sure you want to continue (Y)?";
 
 if ($continue) {
     $variable = $args[0];

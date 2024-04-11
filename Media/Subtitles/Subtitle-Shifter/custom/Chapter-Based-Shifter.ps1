@@ -25,24 +25,38 @@ $handlers = @{
     ".srt" = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Subtitles\Subtitle-Shifter/handlers/Srt-Subtitle-Shifter.ps1";
 };
 
+$getChapterScriptPath = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Shared\Get-Chapters.ps1";
+function Get-Chapters {
+    param (
+        $path
+    )
+    
+    return & $getChapterScriptPath $path;
+}
+
 function Handle {
     param ($videoFile, $subFile, $handler)
-    $chapters = & $getChapterScriptPath $videoFile;
+    $chapters = Get-Chapters -path $videoFile;
     Write-Host "Chapters: " -ForegroundColor Green -NoNewline;
     Write-Host ($chapters.Title) -Separator ", "
     $startFromSecond = 0;
     $delayMilliseconds = 0;
-    foreach ($c in $chapters) { 
-        if (!$c.SegmentId) {
-            if ($c.Title -eq "Part A") {
-                break;
-            }
-
-            $startFromSecond = $c.End.TotalSeconds;
+    $foundSegmentedChapter = $false;
+    foreach ($c in $chapters) {
+        if ($c.Title -match "(?i)Ending|ED") {
+            break;
+        }
+        if ($c.SegmentId) {
+            $foundSegmentedChapter = $true;
+            $delayMilliseconds += $c.Duration;
             continue;
         }
 
-        $delayMilliseconds += $c.Duration;
+        if ($foundSegmentedChapter) {
+            break;
+        }
+        
+        $startFromSecond += $c.Duration;
     }
 
     if (!$delayMilliseconds) {
