@@ -5,7 +5,12 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 
 $items = Get-ChildItem -LiteralPath "$($PSScriptRoot)" -File;
 $sendToMenuFolder = "$($env:APPDATA)\Microsoft\Windows\SendTo";
-Remove-Item $sendToMenuFolder -Include "*.lnk" -Force;
+
+Remove-Item -LiteralPath $sendToMenuFolder -Force -Recurse;
+if (!(Test-Path -LiteralPath $sendToMenuFolder)) {
+    New-Item -Path $sendToMenuFolder -ItemType Directory -Force;
+}
+
 foreach ($item in $items) {
     if ($item.Name -eq $MyInvocation.MyCommand.Name) {
         continue;
@@ -15,4 +20,3 @@ foreach ($item in $items) {
         -LiteralPath $item.FullName `
         -Destination $sendToMenuFolder -Force;
 }
-timeout.exe 15;

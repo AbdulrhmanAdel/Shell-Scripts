@@ -6,4 +6,3 @@ $data = $args | ForEach-Object {
 
 # Write-Host $data;
 Set-Clipboard -Value "$($data -join ", ")"
-timeout.exe 10;
