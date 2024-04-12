@@ -64,6 +64,7 @@ function Handle {
     }
 
     $delayMilliseconds = -1 * $delayMilliseconds;
+    $startFromSecond = $startFromSecond / 1000;
     if ($startFromSecond) {
         $startFromSecond = "startFromSecond=$($startFromSecond)";
         & $handler  "file=$subFile" $startFromSecond "delayMilliseconds=$delayMilliseconds";
@@ -83,7 +84,7 @@ foreach ($file in $files) {
         -handler $handlers[$info.Extension] `
         -videoFile $videInfo `
         -subFile $file;
-    Write-Host "Start Handling File: $file" -ForegroundColor $color;
+    Write-Host "End Handling File: $file" -ForegroundColor $color;
 }
 
 Read-Host "Press Any Key To Exit."

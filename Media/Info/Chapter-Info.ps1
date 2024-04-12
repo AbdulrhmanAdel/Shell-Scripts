@@ -9,6 +9,31 @@ $getChapterScriptPath = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Sh
     Write-Host $file -ForegroundColor Blue;
     $chapters = & $getChapterScriptPath $file;
     Write-Host ($chapters | ForEach-Object { return $_.Title }) -Separator ", " -ForegroundColor Green;
+
+    $startFromSecond = 0;
+    $delayMilliseconds = 0;
+    $foundSegmentedChapter = $false;
+    foreach ($c in $chapters) {
+        if ($c.Title -match "(?i)Ending|ED") {
+            break;
+        }
+        if ($c.SegmentId) {
+            $foundSegmentedChapter = $true;
+            $delayMilliseconds += $c.Duration;
+            continue;
+        }
+
+        if ($foundSegmentedChapter) {
+            break;
+        }
+        
+        $startFromSecond += $c.Duration;
+    }
+    Write-Host "StartFromSecond: " -NoNewline
+    Write-Host "$($startFromSecond / 1000), " -ForegroundColor Red -NoNewline
+    Write-Host "DelayMilliseconds: " -NoNewline
+    Write-Host "$delayMilliseconds" -ForegroundColor Red
+
     foreach ($chapter in $chapters) {
 
         Write-Host "$($chapter.Title): $($chapter.Start) -> $($chapter.End)," -NoNewline;
