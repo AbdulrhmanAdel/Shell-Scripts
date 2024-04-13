@@ -3,8 +3,8 @@ function Sync {
     $type = [int](Read-Host "
     1- Watch    
     2- Programs
-    3- Education Programs
-    4- Education Projects
+    3- Programming Programs
+    4- Programming Projects
     5- Game Saves
 ");
 
@@ -25,16 +25,16 @@ function Sync {
         }
         3 {
             $command += " ""$mirrorConfig""";
-            $command += " -DirPair ""D:\Education\Programs"" ""E:\Education\Programs"""; 
+            $command += " -DirPair ""D:\Programming\Programs"" ""E:\Programming\Programs"""; 
             break;
         }
         4 { 
-            $command += " ""D:\Programs\Tools\Free File Sync\Configs\Education Projects.ffs_gui""";
-            $command += " -DirPair ""D:\Education\Projects"" ""E:\Education\Projects"""; 
+            $command += " ""D:\Programs\Tools\Free File Sync\Configs\Programming Projects.ffs_gui""";
+            $command += " -DirPair ""D:\Programming\Projects"" ""E:\Programming\Projects"""; 
             break;
         }
         5 { 
-            $command += " ""D:\Programs\Tools\Free File Sync\Configs\Education Projects.ffs_gui""";
+            $command += " ""D:\Programs\Tools\Free File Sync\Configs\Programming Projects.ffs_gui""";
             $command += " -DirPair ""D:\Personal\Game Saves"" ""E:\Personal\Game Saves""";
             break;
         }
