@@ -3,9 +3,8 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     exit;
 }
 
-$powershellPath = "C:\Program Files\PowerShell\7\pwsh.exe";
 $sendToMenuFolder = "$($env:APPDATA)\Microsoft\Windows\SendTo";
-$scriptPath = "D:\Education\Projects\MyProjects\Shell-Scripts"
+$scriptPath = $PSScriptRoot;
 #region Menu
 $menu = @(
     @{
@@ -14,11 +13,11 @@ $menu = @(
     },
     @{
         Name      = "02- Media - Display Chapters Info.lnk"
-        Arguments = "-File ""$scriptPath\Media\Info\Chapter-Info.ps1"""
+        Arguments = "-File ""$scriptPath\Media\Display-Chapter-Info.ps1"""
     },
     @{
         Name      = "02- Media - Remove Linked Segements.lnk"
-        Arguments = "-File ""$scriptPath\Media\Shared\Remove-Segment-Link.ps1"""
+        Arguments = "-File ""$scriptPath\Media\Remove-Segment-Link.ps1"""
     },
     @{
         Name      = "02- Media - Tracks Extractor.lnk"
@@ -53,14 +52,14 @@ $menu = @(
 #endregion
 Remove-Item -LiteralPath $sendToMenuFolder -Force -Recurse;
 if (!(Test-Path -LiteralPath $sendToMenuFolder)) {
-    New-Item -Path $sendToMenuFolder -ItemType Directory -Force;
+    New-Item -Path $sendToMenuFolder -ItemType Directory -Force | Out-Null;
 }
 
 $menu | ForEach-Object {
     $sh = New-Object -ComObject WScript.Shell
     $path = "$sendToMenuFolder/$($_.Name)";
     $shortCut = $sh.CreateShortcut($path);
-    $shortCut.TargetPath = """$powershellPath""";
+    $shortCut.TargetPath = "pwsh.exe";
     $shortCut.Arguments = "$($_.Arguments)";
     $shortCut.Save();
 }

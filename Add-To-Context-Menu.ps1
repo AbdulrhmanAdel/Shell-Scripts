@@ -56,12 +56,12 @@ $mediaPath = @(
         Key   = "0 Media" 
     }
 );
-$windowsPath = @(
-    @{
-        Title = "Windows" 
-        Key   = "5 Windows" 
-    }
-);
+# $windowsPath = @(
+#     @{
+#         Title = "Windows" 
+#         Key   = "5 Windows" 
+#     }
+# );
 $toolsPath = @(
     @{
         Title = "Tools" 
@@ -81,21 +81,28 @@ $scripts = @(
         Extensions = @(".mp3", ".m4a")
         Title      = "Crop"
         Key        = "999 Crop"
-        ScriptPath = "Media\Crop\Crop.ps1"
+        ScriptPath = "Media\Crop.ps1"
         Path       = $mediaPath
     },
     @{
         Extensions = @("*")
         Title      = "Pin To Start"
         Key        = "Pin To Start"
-        ScriptPath = "Windows Utils\Pin-File-To-Start\Pin-File-To-Start.ps1"
-        Path       = $windowsPath
+        ScriptPath = "Tools\Pin-File-To-Start.ps1"
+        Path       = $toolsPath
     },
     @{
         Extensions = @("*", "Directory")
         Title      = "TakeOwn"
         Key        = "TakeOwn"
-        ScriptPath = "TakeOwn\Takeown.ps1"
+        ScriptPath = "Tools\Takeown.ps1"
+        Path       = $toolsPath
+    },
+    @{
+        Extensions = @("Directory")
+        Title      = "Add To Envirement Varaibles"
+        Key        = "Add To Envirement Varaibles"
+        ScriptPath = "Tools\Add-To-Envirement-Varaibles.ps1"
         Path       = $toolsPath
     },
     @{
@@ -122,7 +129,14 @@ $scripts = @(
 ) 
 #endregion
 
-$allExtensions = $scripts | Select-Object -Property Extensions;
+@($scripts | ForEach-Object { return $_.Extensions } | Get-Unique) | ForEach-Object {
+    if ($_ -eq "*" -or $_ -eq "Directory") {
+        reg delete "HKEY_CURRENT_USER\Software\Classes\$_\shell\0 Scripts" /f;
+    }
+    else {
+        reg delete "HKEY_CLASSES_ROOT\SystemFileAssociations\$_\shell\0 Special Scripts" /f;
+    }
+};
 
 $scripts | ForEach-Object {
     $element = $_;
