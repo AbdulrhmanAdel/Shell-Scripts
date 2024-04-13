@@ -1,14 +1,14 @@
 $files = $args;
 
 
-$objShell = New-Object -ComObject "Shell.Application"
+$shell = New-Object -ComObject "Shell.Application"
 function CopyWithGui {
     param (
         $source,
         $dest
     )
 
-    $objFolder = $objShell.NameSpace($dest) 
+    $objFolder = $shell.NameSpace($dest) 
     $objFolder.CopyHere($source, 16)
 }
 
@@ -31,3 +31,5 @@ $files | ForEach-Object {
         New-Item -Path $path -ItemType Directory -Force;
     }
 }
+
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell) | Out-Null
