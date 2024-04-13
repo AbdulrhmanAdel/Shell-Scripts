@@ -1,20 +1,20 @@
 $files = $args;
 
 
-$shell = New-Object -ComObject "Shell.Application"
+$teraCopy = "C:\Program Files\TeraCopy\TeraCopy.exe"
+# $shell = New-Object -ComObject "Shell.Application"
 function CopyWithGui {
     param (
         $source,
         $dest
     )
 
-    $objFolder = $shell.NameSpace($dest) 
-    $objFolder.CopyHere($source, 16)
+    & $teraCopy  Copy """$source""" """$dest"""
 }
 
 $driveLetter = Read-Host "Enter Driver Letter";
 $files | ForEach-Object {
-    $path = "$($driveLetter):\"
+    $path = "$($driveLetter):"
     $newPath = $_;
     $pathes = $newPath -split "\\";
     for ($i = 1; $i -lt $pathes.Count; $i++) {
@@ -23,7 +23,7 @@ $files | ForEach-Object {
             return;
         }
         
-        $path += $pathes[$i] + "\";
+        $path += "\$($pathes[$i])";
         if (Test-Path -LiteralPath $path) {
             continue;
         }
@@ -32,4 +32,4 @@ $files | ForEach-Object {
     }
 }
 
-[System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell) | Out-Null
+# [System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell) | Out-Null
