@@ -1,17 +1,30 @@
 $files = $args;
 
 
+#region functions
 $teraCopy = "C:\Program Files\TeraCopy\TeraCopy.exe"
 # $shell = New-Object -ComObject "Shell.Application"
-function CopyWithGui {
+function CopyWithTeraCopy {
     param (
         $source,
         $dest
     )
 
-    & $teraCopy  Copy """$source""" """$dest""" /OverwriteAll /Close;
+    & $teraCopy  Copy """$source""" """$dest""" /Close;
 }
 
+$shell = New-Object -ComObject "Shell.Application"
+function CopyWithShellGUI {
+    param (
+        $source,
+        $dest
+    )
+
+    $objFolder = $shell.NameSpace($dest) 
+    $objFolder.CopyHere($source, 16)
+}
+
+#endregion
 $driveLetter = Read-Host "Enter Driver Letter";
 $files | ForEach-Object {
     $path = "$($driveLetter):"
@@ -19,7 +32,7 @@ $files | ForEach-Object {
     $pathes = $newPath -split "\\";
     for ($i = 1; $i -lt $pathes.Count; $i++) {
         if ($i -eq $pathes.Count - 1) {
-            CopyWithGui -source $_ -dest $path;
+            CopyWithShellGUI -source $_ -dest $path;
             return;
         }
         
@@ -32,4 +45,6 @@ $files | ForEach-Object {
     }
 }
 
-# [System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell) | Out-Null
+if ($shell) {
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell) | Out-Null
+}
