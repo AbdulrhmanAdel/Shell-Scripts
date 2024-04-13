@@ -99,6 +99,13 @@ $scripts = @(
         Path       = $toolsPath
     },
     @{
+        Extensions = @("*", "Directory")
+        Title      = "Create Symblink"
+        Key        = "Create Symblink"
+        ScriptPath = "Tools\Create-Symblink.ps1"
+        Path       = $toolsPath
+    },
+    @{
         Extensions = @("Directory")
         Title      = "Single Video"
         Key        = "0 Single Video"
