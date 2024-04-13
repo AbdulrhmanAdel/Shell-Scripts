@@ -20,7 +20,7 @@ $WshShell = New-Object -comObject "WScript.Shell";
 $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
 $Shortcut.TargetPath = $filePath;
 $Shortcut.Save();
-timeout.exe 10;
+# timeout.exe 10;
 # $appName = $fileInfo.Name.Replace($fileInfo.Extension, "");
 # $apps = Get-StartApps | Where-Object { $_.Name -eq $appName } ;
 
