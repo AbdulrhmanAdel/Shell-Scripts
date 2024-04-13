@@ -9,7 +9,7 @@ function CopyWithGui {
         $dest
     )
 
-    & $teraCopy  Copy """$source""" """$dest"""
+    & $teraCopy  Copy """$source""" """$dest""" /OverwriteAll /Close;
 }
 
 $driveLetter = Read-Host "Enter Driver Letter";

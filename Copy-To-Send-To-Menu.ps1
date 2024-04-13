@@ -1,5 +1,9 @@
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process pwsh.exe -Verb RunAs "-Command ""$($MyInvocation.MyCommand.Path)""";
+    $script = $MyInvocation.MyCommand.Path;
+    $arguments = @(
+        "-File", """$script"""
+    );
+    Start-Process pwsh.exe -Verb RunAs -ArgumentList $arguments;
     exit;
 }
 
@@ -46,6 +50,10 @@ $menu = @(
     @{
         Name      = "500- Copy Paths To Clipboard.lnk"
         Arguments = "-File ""$scriptPath\Tools\Copy-Paths-To-Clipboard.ps1"""
+    },
+    @{
+        Name      = "500- Copy To Different Drive With The Same Hierarchy.lnk"
+        Arguments = "-File ""$scriptPath\Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"""
     }
 )
      
