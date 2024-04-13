@@ -1,27 +1,27 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts]
 "MUIVerb"="Scripts"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell]
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Attributes]
 "MUIVerb"="Attributes"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Attributes\shell]
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell\System]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Attributes\shell\System]
 @="System"
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell\System\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\" \"System\""
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Attributes\shell\System\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\" \"System\""
 
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell\Hidden]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Attributes\shell\Hidden]
 @="Hidden"
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Attributes\shell\Hidden\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\" \"Hidden\""
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Attributes\shell\Hidden\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Attributes\\Change-Attributes.ps1\" \"%1\" \"Hidden\""

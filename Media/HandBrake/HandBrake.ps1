@@ -112,7 +112,7 @@ if ($coursePathInfo -is [System.IO.DirectoryInfo]) {
     Write-Output "DONE CONVERTING";
     Write-Output "Checking video's Lengths";
     Write-Output "START Checking";
-    powershell.exe -File "D:\Programs\Shell-Scripts\Media\HandBrake\VerfiyVideoLength.ps1" $coursePath;
+    pwsh.exe -File "D:\Programs\Shell-Scripts\Media\HandBrake\VerfiyVideoLength.ps1" $coursePath;
     Write-Output "DONE Checking";
 }
 else {

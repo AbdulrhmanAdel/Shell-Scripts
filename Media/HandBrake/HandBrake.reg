@@ -1,30 +1,30 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts]
 "MUIVerb"="Scripts"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Media]
 "MUIVerb"="Media"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Media\shell]
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Encode]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Media\shell\Encode]
 "MUIVerb"="Encode"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Encode\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Media\shell\Encode\shell]
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses]
 @="Courses"
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Media\\HandBrake\\HandBrake.ps1\" \"%1\" "
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Media\shell\Encode\shell\001 Courses\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Media\\HandBrake\\HandBrake.ps1\" \"%1\" "
 
 # Files
 
@@ -32,24 +32,24 @@ Windows Registry Editor Version 5.00
 "MUIVerb"="Scripts"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell]
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Media]
 "MUIVerb"="Media"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Media\shell]
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Media\shell\Encode]
 "MUIVerb"="Encode"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Media\shell\Encode\shell]
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell\001 compress]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Media\shell\Encode\shell\001 compress]
 @="Compress"
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\Media\shell\Encode\shell\001 compress\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Media\\HandBrake\\Compress.ps1\" \"%1\" "
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\Media\shell\Encode\shell\001 compress\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Media\\HandBrake\\Compress.ps1\" \"%1\" "

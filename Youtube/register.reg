@@ -1,28 +1,28 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts]
 "MUIVerb"="Scripts"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\001 Youtube]
 "MUIVerb"="Youtube"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\001 Youtube\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Single Video]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\001 Youtube\shell\Download Single Video]
 @="Download Single Video"
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Single Video\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Youtube\\yt-downloader-single-video.ps1\" \"%1\"" 
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\001 Youtube\shell\Download Single Video\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Youtube\\yt-downloader-single-video.ps1\" \"%1\"" 
 
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Playlist]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\001 Youtube\shell\Download Playlist]
 @="Download Playlist"
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\001 Youtube\shell\Download Playlist\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Youtube\\yt-downloader-playlist.ps1\" \"%1\""
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\001 Youtube\shell\Download Playlist\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Youtube\\yt-downloader-playlist.ps1\" \"%1\""

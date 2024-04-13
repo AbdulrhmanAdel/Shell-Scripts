@@ -1,13 +1,13 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts]
 "MUIVerb"="Scripts"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\900 Add This Folder To Path]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\900 Add This Folder To Path]
 @="Add This Folder To Path"
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\900 Add This Folder To Path\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\EnvironmentVariable\\Add-This-Folder-To-Path.ps1\" \"%1\" "
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\900 Add This Folder To Path\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\EnvironmentVariable\\Add-This-Folder-To-Path.ps1\" \"%1\" "

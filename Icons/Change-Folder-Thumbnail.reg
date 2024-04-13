@@ -1,27 +1,27 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts]
 "MUIVerb"="Scripts"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Icons]
 "MUIVerb"="Icons"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Icons\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Change Folder Icon]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Icons\shell\Change Folder Icon]
 @="Change Folder Icon"
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Change Folder Icon\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\OS\\Windows\\Shell-Scripts\\Icons\\Change-Folder-Thumbnail.ps1\" \"%1\""
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Icons\shell\Change Folder Icon\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\OS\\Windows\\Shell-Scripts\\Icons\\Change-Folder-Thumbnail.ps1\" \"%1\""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Remove Folder Icon]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Icons\shell\Remove Folder Icon]
 @="Remove Folder Icon"
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Icons\shell\Remove Folder Icon\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\OS\\Windows\\Shell-Scripts\\Icons\\Change-Folder-Thumbnail.ps1\" \"%1\" \"Remove\""
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Icons\shell\Remove Folder Icon\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\OS\\Windows\\Shell-Scripts\\Icons\\Change-Folder-Thumbnail.ps1\" \"%1\" \"Remove\""

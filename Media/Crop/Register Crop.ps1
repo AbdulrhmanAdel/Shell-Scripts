@@ -1,10 +1,10 @@
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process Powershell -Verb RunAs "-Command ""$($MyInvocation.Line)""";
+    Start-Process pwsh.exe -Verb RunAs "-Command ""$($MyInvocation.Line)""";
     exit;
 }
 
 $cropPath = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Crop\Crop.ps1";
-$command = "powershell.exe -file ""$cropPath"" ""%1""";
+$command = "pwsh.exe -file ""$cropPath"" ""%1""";
 
 function Register {
     param ([string]$extension)

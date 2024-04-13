@@ -1,28 +1,28 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts]
 "MUIVerb"="Scripts"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Rename]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Rename]
 "MUIVerb"="Rename"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Rename\shell]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Rename\shell]
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Rename\shell\Remove Text]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Rename\shell\Remove Text]
 @="Remove Text"
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Rename\shell\Remove Text\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\OS\\Windows\\Shell-Scripts\\FileNames\\Rename\\Rename.ps1\" \"%1\" \"Remove\"" 
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Rename\shell\Remove Text\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\OS\\Windows\\Shell-Scripts\\FileNames\\Rename\\Rename.ps1\" \"%1\" \"Remove\"" 
 
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Rename\shell\Replace Text]
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Rename\shell\Replace Text]
 @="Replace Text"
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\Directory\shell\Scripts\shell\Rename\shell\Replace Text\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\OS\\Windows\\Shell-Scripts\\FileNames\\Rename\\Rename.ps1\" \"%1\"  \"Replace\""
+[HKEY_CURRENT_USER\Software\Classes\Directory\shell\Scripts\shell\Rename\shell\Replace Text\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\OS\\Windows\\Shell-Scripts\\FileNames\\Rename\\Rename.ps1\" \"%1\"  \"Replace\""

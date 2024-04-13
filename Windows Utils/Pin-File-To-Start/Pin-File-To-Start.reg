@@ -1,20 +1,20 @@
 Windows Registry Editor Version 5.00
 
 # Files
-[HKEY_CLASSES_ROOT\*\shell\Scripts]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts]
 "MUIVerb"="Scripts"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell]
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\004 Windows]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\004 Windows]
 "MUIVerb"="Windows"
 "SubCommands"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\004 Windows\shell]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\004 Windows\shell]
 "Icon"=""
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\004 Windows\shell\Pin To Start Menu]
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\004 Windows\shell\Pin To Start Menu]
 @="Pin To Start Menu"
 
-[HKEY_CLASSES_ROOT\*\shell\Scripts\shell\004 Windows\shell\Pin To Start Menu\command]
-@="powershell.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Windows Utils\\Pin-File-To-Start\\Pin-File-To-Start.ps1\" \"%1\""
+[HKEY_CURRENT_USER\Software\Classes\*\shell\Scripts\shell\004 Windows\shell\Pin To Start Menu\command]
+@="pwsh.exe -file \"D:\\Education\\Projects\\MyProjects\\Shell-Scripts\\Windows Utils\\Pin-File-To-Start\\Pin-File-To-Start.ps1\" \"%1\""

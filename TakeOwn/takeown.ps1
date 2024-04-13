@@ -4,7 +4,7 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
         $argBuilder += """$arg"" ";
     }
     Write-Host $argBuilder;
-    Start-Process Powershell -Verb RunAs "-File ""$($MyInvocation.MyCommand.Path)"" $($argBuilder)";
+    Start-Process pwsh.exe -Verb RunAs "-File ""$($MyInvocation.MyCommand.Path)"" $($argBuilder)";
     exit;
 }
 
