@@ -113,6 +113,13 @@ $scripts = @(
         Path       = $toolsPath
     },
     @{
+        Extensions = @("*", "Directory")
+        Title      = "Copy To Different Drive With The Same Hierarchy"
+        Key        = "999-Copy-To-Different-Drive-With-The-Same-Hierarchy"
+        ScriptPath = "Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"
+        Path       = $toolsPath
+    },
+    @{
         Extensions = @("Directory")
         Title      = "Single Video"
         Key        = "0 Single Video"
