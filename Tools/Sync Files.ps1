@@ -24,7 +24,7 @@ function Sync {
             break;
         }
         3 {
-            $command += " ""$mirrorConfig""";
+            $command += " ""D:\Programs\Tools\Free File Sync\Configs\Programming Programs.ffs_gui""";
             $command += " -DirPair ""D:\Programming\Programs"" ""E:\Programming\Programs"""; 
             break;
         }
