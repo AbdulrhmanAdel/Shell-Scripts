@@ -1,4 +1,5 @@
-$files = @($args | Where-Object { $_ -match "\.ass" });
+$files = @($args | Where-Object { $_.ToString().EndsWith(".ass") });
+
 #region Keys
 $NameKey = "Name";
 $FontnameKey = "Fontname";
