@@ -6,6 +6,7 @@ function Sync {
     3- Programming Programs
     4- Programming Projects
     5- Game Saves
+    6- Programs Data
 ");
 
     $mirrorConfig = "D:\Programs\Tools\Free File Sync\Configs\Mirror.ffs_gui";
@@ -36,6 +37,11 @@ function Sync {
         5 { 
             $command += " ""D:\Programs\Tools\Free File Sync\Configs\Programming Projects.ffs_gui""";
             $command += " -DirPair ""D:\Personal\Game Saves"" ""E:\Personal\Game Saves""";
+            break;
+        }
+        6 {
+            $command += " ""$mirrorConfig""";
+            $command += " -DirPair ""D:\Programming\Programs\1- Programs Data"" ""E:\Programming\Programs\1- Programs Data""";
             break;
         }
         Default {
