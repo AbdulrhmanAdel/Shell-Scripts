@@ -2,7 +2,7 @@
 
 function GetChapters {
     param($path)
-    $ffmpegOutput = & $ffmpegPath -loglevel error -i $path -f ffmetadata -;
+    $ffmpegOutput = & ffmpeg -loglevel error -i $path -f ffmetadata -;
     $chapters = @()
     for ($i = 0; $i -lt $ffmpegOutput.Length; $i++) {
         if ($ffmpegOutput[$i] -match "\[CHAPTER\]") {
@@ -79,7 +79,6 @@ $colors = @(
     [System.ConsoleColor]::Magenta
 );
 
-$ffmpegPath = "D:\Programs\Media\Tools\yt\ffmpeg.exe"
 $handlers = @{
     ".ass" = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Subtitles\Subtitle-Shifter/handlers/Ass-Subtitle-Shifter.ps1";
     ".srt" = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Subtitles\Subtitle-Shifter/handlers/Srt-Subtitle-Shifter.ps1";

@@ -1,4 +1,4 @@
-$ffmpeg = "D:\Programs\Media\Tools\yt\ffmpeg.exe";
+
 $filePath = $args[0];
 $fileExtension = [System.IO.Path]::GetExtension($filePath);
 $outputPath = $filePath.Replace($fileExtension, ".cropped$fileExtension");
@@ -40,4 +40,4 @@ $commandArgs = @(
     "-i", """$filePath""",
     """$outputPath""");
 
-Start-Process $ffmpeg -ArgumentList $commandArgs -NoNewWindow;
+Start-Process ffmpeg -ArgumentList $commandArgs -NoNewWindow;

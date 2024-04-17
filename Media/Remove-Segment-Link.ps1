@@ -1,8 +1,3 @@
-#region External Programs
-$mkvMerge = "D:\Programs\Media\Tools\mkvtoolnix\mkvmerge.exe";
-$mkvextract = "D:\Programs\Media\Tools\mkvtoolnix\mkvextract.exe";
-#endregion
-
 $colors = @(
     #region Vars
     [System.ConsoleColor]::Black,
@@ -27,7 +22,7 @@ $colors = @(
     $fileInfo = Get-Item -LiteralPath $file;
     $chapterFileName = "$($fileInfo.Name)-$(Get-Random)_chapters.xml";
     $chapterOutput = "$($env:TEMP)\$chapterFileName";
-    & $mkvextract chapters $_ > $chapterOutput;
+    & mkvextract chapters $_ > $chapterOutput;
 
     # Backup Chapters File
     $chaptersDirectory = $fileInfo.Directory.FullName + "\Chapters";
@@ -65,7 +60,7 @@ $colors = @(
     $xml.OuterXml | Set-Content $chapterOutput;
     $tempFileName = "$($fileInfo.Directory.FullName)\" + $fileInfo.Name -replace $fileInfo.Extension, "(TEMP)$($fileInfo.Extension)";
     Rename-Item -LiteralPath $file -NewName $tempFileName -Force;
-    & $mkvmerge -o "$file" --chapters "$chapterOutput" --no-chapters "$tempFileName";
+    & mkvmerge -o "$file" --chapters "$chapterOutput" --no-chapters "$tempFileName";
     Remove-Item -LiteralPath $chapterOutput -Force;
     Remove-Item -LiteralPath $tempFileName -Force;
     Write-Host "Done Handling File: $file" -ForegroundColor $color;

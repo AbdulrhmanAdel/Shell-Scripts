@@ -1,4 +1,4 @@
-$yt = "D:\Programs\Media\Tools\yt\yt-dlp.exe";
+
 $destinitionPath = $args[0];
 
 if (!$destinitionPath) {
@@ -17,11 +17,11 @@ $url = Read-Host "Please enter url?";
 
 function download {
     switch ($format) {
-        1 { &$yt -f "ba" -x --audio-format mp3 --audio-quality 160K  -o "$destinitionPath\\%(title)s" $url; }
-        2 { &$yt -f "ba" -x --audio-format m4a --audio-quality 160K  -o "$destinitionPath\\%(title)s" $url; }
-        3 { &$yt -f "bestvideo[height<=480]+bestaudio[ext=m4a]" -o "$destinitionPath\\%(title)s.%(ext)s" $url; }
-        4 { &$yt -f "bestvideo[height<=720]+bestaudio[ext=m4a]" -o "$destinitionPath\\%(title)s.%(ext)s" $url; }
-        Default { &$yt -f "ba" -x --audio-format m4a -o "$destinitionPath\\%(title)s" $url; }
+        1 { & yt-dlp -f "ba" -x --audio-format mp3 --audio-quality 160K  -o "$destinitionPath\\%(title)s" $url; }
+        2 { & yt-dlp -f "ba" -x --audio-format m4a --audio-quality 160K  -o "$destinitionPath\\%(title)s" $url; }
+        3 { & yt-dlp -f "bestvideo[height<=480]+bestaudio[ext=m4a]" -o "$destinitionPath\\%(title)s.%(ext)s" $url; }
+        4 { & yt-dlp -f "bestvideo[height<=720]+bestaudio[ext=m4a]" -o "$destinitionPath\\%(title)s.%(ext)s" $url; }
+        Default { & yt-dlp -f "ba" -x --audio-format m4a -o "$destinitionPath\\%(title)s" $url; }
     }
 
     $url = Read-Host "Please enter url?";

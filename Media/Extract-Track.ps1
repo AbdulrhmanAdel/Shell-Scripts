@@ -1,6 +1,3 @@
-$mediaInfo = "D:\Programs\Media\Tools\MediaInfo\MediaInfo.exe";
-$mkvExtractPath = "D:\Programs\Media\Tools\mkvtoolnix\mkvextract.exe";
-
 function ExtractTrack {
     param (
         $fileInfo,
@@ -15,20 +12,20 @@ function ExtractTrack {
         """$($fileInfo.FullName)""",
         "$($trackInfo["index"]):""$output"""
     );
-    Start-Process -FilePath $mkvExtractPath -NoNewWindow -Wait `
+    Start-Process mkvextract -NoNewWindow -Wait `
         -ArgumentList $processArgs;
 }
 
 function GetTrackInfo($inputPath) {
-    $json = &$mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json;
+    $json = & mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json;
     $tracks = $json.media.track | Where-Object { $_.'@type' -eq "Text" -or $_.'@type' -eq "Audio" }
     foreach ($track in $tracks) {
-        Write-Host "$($track.ID) =>  $($track.Title) - $($track.'@type') - $($track.Language)";
+        Write-Host "$($track.StreamOrder) =>  $($track.Title) - $($track.'@type') - $($track.Language)";
     }
-    $trackId = (Read-Host "Please Enter TrackId") -as [int];
-    $selectedTrack = $tracks | Where-Object { $_.ID -eq $trackId };
+    $streamOrder = (Read-Host "Please Enter StreamOrder") -as [int];
+    $selectedTrack = $tracks | Where-Object { $_.StreamOrder -eq $streamOrder };
     return @{
-        index     = $selectedTrack.ID - 1
+        index     = $selectedTrack.StreamOrder
         extension = $selectedTrack.Format.ToLower()
     };
 }

@@ -1,6 +1,3 @@
-#region External Programs
-$mkvextract = "D:\Programs\Media\Tools\mkvtoolnix\mkvextract.exe";
-#endregion
 #region vars
 $filePath = $args[0];
 $logOtherDetails = $args.Contains("--log");
@@ -32,7 +29,7 @@ function Get-Chapters {
     $file = $path;
     $fileInfo = Get-Item -LiteralPath $file;
     $chapterOutput = "$($env:TEMP)\$($fileInfo.Name)($(Get-Random ))_chapters.xml";
-    & $mkvextract chapters $file > $chapterOutput;
+    & mkvextract chapters $file > $chapterOutput;
     [xml]$xml = Get-Content $chapterOutput;
     $editionEntry = $xml.GetElementsByTagName("EditionEntry").Item(0);
     $editionEntry.ChildNodes | ForEach-Object {

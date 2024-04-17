@@ -1,6 +1,4 @@
 Write-Host "V2"
-$mkvmerge = "D:\Programs\Media\Tools\mkvtoolnix\mkvmerge.exe";
-$mediaInfo = "D:\Programs\Media\Tools\MediaInfo\MediaInfo.exe";
 $prefix = "D:\Watch";
 $inputFiles = $args;
 $outputPath = & "D:\Programming\Projects\Personal Projects\Shell-Scripts\Shared\Folder-Picker.ps1" $prefix;
@@ -21,7 +19,7 @@ function RemoveUnusedTracks(
         $outputPath = $outputPath -replace "$($outputFile.Extension)", " - Converted$($outputFile.Extension)"
     }
 
-    $tracks = (&$mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json).media.track;
+    $tracks = (& mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json).media.track;
     $videoTrack = $tracks | Where-Object { $_.'@type' -eq 'Video' }
     $tracksOrder = @([int]$videoTrack.StreamOrder);
     $arguments = @(
@@ -76,7 +74,7 @@ function RemoveUnusedTracks(
     $arguments += "--track-order"
     $arguments += ($tracksOrder | ForEach-Object { return "0:$_" }) -join ","
 
-    $p = Start-Process $mkvmerge -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
+    $p = Start-Process mkvmerge -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
     Write-Host $p.ExitCode -ForegroundColor Red;
     if ($p.ExitCode -eq 0) {
         Remove-Item -LiteralPath $inputPath -Force;

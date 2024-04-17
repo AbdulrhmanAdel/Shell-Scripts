@@ -1,10 +1,13 @@
-$continue = Read-Host "Are you sure you want to continue (Y)?";
-
-if ($continue) {
-    $variable = $args[0];
-    $path = [Environment]::GetEnvironmentVariable('path', [EnvironmentVariableTarget]::User);
-    $path += ";$variable";
-    [Environment]::SetEnvironmentVariable('Path', $path, [EnvironmentVariableTarget]::User);
-    Write-Output "New Path Variable Is $path";
-    Read-Host "PRESS ANY KEY TO EXIT."
+$variable = $args[0].ToString().ToLower();
+$path = [Environment]::GetEnvironmentVariable('path', [EnvironmentVariableTarget]::User);
+$alreadyExists = ($path -split ";").Contains($variable);
+if ($alreadyExists) {
+    Write-Host "Path Already Exists" -ForegroundColor Red
+    timeout.exe 5;
+    Exit;
 }
+
+$path += ";$variable";
+[Environment]::SetEnvironmentVariable('Path', $path, [EnvironmentVariableTarget]::User);
+Write-Output "New Path Variable Is $path";
+Read-Host "PRESS ANY KEY TO EXIT."

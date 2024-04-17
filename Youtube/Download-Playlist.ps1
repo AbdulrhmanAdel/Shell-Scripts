@@ -1,4 +1,4 @@
-$yt = "D:\Programs\Media\Tools\yt\yt-dlp.exe";
+$yt = "yt-dlp";
 $destinitionPath = $args[0];
 
 if (!$destinitionPath) {
