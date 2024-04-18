@@ -1,9 +1,25 @@
-Write-Host "V2"
 $prefix = "D:\Watch";
 $inputFiles = $args;
 $outputPath = & "D:\Programming\Projects\Personal Projects\Shell-Scripts\Shared\Folder-Picker.ps1" $prefix;
 if (!$outputPath) {
     return;
+}
+
+function ForceRename {
+    param (
+        $path,
+        $newName
+
+    )
+    
+    $RenameError = $null;
+    Rename-Item -LiteralPath $path -NewName $newName -Force -ErrorVariable RenameError | Out-Null;
+    if (!$RenameError.Count) {
+        return
+    }
+
+    Write-Host $RenameError -ForegroundColor Red;
+    ForceRename -path $path -newName $newName
 }
 # $removeSent = Read-Host "Do you want to remove any char from video file?";
 $removeSent = "-PSA";
@@ -11,12 +27,16 @@ function RemoveUnusedTracks(
     $inputPath,
     $outputPath
 ) {
-    $oldName = $null;
+    Write-Host "Handling File $inputPath" -ForegroundColor Green;
+
     if (Test-Path -LiteralPath $outputPath) {
-        Write-Output "File Already Exists"
-        $outputFile = Get-Item -LiteralPath $outputPath;
-        $oldName = $outputFile.Name;
-        $outputPath = $outputPath -replace "$($outputFile.Extension)", " - Converted$($outputFile.Extension)"
+        $outputPathInfo = Get-Item -LiteralPath $outputPath;
+        $newName = $outputPathInfo.Name -replace "$($outputPathInfo.Extension)", " - OLD - $(Get-Date  -f yyyy-MM-dd)$($outputPathInfo.Extension)";
+        Write-Output "File Already Exists: RENAMING IT TO $newName";
+        ForceRename -path $outputPath -newName $newName;
+        if ($inputPath -eq $outputPath) {
+            $inputPath = "$($outputPathInfo.DirectoryName)\$newName";
+        }
     }
 
     $tracks = (& mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json).media.track;
@@ -75,29 +95,32 @@ function RemoveUnusedTracks(
     $arguments += ($tracksOrder | ForEach-Object { return "0:$_" }) -join ","
 
     $p = Start-Process mkvmerge -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
-    Write-Host $p.ExitCode -ForegroundColor Red;
+    
     if ($p.ExitCode -eq 0) {
         Remove-Item -LiteralPath $inputPath -Force;
-        if ($oldName) {
-            Rename-Item -LiteralPath $outputPath -NewName $oldName;
-        }
+        Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
     }
+    else {
+        Write-Host "FAILD Processing File. ExitCode: $($p.ExitCode)" -ForegroundColor Red;
+    }
+
+    Write-Host "==========================" -ForegroundColor DarkBlue;
 }
 
 foreach ($inputPath in $inputFiles) {
     $pathAsAfile = Get-Item -LiteralPath $inputPath;
     if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
         $newName = $pathAsAfile.Name.Replace($removeSent, "");
-        $outputFilePath = "$outputPath/$newName";
+        $outputFilePath = "$outputPath\$newName";
         RemoveUnusedTracks -inputPath $inputPath -outputPath $outputFilePath;
     }
     else {
         $filter = Read-Host "Start with?";
         if (!$filter) { $filter = ""; }
         Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
-            $outputFilePath = "$outputPath/$_";
+            $outputFilePath = "$outputPath\$_";
             if ($removeSent) {
-                $outputFilePath = "$outputPath/" + $_.Name.Replace($removeSent, "");
+                $outputFilePath = "$outputPath\" + $_.Name.Replace($removeSent, "");
             }
     
             RemoveUnusedTracks -inputPath $_.FullName -outputPath $outputFilePath;
