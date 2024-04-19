@@ -1,6 +1,6 @@
 $prefix = "D:\Watch";
 $inputFiles = $args;
-$outputPath = & "D:\Programming\Projects\Personal Projects\Shell-Scripts\Shared\Folder-Picker.ps1" $prefix;
+$outputPath = & "Folder-Picker.ps1" $prefix;
 if (!$outputPath) {
     return;
 }
@@ -9,7 +9,6 @@ function ForceRename {
     param (
         $path,
         $newName
-
     )
     
     $RenameError = $null;

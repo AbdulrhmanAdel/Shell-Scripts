@@ -54,6 +54,10 @@ $menu = @(
     @{
         Name      = "500- Copy To Different Drive With The Same Hierarchy.lnk"
         Arguments = "-File ""$scriptPath\Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"""
+    },
+    @{
+        Name      = "600- Compress.lnk"
+        Arguments = "-File ""$scriptPath\Media\Compress\Compress.ps1"""
     }
 )
      
