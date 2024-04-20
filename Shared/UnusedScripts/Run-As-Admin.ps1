@@ -2,7 +2,3 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     Start-Process pwsh.exe -Verb RunAs "-Command ""$($MyInvocation.Line)""";
     exit;
 }
-
-$d = $MyInvocation;
-Write-Host "$($args[0])"
-Read-Host "Enter Data";

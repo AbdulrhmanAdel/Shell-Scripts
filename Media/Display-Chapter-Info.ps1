@@ -1,13 +1,7 @@
-#region External Programs
-
-$getChapterScriptPath = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Shared\Get-Chapters.ps1";
-
-#endregion
-
 ($args | Where-Object { $_ -match ".*(.mkv)$" })  | ForEach-Object {
     $file = $_;
     Write-Host $file -ForegroundColor Blue;
-    $chapters = & $getChapterScriptPath $file;
+    $chapters = & Get-Chapters.ps1 $file;
     Write-Host ($chapters | ForEach-Object { return $_.Title }) -Separator ", " -ForegroundColor Green;
 
     $startFromSecond = 0;

@@ -17,10 +17,10 @@ function ForceRename {
         return
     }
 
-    Write-Host $RenameError -ForegroundColor Red;
+    Read-Host $RenameError -ForegroundColor Red;
     ForceRename -path $path -newName $newName
 }
-# $removeSent = Read-Host "Do you want to remove any char from video file?";
+
 $removeSent = "-PSA";
 function RemoveUnusedTracks(
     $inputPath,
@@ -38,7 +38,7 @@ function RemoveUnusedTracks(
         }
     }
 
-    $tracks = (& mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json).media.track;
+    $tracks = (& mediaInfo --Output=JSON "$inputPath" | ConvertFrom-Json).media.track;
     $videoTrack = $tracks | Where-Object { $_.'@type' -eq 'Video' }
     $tracksOrder = @([int]$videoTrack.StreamOrder);
     $arguments = @(

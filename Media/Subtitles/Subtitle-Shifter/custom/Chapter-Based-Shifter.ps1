@@ -1,9 +1,3 @@
-#region External Programs
-
-$getChapterScriptPath = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Shared\Get-Chapters.ps1";
-
-#endregion
-
 $colors = @(
     [System.ConsoleColor]::Black,
     [System.ConsoleColor]::DarkBlue,
@@ -20,18 +14,18 @@ $colors = @(
 );
 
 
+$base = (Get-Item -LiteralPath $PSScriptRoot).Directory;
 $handlers = @{
-    ".ass" = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Subtitles\Subtitle-Shifter/handlers/Ass-Subtitle-Shifter.ps1";
-    ".srt" = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Subtitles\Subtitle-Shifter/handlers/Srt-Subtitle-Shifter.ps1";
+    ".ass" = "$base/handlers/Ass-Subtitle-Shifter.ps1";
+    ".srt" = "$base/handlers/Srt-Subtitle-Shifter.ps1";
 };
 
-$getChapterScriptPath = "D:\Education\Projects\MyProjects\Shell-Scripts\Media\Shared\Get-Chapters.ps1";
 function Get-Chapters {
     param (
         $path
     )
     
-    return & $getChapterScriptPath $path;
+    return & Get-Chapters.ps1 $path;
 }
 
 function Handle {

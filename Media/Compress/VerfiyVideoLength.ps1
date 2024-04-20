@@ -10,7 +10,7 @@ function GetDuration {
         Write-Output "FILE $videoPath DOESN'T EXITS";
     }
     
-    $json = & mediaInfo  --Output=JSON "D:\Education\Courses\Mosh Hamedani\React\React Native\The Ultimate React Native Series - Part 1\1. Getting Started\11- Logging.mp4" | ConvertFrom-Json;
+    $json = & mediaInfo --Output=JSON """$videoPath""" | ConvertFrom-Json;
     foreach ($track in $json.media.track) {
         $trackType = $track.'@type'; 
         if ($trackType -eq "Video") {
