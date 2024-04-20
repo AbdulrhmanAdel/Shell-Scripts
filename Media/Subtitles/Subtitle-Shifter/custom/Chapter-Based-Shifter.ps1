@@ -20,17 +20,14 @@ $handlers = @{
     ".srt" = "$base/handlers/Srt-Subtitle-Shifter.ps1";
 };
 
-function Get-Chapters {
-    param (
-        $path
-    )
-    
-    return & Get-Chapters.ps1 $path;
-}
 
 function Handle {
     param ($videoFile, $subFile, $handler)
-    $chapters = Get-Chapters -path $videoFile;
+    $chapters = & Get-Chapters.ps1 $videoFile;
+    if (!$chapters) {
+        Write-Host "NO CHAPTERS FOUND" -ForegroundColor Red;
+        return;
+    }
     Write-Host "Chapters: " -ForegroundColor Green -NoNewline;
     Write-Host ($chapters.Title) -Separator ", "
     $startFromSecond = 0;

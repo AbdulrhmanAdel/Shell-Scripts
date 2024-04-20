@@ -16,21 +16,29 @@ function GetTagValue {
     param (
         $xml, $tag
     )
-    
-    return $xml.GetElementsByTagName($tag).Item(0).InnerXml;
+    $elements = $xml.GetElementsByTagName($tag);
+
+    if (!$elements) {
+        return $null
+    }
+    return $elements.Item(0).InnerXml;
 }
 
 function Get-Chapters {
     param (
         $path
     )
-    
-    $chapters = @();
+
     $file = $path;
     $fileInfo = Get-Item -LiteralPath $file;
     $chapterOutput = "$($env:TEMP)\$($fileInfo.Name)($(Get-Random ))_chapters.xml";
     & mkvextract chapters $file > $chapterOutput;
     [xml]$xml = Get-Content $chapterOutput;
+    if (!$xml) {
+        return @();
+    }
+
+    $chapters = @();
     $editionEntry = $xml.GetElementsByTagName("EditionEntry").Item(0);
     $editionEntry.ChildNodes | ForEach-Object {
         $tag = $_;

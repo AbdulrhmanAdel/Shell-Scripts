@@ -2,6 +2,10 @@
     $file = $_;
     Write-Host $file -ForegroundColor Blue;
     $chapters = & Get-Chapters.ps1 $file;
+    if (!$chapters) {
+        Write-Host "NO CHAPTERS FOUND" -ForegroundColor Red;
+        return;
+    }
     Write-Host ($chapters | ForEach-Object { return $_.Title }) -Separator ", " -ForegroundColor Green;
 
     $startFromSecond = 0;
