@@ -100,9 +100,9 @@ $scripts = @(
     },
     @{
         Extensions = @("Directory")
-        Title      = "Add To Envirement Varaibles"
-        Key        = "Add To Envirement Varaibles"
-        ScriptPath = "Tools\Add-To-Envirement-Varaibles.ps1"
+        Title      = "Add To Environment Varaibles"
+        Key        = "Add To Environment Varaibles"
+        ScriptPath = "Tools\Add-To-Environment-Varaibles.ps1"
         Path       = $toolsPath
     },
     @{
