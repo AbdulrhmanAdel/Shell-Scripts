@@ -12,7 +12,8 @@ enum SyncTarget {
     Watch    
     Programs
     ProgrammingPrograms
-    ProgrammingProjects
+    PersonalProjects
+    WorkProjects
     GameSaves
     ProgramsData
     Fortnite
@@ -45,14 +46,19 @@ function Sync {
             $command += " -DirPair ""D:\Programs"" ""$($driveLetter):\Programs""";  
             break;
         }
+        ([SyncTarget]::PersonalProjects) { 
+            $command += " ""$mirrorConfig""";
+            $command += " -DirPair ""D:\Programming\Projects\Personal Projects"" ""$($driveLetter):\Programming\Projects\Personal Projects"""; 
+            break;
+        }
         ([SyncTarget]::ProgrammingPrograms) {
-            $command += " ""D:\Programs\Tools\Free File Sync\Configs\Programming Programs.ffs_gui""";
+            $command += " ""$mirrorConfig""";
             $command += " -DirPair ""D:\Programming\Programs"" ""$($driveLetter):\Programming\Programs"""; 
             break;
         }
-        ([SyncTarget]::ProgrammingProjects) { 
+        ([SyncTarget]::WorkProjects) { 
             $command += " ""D:\Programs\Tools\Free File Sync\Configs\Programming Projects.ffs_gui""";
-            $command += " -DirPair ""D:\Programming\Projects"" ""$($driveLetter):\Programming\Projects"""; 
+            $command += " -DirPair ""D:\Programming\Projects\Work"" ""$($driveLetter):\Programming\Projects\Work"""; 
             break;
         }
         ([SyncTarget]::GameSaves) { 
