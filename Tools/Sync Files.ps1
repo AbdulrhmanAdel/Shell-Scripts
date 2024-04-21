@@ -24,7 +24,10 @@ enum SyncTarget {
 $syncProgramPath = "D:\Programs\Tools\Free File Sync"
 $syncProgram = "$syncProgramPath\FreeFileSync.exe";
 $mirrorConfig = "$syncProgramPath\Configs\Mirror.ffs_gui";
-$updateConfig = "$syncProgramPath\Configs\Update.ffs_gui"
+$updateConfig = "$syncProgramPath\Configs\Update.ffs_gui";
+
+$programmingProjectConfig = "D:\Programs\Tools\Free File Sync\Configs\Programming Projects.ffs_gui";
+$programmingProgramsConfig = "D:\Programs\Tools\Free File Sync\Configs\Programming Programs.ffs_gui";
 function Sync {
     $type = & Options-Selector.ps1 ([SyncTarget].GetEnumNames());
     
@@ -46,23 +49,23 @@ function Sync {
             $command += " -DirPair ""D:\Programs"" ""$($driveLetter):\Programs""";  
             break;
         }
+        ([SyncTarget]::ProgrammingPrograms) {
+            $command += " ""$programmingProgramsConfig""";
+            $command += " -DirPair ""D:\Programming\Programs"" ""$($driveLetter):\Programming\Programs"""; 
+            break;
+        }
         ([SyncTarget]::PersonalProjects) { 
             $command += " ""$mirrorConfig""";
             $command += " -DirPair ""D:\Programming\Projects\Personal Projects"" ""$($driveLetter):\Programming\Projects\Personal Projects"""; 
             break;
         }
-        ([SyncTarget]::ProgrammingPrograms) {
-            $command += " ""$mirrorConfig""";
-            $command += " -DirPair ""D:\Programming\Programs"" ""$($driveLetter):\Programming\Programs"""; 
-            break;
-        }
         ([SyncTarget]::WorkProjects) { 
-            $command += " ""D:\Programs\Tools\Free File Sync\Configs\Programming Projects.ffs_gui""";
+            $command += " ""$programmingProjectConfig""";
             $command += " -DirPair ""D:\Programming\Projects\Work"" ""$($driveLetter):\Programming\Projects\Work"""; 
             break;
         }
         ([SyncTarget]::GameSaves) { 
-            $command += " ""D:\Programs\Tools\Free File Sync\Configs\Programming Projects.ffs_gui""";
+            $command += " ""$programmingProjectConfig""";
             $command += " -DirPair ""D:\Personal\Game Saves"" ""$($driveLetter):\Personal\Game Saves""";
             break;
         }
