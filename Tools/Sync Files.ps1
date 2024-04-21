@@ -1,5 +1,3 @@
-$syncProgram = "D:\Programs\Tools\Free File Sync\FreeFileSync.exe";
-
 Write-Host "GETTING DRIVE LETTER..." -ForegroundColor Green
 $disk = Get-Disk -FriendlyName "WD My Passport 2626" -ErrorAction Ignore
 $part = Get-Partition -DiskNumber $disk.DiskNumber -ErrorAction Ignore;
@@ -22,8 +20,10 @@ enum SyncTarget {
     Cancel
 }
 
-$mirrorConfig = "D:\Programs\Tools\Free File Sync\Configs\Mirror.ffs_gui";
-$updateConfig = "D:\Programs\Tools\Free File Sync\Configs\Update.ffs_gui"
+$syncProgramPath = "D:\Programs\Tools\Free File Sync"
+$syncProgram = "$syncProgramPath\FreeFileSync.exe";
+$mirrorConfig = "$syncProgramPath\Configs\Mirror.ffs_gui";
+$updateConfig = "$syncProgramPath\Configs\Update.ffs_gui"
 function Sync {
     $type = & Options-Selector.ps1 ([SyncTarget].GetEnumNames());
     
@@ -75,7 +75,7 @@ function Sync {
             $command += " -DirPair ""D:\Personal\Media\القرأن الكريم"" ""$($driveLetter):\Personal\Media\القرأن الكريم""";
             break;
         }
-        ([SyncTarget]::Cancel) {
+        { ([SyncTarget]::Cancel) -or $null } {
             Exit;
         }
         Default {
