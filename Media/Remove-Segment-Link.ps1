@@ -14,6 +14,7 @@ $colors = @(
     [System.ConsoleColor]::Magenta
 );
 
+$keepRenamingChapters = (Read-Host "Keep Renaming Chapters? (Y/N)") -eq "Y"; 
 #endregion
 @($args | Where-Object { $_ -match ".*\.mkv$"; }) | ForEach-Object {
     $file = $_;
@@ -60,7 +61,13 @@ $colors = @(
     $xml.OuterXml | Set-Content $chapterOutput;
     $tempFileName = "$($fileInfo.Directory.FullName)\" + $fileInfo.Name -replace $fileInfo.Extension, "(TEMP)$($fileInfo.Extension)";
     Rename-Item -LiteralPath $file -NewName $tempFileName -Force;
-    & mkvmerge -o "$file" --chapters "$chapterOutput" --no-chapters "$tempFileName";
+    if ($keepRenamingChapters) {
+        & mkvmerge -o "$file" --chapters "$chapterOutput" --no-chapters "$tempFileName";
+    }
+    else {
+        & mkvmerge -o "$file" --no-chapters "$tempFileName";
+    }
+    
     Remove-Item -LiteralPath $chapterOutput -Force;
     Remove-Item -LiteralPath $tempFileName -Force;
     Write-Host "Done Handling File: $file" -ForegroundColor $color;
