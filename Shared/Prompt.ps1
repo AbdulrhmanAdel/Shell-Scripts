@@ -29,4 +29,6 @@ function CreateButton($text) {
 
 $form.AcceptButton = CreateButton -text "Yes";
 $form.CancelButton = CreateButton -text "No";
-return ($form.ShowDialog()) -eq [System.Windows.Forms.DialogResult]::Yes;
+$result = ($form.ShowDialog()) -eq [System.Windows.Forms.DialogResult]::Yes;
+$form.Dispose();
+return $result;

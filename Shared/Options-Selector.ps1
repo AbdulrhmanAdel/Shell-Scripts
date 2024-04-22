@@ -49,7 +49,8 @@ $options | ForEach-Object {
     CreateButton $_;
 }
 
-$result = $form.ShowDialog()
+$result = $form.ShowDialog();
+$form.Dispose();
 if ($result -eq [System.Windows.Forms.DialogResult]::OK -and $global:selectedOption) {
     return $global:selectedOption;
 }
