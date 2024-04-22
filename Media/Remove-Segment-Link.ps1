@@ -14,7 +14,7 @@ $colors = @(
     [System.ConsoleColor]::Magenta
 );
 
-$keepRenamingChapters = (Read-Host "Keep Renaming Chapters? (Y/N)") -eq "Y"; 
+$keepRenamingChapters = & Prompt.ps1; 
 #endregion
 @($args | Where-Object { $_ -match ".*\.mkv$"; }) | ForEach-Object {
     $file = $_;
