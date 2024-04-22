@@ -1,6 +1,6 @@
 $prefix = "D:\Watch";
 $inputFiles = $args;
-$outputPath = & "Folder-Picker.ps1" $prefix;
+$outputPath = & Folder-Picker.ps1 $prefix;
 if (!$outputPath) {
     return;
 }

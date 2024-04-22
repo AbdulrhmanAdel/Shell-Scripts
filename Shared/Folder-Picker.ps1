@@ -7,6 +7,7 @@ if (!$intialDirectory) {
 
 $foldername = New-Object System.Windows.Forms.FolderBrowserDialog
 $foldername.InitialDirectory = $intialDirectory;
+$foldername.Dispose();
 if ($foldername.ShowDialog() -eq "OK") {
     return "$($foldername.SelectedPath)";
 }
