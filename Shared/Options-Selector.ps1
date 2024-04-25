@@ -8,9 +8,10 @@ function ParseArgs {
 }
 
 $options = $args[0];
+$title = (ParseArgs -list $args -key "title") ?? 'Select an Option';
 
 $form = New-Object System.Windows.Forms.Form
-$form.Text = (ParseArgs -list $args -key "title") ?? 'Select an Option';
+$form.Text = $title;
 $form.StartPosition = 'CenterScreen'
 $form.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 $form.Width = 500;
