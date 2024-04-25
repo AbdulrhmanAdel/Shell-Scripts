@@ -27,28 +27,27 @@ function Delete {
 }
 
 $files = $args;
+# $files = @("F:""");
 $files | ForEach-Object {
     $isDrive = $_ -match '^(?<Drive>[a-z]:)"$';
     if ($isDrive) {
         $drive = $Matches.Drive;
-        Delete -procesArgs @("-c", $drive)
-        # $deleteType = & Options-Selector.ps1 @("Format Disk", "Clean Free Space");
-        # if ($deleteType -eq "Clean Free Space") {
-        # }
-        # elseif ($deleteType -eq "Format Disk") {
-        #     Delete -procesArgs @("-f", "$drive/")
-        # }
+        $deleteType = & Options-Selector.ps1 @("Format Disk", "Clean Free Space");
+        if (!$deleteType) {
+            return;
+        }
+
+        if ($deleteType -eq "Format Disk") {
+            Get-ChildItem -LiteralPath "$drive/" | ForEach-Object {
+                Delete -procesArgs @("-r", "-s", """$($_)""");
+            };
+        }
+        
+        Delete -procesArgs @("-c", $drive);
         return;
     }
 
-    $procesArgs = @("-r");
-    $isDirectory = (Get-Item -LiteralPath $_) -is [System.IO.DirectoryInfo];
-    if ($isDirectory) {
-        $procesArgs += "-s";
-    } 
-
-    $procesArgs += """$($_)""";
-    Delete -procesArgs $procesArgs;
+    Delete -procesArgs @("-r", "-s", """$($_)""");
 }    
 
 
