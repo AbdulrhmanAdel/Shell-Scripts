@@ -56,6 +56,13 @@ $mediaPath = @(
         Key   = "0 Media" 
     }
 );
+
+$safeDelete = @(
+    @{
+        Title = "Delete" 
+        Key   = "9999 Delete" 
+    }
+);
 # $windowsPath = @(
 #     @{
 #         Title = "Windows" 
@@ -132,12 +139,20 @@ $scripts = @(
         Key        = "1 Playlist"
         ScriptPath = "Youtube\Download-Playlist.ps1"
         Path       = $youtubePath
+    },
+    @{
+        Extensions = @("Drive", "*", "Directory")
+        Title      = "Safe Delete"
+        Key        = "Safe Delete"
+        ScriptPath = "Tools\Safe-Delete.ps1"
+        Path       = $safeDelete
     }
 ) 
 #endregion
 
+$specialsExtensions = @("*", "Directory", "Drive");
 @($scripts | ForEach-Object { return $_.Extensions } | Get-Unique) | ForEach-Object {
-    if ($_ -eq "*" -or $_ -eq "Directory") {
+    if ($_ -in $specialsExtensions) {
         reg delete "HKEY_CURRENT_USER\Software\Classes\$_\shell\0 Scripts" /f;
     }
     else {
@@ -152,7 +167,7 @@ $scripts | ForEach-Object {
     foreach ($extension in $extensions) {
         $base = "";
         $title = "";
-        if ($extension -eq "*" -or $extension -eq "Directory") {
+        if ($extension -in $specialsExtensions) {
             $base = "HKEY_CURRENT_USER\Software\Classes\$extension\shell\0 Scripts";
             $title = "Scripts";
         }
