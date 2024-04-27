@@ -1,4 +1,5 @@
 Add-Type -AssemblyName System.Windows.Forms
+[System.Windows.Forms.Application]::EnableVisualStyles();
 
 function ParseArgs {
     param ($list, [string]$key)
@@ -15,8 +16,6 @@ $form.Text = $title;
 $form.StartPosition = 'CenterScreen'
 $form.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 $form.Width = 500;
-$form.BackColor = [System.Drawing.Color]::FromArgb(240, 240, 240)
-
 $global:selectedOption = $null
 
 function ButtonClicked {
@@ -37,10 +36,6 @@ function CreateButton($text) {
     $button.Tag = $text
     $button.AutoSize = $true
     $button.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
-    $button.BackColor = [System.Drawing.Color]::FromArgb(255, 255, 255)
-    $button.ForeColor = [System.Drawing.Color]::FromArgb(0, 0, 0)
-    $button.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-    $button.Font = New-Object System.Drawing.Font("Segoe UI", 9)
     $button.Padding = New-Object System.Windows.Forms.Padding(5)  # Add button padding
     $button.Add_Click({ ButtonClicked $args[0] $args[1] })
     $flowLayoutPanel.Controls.Add($button)

@@ -6,57 +6,57 @@ $args | Where-Object { $null -ne $_ -and $_.ToString().Split("=").Length -eq 2 }
     Set-Variable -Name $var[0] -Value $var[1];
 };
 
+# Load necessary assemblies
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
-
-$maxWidth = 500;
-$width = ($form.Text.Length) * $form.Font.Size;
+[System.Windows.Forms.Application]::EnableVisualStyles()
+# Form Configuration
 $form = New-Object System.Windows.Forms.Form
-$form.MinimizeBox = $false
-$form.MaximizeBox = $false
 $form.Text = $title;
 $form.StartPosition = 'CenterScreen'
 $form.Font = New-Object System.Drawing.Font("Segoe UI", 12)
-$formWidth = if ($width -gt $maxWidth) { $width } else { $maxWidth };
-$form.Size = New-Object System.Drawing.Size($formWidth, 0)
-$form.AutoSize = $true;
-$form.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowOnly
+$form.MinimizeBox = $false;
+$form.MaximizeBox = $false;
+$form.AutoSize = $true
+$form.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
 
+# Main FlowLayoutPanel Configuration
 $flowLayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
 $flowLayoutPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$flowLayoutPanel.Width = $form.Width
 $flowLayoutPanel.AutoSize = $true
-$flowLayoutPanel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowOnly
-$buttonsFlowLayoutPanel.FlowDirection = [System.Windows.Forms.FlowDirection]::TopDown
+$flowLayoutPanel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+$flowLayoutPanel.FlowDirection = [System.Windows.Forms.FlowDirection]::TopDown
 $flowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding(10)
-$form.Controls.Add($flowLayoutPanel);
+$form.Controls.Add($flowLayoutPanel)
 
-
-
-# Create the Label
+# Label Configuration
 $label = New-Object System.Windows.Forms.Label
-$label.Text = $message ?? $args[0] ?? 'Are you sure you want continue?'
-$label.AutoSize = $true;
-$label.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 10);
-$label.MaximumSize = New-Object System.Drawing.Size(($form.Width), 0)
-$flowLayoutPanel.Controls.Add($label);
+$label.Text = $message ?? $args[0] ?? 'Are you sure you want to continue?'
+$label.AutoSize = $true
+$label.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 10)
+$flowLayoutPanel.Controls.Add($label)
 
+# Buttons FlowLayoutPanel Configuration
 $buttonsFlowLayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
 $buttonsFlowLayoutPanel.FlowDirection = [System.Windows.Forms.FlowDirection]::LeftToRight
-$buttonsFlowLayoutPanel.Width = $form.Width;
 $buttonsFlowLayoutPanel.AutoSize = $true
-$flowLayoutPanel.Controls.Add($buttonsFlowLayoutPanel);
+$buttonsFlowLayoutPanel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+$flowLayoutPanel.Controls.Add($buttonsFlowLayoutPanel)
 
-function CreateButton($text) {
-    $button = New-Object System.Windows.Forms.Button
-    $button.Text = $text
-    $button.Size = New-Object System.Drawing.Size(200, 40)
-    $button.DialogResult = [System.Windows.Forms.DialogResult]::$($text);
-    $buttonsFlowLayoutPanel.Controls.Add($button)
-}
+# Create Buttons
+$form.AcceptButton = $buttonYes = New-Object System.Windows.Forms.Button
+$form.CancelButton = $buttonNo = New-Object System.Windows.Forms.Button
+$buttonYes.Text = "Yes"
+$buttonNo.Text = "No"
+$btnWidth = $form.Width / 2;
+$buttonYes.Size = $buttonNo.Size = New-Object System.Drawing.Size($btnWidth, 40)
+$buttonYes.DialogResult = $buttonNo.DialogResult = [System.Windows.Forms.DialogResult]::OK
+$buttonsFlowLayoutPanel.Controls.Add($buttonYes)
+$buttonsFlowLayoutPanel.Controls.Add($buttonNo)
+# $padding = $form.Width - $buttonYes.Width - $buttonNo.Width;
+# $buttonsFlowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding($padding, 0, 0, 0)
 
-$form.AcceptButton = CreateButton -text "Yes";
-$form.CancelButton = CreateButton -text "No";
-$result = ($form.ShowDialog()) -eq [System.Windows.Forms.DialogResult]::Yes;
-$form.Dispose();
-return $result;
+# Show the form
+$result = $form.ShowDialog();
+$form.Dispose()
+return $result -eq [System.Windows.Forms.DialogResult]::OK;
