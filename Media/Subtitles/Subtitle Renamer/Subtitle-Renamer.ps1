@@ -67,7 +67,6 @@ foreach ($video in $videos) {
     Write-Host " => " -NoNewline -ForegroundColor Blue;
     Write-Host $($subtitle.EpisodeNumber) -ForegroundColor Green -NoNewline;
     Write-Host "-$($subtitle.FileName)";
-
     $dic.Add($($video, $subtitle)) | Out-Null;
 }
 
@@ -76,11 +75,12 @@ if ($isSomeEpisodeMissSubtitle) {
     exit;
 }
 
-function PromptForYes {
-    $result = (Read-Host "Press Y to continue or exit the window to stop").ToLower();
-    if ($result -ne "y") { PromptForYes }
+$continue = & Prompt.ps1 "message=Do You Want To Continue?"
+if (!$continue) {
+    Write-Host "EXITING" -ForegroundColor Red
+    Start-Sleep -Seconds 5;
+    EXIT;
 }
-PromptForYes
 
 $replaceRegex = "(?i)-PSA|\(Hi10\)(_| )*|\[AniDL\] *";
 foreach ($files in $dic) {
