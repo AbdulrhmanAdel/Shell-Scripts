@@ -146,6 +146,15 @@ $scripts = @(
         Key        = "Safe Delete"
         ScriptPath = "Tools\Safe-Delete.ps1"
         Path       = $safeDelete
+    },
+    @{
+        Extensions     = @("*", "Directory")
+        Title          = "Safe Delete (Without Prompt)"
+        Key            = "Safe Delete (Without Prompt)"
+        ScriptPath     = "Tools\Safe-Delete.ps1"
+        Path           = $safeDelete
+        AdditionalArgs = @("true")
+        
     }
 ) 
 #endregion

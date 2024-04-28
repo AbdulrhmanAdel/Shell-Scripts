@@ -9,13 +9,14 @@
 # -nobanner	Do not display the startup banner and copyright message.
 
 Write-Host $args
-$continue = & Prompt.ps1 "message=Are you sure you want to remove these files?";
-if (!$continue) {
-    Write-Host "ABORTED" -ForegroundColor Red
-    timeout 15;
-    EXIT;
+if (!$args[1]) {
+    $continue = & Prompt.ps1 "message=Are you sure you want to remove these files?";
+    if (!$continue) {
+        Write-Host "ABORTED" -ForegroundColor Red
+        timeout 15;
+        EXIT;
+    }
 }
-
 
 function Delete {
     param (
@@ -51,4 +52,4 @@ $files | ForEach-Object {
 }    
 
 
-timeout 15;
+timeout 5;
