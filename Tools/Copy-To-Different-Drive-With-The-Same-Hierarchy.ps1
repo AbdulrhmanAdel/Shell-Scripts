@@ -21,28 +21,40 @@ function CopyWithShellGUI {
     )
 
     $objFolder = $shell.NameSpace($dest) 
-    $objFolder.CopyHere($source, 16)
+    $objFolder.CopyHere($source, 88) # 88 => 16, 64, 8
 }
 
 #endregion
-$driveLetter = Read-Host "Enter Driver Letter";
-$files | ForEach-Object {
-    $path = "$($driveLetter):"
-    $newPath = $_;
-    $pathes = $newPath -split "\\";
-    for ($i = 1; $i -lt $pathes.Count; $i++) {
-        if ($i -eq $pathes.Count - 1) {
-            CopyWithShellGUI -source $_ -dest $path;
-            return;
-        }
-        
-        $path += "\$($pathes[$i])";
-        if (Test-Path -LiteralPath $path) {
-            continue;
-        }
+# $driveLetter = & Options-Selector.ps1 @(Get-Partition -DiskNumber 0 | Where-Object { !!$_.DriveLetter } | ForEach-Object { return $_.DriveLetter })
+$driveLetter = Read-Host "Enter Drive Letter";
+if (!$driveLetter) {
+    EXIT;
+}
 
-        New-Item -Path $path -ItemType Directory -Force;
+$files | ForEach-Object {
+    $dest = (Split-Path $_).ToCharArray();
+    $dest[0] = $driveLetter;
+    $dest = $dest -join "";
+    if (!(Test-Path -LiteralPath $dest)) {
+        New-Item -Path $dest -ItemType Directory -ErrorAction Ignore | Out-Null
     }
+    CopyWithShellGUI -source $_ -dest $dest;
+    # $path = "$($driveLetter):"
+    # $newPath = $_;
+    # $pathes = $newPath -split "\\";
+    # for ($i = 1; $i -lt $pathes.Count; $i++) {
+    #     if ($i -eq $pathes.Count - 1) {
+    #         CopyWithShellGUI -source $_ -dest $path;
+    #         return;
+    #     }
+        
+    #     $path += "\$($pathes[$i])";
+    #     if (Test-Path -LiteralPath $path) {
+    #         continue;
+    #     }
+
+    #     New-Item -Path $path -ItemType Directory -Force;
+    # }
 }
 
 if ($shell) {
