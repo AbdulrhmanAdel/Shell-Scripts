@@ -1,13 +1,7 @@
-function ParseArgs {
-    param ($list, [string]$key)
-    $value = $list | Where-Object { $null -ne $_ -and $_.ToString().StartsWith("$key=") };
-    if (!$value) { return $null; }
-    return $value -replace "$key=", ""
-}
-
-$file = ParseArgs -list $args -key "file";
-$delayMilliseconds = [double](ParseArgs -list $args -key "delayMilliseconds");
-$startFromSecond = [double](ParseArgs -list $args -key "startFromSecond");
+$file = $null;
+$delayMilliseconds = $null;
+$startFromSecond = $null;
+& Parse-Args.ps1 $args;
 
 $delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds);
 Write-Output "Start Delaying By $delayTimeSpan $($delayTimeSpan.TotalMilliseconds), Start From $startFromSecond To File: $file";

@@ -29,9 +29,13 @@ function Handle {
         CreateMenu -base "$base" -title $path.Title;
         $base = "$base\shell";
     }
+
     $key = $element.Key;
     $command = BuildScript -scriptPath $element.ScriptPath -additionalArgs $element.AdditionalArgs;
     reg add "$base\$key" /d $element.Title /t REG_SZ /f | Out-Null;
+    if ($element.Icon) {
+        reg add "$base\$key" /v "Icon" /d $element.Icon /t REG_SZ /f | Out-Null;
+    }
     reg add "$base\$key\Command" /d $command /t REG_SZ /f | Out-Null;
 }
 
@@ -90,6 +94,7 @@ $scripts = @(
         Key        = "999 Crop"
         ScriptPath = "Media\Crop.ps1"
         Path       = $mediaPath
+        Icon       = "pwsh.exe"
     },
     @{
         Extensions = @("*")
@@ -97,6 +102,7 @@ $scripts = @(
         Key        = "Pin To Start"
         ScriptPath = "Tools\Pin-File-To-Start.ps1"
         Path       = $toolsPath
+        Icon       = "pwsh.exe"
     },
     @{
         Extensions = @("*", "Directory")
@@ -104,6 +110,7 @@ $scripts = @(
         Key        = "TakeOwn"
         ScriptPath = "Tools\Takeown.ps1"
         Path       = $toolsPath
+        Icon       = "pwsh.exe"
     },
     @{
         Extensions = @("Directory")
@@ -111,6 +118,7 @@ $scripts = @(
         Key        = "Add To Environment Varaibles"
         ScriptPath = "Tools\Add-To-Environment-Varaibles.ps1"
         Path       = $toolsPath
+        Icon       = "pwsh.exe"
     },
     @{
         Extensions = @("*", "Directory")
@@ -118,6 +126,7 @@ $scripts = @(
         Key        = "Create Symblink"
         ScriptPath = "Tools\Create-Symblink.ps1"
         Path       = $toolsPath
+        Icon       = "pwsh.exe"
     },
     @{
         Extensions = @("*", "Directory")
@@ -125,6 +134,7 @@ $scripts = @(
         Key        = "999-Copy-To-Different-Drive-With-The-Same-Hierarchy"
         ScriptPath = "Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"
         Path       = $toolsPath
+        Icon       = "pwsh.exe"
     },
     @{
         Extensions = @("Directory")
@@ -132,6 +142,7 @@ $scripts = @(
         Key        = "0 Single Video"
         ScriptPath = "Youtube\Download-Single-video.ps1"
         Path       = $youtubePath
+        Icon       = "pwsh.exe"
     },
     @{
         Extensions = @("Directory")
@@ -139,6 +150,7 @@ $scripts = @(
         Key        = "1 Playlist"
         ScriptPath = "Youtube\Download-Playlist.ps1"
         Path       = $youtubePath
+        Icon       = "pwsh.exe"
     },
     @{
         Extensions = @("Drive", "*", "Directory")
@@ -146,6 +158,7 @@ $scripts = @(
         Key        = "Safe Delete"
         ScriptPath = "Tools\Safe-Delete.ps1"
         Path       = $safeDelete
+        Icon       = "pwsh.exe"
     },
     @{
         Extensions     = @("*", "Directory")
@@ -153,6 +166,7 @@ $scripts = @(
         Key            = "Safe Delete (Without Prompt)"
         ScriptPath     = "Tools\Safe-Delete.ps1"
         Path           = $safeDelete
+        Icon           = "pwsh.exe"
         AdditionalArgs = @("true")
         
     }

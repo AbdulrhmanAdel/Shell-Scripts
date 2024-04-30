@@ -1,6 +1,6 @@
 $selector = "Options-Selector.ps1";
-$newSize = (& $selector @("AsSource" , "2560x1440", "1920x1080", "1024x768") "title=Select Image Resoluation") ?? "AsSource";
-$quality = (& $selector @("75", "100") "title=Select Image Quality") ?? "75";
+$newSize = (& $selector @("AsSource" , "2560x1440", "1920x1080", "1024x768") "-title=Select Image Resoluation") ?? "AsSource";
+$quality = (& $selector @("75", "100") "-title=Select Image Quality") ?? "75";
 
 $sharedArgs += @(
     "-strip", 

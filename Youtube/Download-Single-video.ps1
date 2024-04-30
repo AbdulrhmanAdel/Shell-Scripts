@@ -1,4 +1,3 @@
-
 $destinitionPath = $args[0];
 
 if (!$destinitionPath) {
@@ -12,8 +11,6 @@ Write-Host "3: video 480P";
 Write-Host "4: video 720P";
 $format = Read-Host "Format: ";
 $url = Read-Host "Please enter url?";
-
-
 
 function download {
     switch ($format) {

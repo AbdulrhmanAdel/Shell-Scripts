@@ -1,15 +1,9 @@
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles();
-
-function ParseArgs {
-    param ($list, [string]$key)
-    $value = $list | Where-Object { $null -ne $_ -and $_.ToString().StartsWith("$key=") };
-    if (!$value) { return $null; }
-    return $value -replace "$key=", ""
-}
+& Parse-Args.ps1 $args;
 
 $options = $args[0];
-$title = (ParseArgs -list $args -key "title") ?? 'Select an Option';
+$title ??= 'Select an Option';
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = $title;

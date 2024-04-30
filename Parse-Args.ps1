@@ -1,1 +1,0 @@
-Set-Variable -Name "title" -Value "name" -Visibility Public -Option Constant -PassThru | Out-Null

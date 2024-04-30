@@ -18,8 +18,8 @@ function Compress {
 }
 
 $selector = "Options-Selector.ps1";
-$width, $height = (((& $selector @("480x640", "720x1280", "1080x1920") "title=Select Video Resoluation") -split "x") | ForEach-Object { return [int]$_ }) ?? @(720, 1280);
-$encoder = (& $selector @("x264", "x265", "x265_10bit") "title=Select Encoder Target") ?? "x264";
+$width, $height = (((& $selector @("480x640", "720x1280", "1080x1920") "-title=Select Video Resoluation") -split "x") | ForEach-Object { return [int]$_ }) ?? @(720, 1280);
+$encoder = (& $selector @("x264", "x265", "x265_10bit") "-title=Select Encoder Target") ?? "x264";
 $encoderPreset = (& $selector @( 
         "ultrafast",
         "superfast",
@@ -27,7 +27,7 @@ $encoderPreset = (& $selector @(
         "faster",
         "fast",
         "medium"
-    ) "title=Select Encoding Speed Preset") ?? "veryfast";
+    ) "-title=Select Encoding Speed Preset") ?? "veryfast";
 
 $sharedArgs = @(
     "--encoder", $encoder,

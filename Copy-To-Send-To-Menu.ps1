@@ -7,6 +7,8 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     exit;
 }
 
+Install-Package SharpShell;
+
 $sendToMenuFolder = "$($env:APPDATA)\Microsoft\Windows\SendTo";
 $scriptPath = $PSScriptRoot;
 #region Menu

@@ -44,11 +44,8 @@ function HandleFiles {
         Write-Host "USING MODULE $extension => $handler";
         Write-Host "Start Handling $file";
         & $handler `
-            "file=$file" `
-            "delayMilliseconds=$delayMilliseconds" `
-            $global:startAtWord `
-            $global:cutFrom `
-            $global:cutTo;
+            "-file=$file" `
+            "-delayMilliseconds=$delayMilliseconds";
 
         Write-Host "Finish Handling $file";
     }
@@ -58,7 +55,7 @@ function HandleFiles {
 $mode = ($args | Where-Object { $null -ne $_ -and $_.StartsWith("mode=") }) -replace "mode=", ""
 switch ($mode) {
     "StartAtWord" {
-        $global:startAtWord = "startAtWord=$(Read-Host 'Please enter startAtWord')";
+        $global:startAtWord = "-startAtWord=$(Read-Host 'Please enter startAtWord')";
         break;
     }
 
@@ -68,6 +65,7 @@ switch ($mode) {
         break;
     }
 }
+
 $files = $args | Where-Object { $_.EndsWith(".ass") -or $_.EndsWith(".srt") }
 HandleFiles -files $files;
 Write-Host "Subtitles adjusted."

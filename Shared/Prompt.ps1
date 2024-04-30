@@ -1,10 +1,6 @@
 $title = $null;
 $message = $null;
-
-$args | Where-Object { $null -ne $_ -and $_.ToString().Split("=").Length -eq 2 } | Foreach-Object {
-    $var = $_ -split "=";
-    Set-Variable -Name $var[0] -Value $var[1];
-};
+& Parse-Args.ps1 $args;
 
 # Load necessary assemblies
 Add-Type -AssemblyName System.Windows.Forms
