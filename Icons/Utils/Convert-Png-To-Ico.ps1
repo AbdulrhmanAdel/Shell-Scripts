@@ -19,12 +19,14 @@ function ConvertImageToIco  (
     [string] 
     $sourceImagePath,
     $newFilePath,
-    $sizes
+    $sizes = @(16, 24, 32, 48, 64, 96, 128, 256)
 ) {
-    if (!$sizes) {
-        # $sizes = 256, 128, 64, 48, 32, 16;
-        $sizes = 16, 32, 48, 64, 128, 256;
-    }
+    
+    # $sizes = 256, 128, 64, 48, 32, 16;
+    # $sizes = 256, 128, 64, 48, 32, 16;
+    # $sizes = 256, 128, 96, 64, 48, 32, 24, 16;
+    # $sizes = 16, 24, 32, 48, 64, 96, 128, 256;
+    # $sizes = 256, 128, 64, 48, 40, 32, 24, 20, 16;
 
     $sourceImage = New-Object System.Drawing.Bitmap($sourceImagePath)
     $imageStreams = [System.IO.MemoryStream[]]::new($sizes.Length);
@@ -37,7 +39,7 @@ function ConvertImageToIco  (
     }
     $sourceImage.Dispose();
     if (Test-Path -LiteralPath $newFilePath) {
-        Remove-Item -LiteralPath $newFilePath;
+        Remove-Item -LiteralPath $newFilePath -Force;
     }
 
     $iconFileStream = New-Object System.IO.FileStream($newFilePath, [System.IO.FileMode]::OpenOrCreate);
