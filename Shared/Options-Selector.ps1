@@ -40,6 +40,10 @@ $options | ForEach-Object {
 }
 
 $result = $form.ShowDialog();
+while ($mustSelectOne -and $result -ne [System.Windows.Forms.DialogResult]::OK) {
+    Write-Host "You Must Select An Option" -ForegroundColor Red;
+    $result = $form.ShowDialog();
+}
 $form.Dispose();
 if ($result -eq [System.Windows.Forms.DialogResult]::OK -and $global:selectedOption) {
     return $global:selectedOption;

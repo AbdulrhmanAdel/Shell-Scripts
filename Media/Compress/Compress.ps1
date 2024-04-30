@@ -39,9 +39,9 @@ if ($source -match "All|Images" -and $images.Count) {
     Write-Host "ENCODING IMAGES" -ForegroundColor Magenta;
     Start-Process  pwsh.exe -ArgumentList $command -Wait -NoNewWindow;
     CopyTransformedToOriginalFolder -files $images;
-
     Write-Host "FINISH ENCODING IMAGES" -ForegroundColor Magenta;
 }
+
 if ($source -match "All|Videos" -and $videos.Count) {
     $command = (@("""$modulesPath\Video-Compressor.ps1""") + $videos) -join " ";
     Write-Host "ENCODING Videos" -ForegroundColor Magenta;

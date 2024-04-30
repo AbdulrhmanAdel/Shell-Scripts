@@ -29,6 +29,7 @@ $encoderPreset = (& $selector @(
         "medium"
     ) "-title=Select Encoding Speed Preset") ?? "veryfast";
 
+
 $sharedArgs = @(
     "--encoder", $encoder,
     "-q", 23,
@@ -36,10 +37,14 @@ $sharedArgs = @(
     "--optimize",
     "--width", $height,
     "--height", $width,
-    "-r", 30, "--pfr",
     "--verbose=0",
     "--encoder-preset", $encoderPreset
 );
+
+$frame = (& $selector @("30", "60", "120", "As Source") "-title=Select Frame Rate") ?? "As Source";
+if ($frame -ne "As Source") {
+    $sharedArgs += @("--rate", [double]$frame, "--pfr");
+}
 
 $allowedExtensions = "mkv$|mp4$";
 $args | ForEach-Object {
