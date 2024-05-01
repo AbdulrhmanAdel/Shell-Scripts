@@ -6,6 +6,10 @@ function ParseValue {
     param (
         $value
     )
+    if ($value.GetType().Name -eq "Object[]") {
+        return $value;
+    }
+    
     $finalValue = $null;
     if ([int]::TryParse($value, [ref]$finalValue)) {
     }

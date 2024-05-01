@@ -1,23 +1,25 @@
 $directory = $args[0];
-# $refreshChilds = Read-Host "Do You Want To refresh Childs Defualt [Y]?";
-$refreshChilds = "";
+& Parse-Args.ps1 $args;
+
+if (!$directory) {
+    $directory = Read-Host "Please enter directory path?";
+}
 
 function RefreshIcon($folderpath) {
-    Write-Output "Handling $folderpath";
-    $desktopFilePath = "$directory/desktop.ini";
-    if (-not (Test-Path -LiteralPath $desktopFilePath)) {
-        return;
+    $directorInfo = Get-Item -LiteralPath $folderpath;
+    $desktopFilePath = "$($directorInfo.FullName)\desktop.ini"; ;
+    $desktopContent = Get-Content -LiteralPath $desktopFilePath;
+    Remove-Item -LiteralPath "$($directorInfo.FullName)\desktop.ini" -Force;
+    if ($directorInfo.Attributes.HasFlag([System.IO.FileAttributes]::System)) {
+        $directorInfo.Attributes += 'System';
+        Start-Sleep -Seconds 3;
     }
-    
-    $fileContent = Get-Content -LiteralPath $desktopFilePath -Force;
-    Remove-Item -LiteralPath $desktopFilePath -Force;
-    
-    
-    $newDesktopFile = New-Item -Path $desktopFilePath -Force;
-    $newDesktopFile.Attributes += 'Hidden';
-    $newDesktopFile.Attributes += 'System';
-    
-    Set-Content -LiteralPath $desktopFilePath -Value $fileContent -Force;
+
+    Set-Content -LiteralPath $desktopFilePath $desktopContent;
+    $desktopFileInfo = Get-item -LiteralPath $desktopFilePath -Force;
+    $desktopFileInfo.Attributes += 'Hidden';
+    $desktopFileInfo.Attributes += 'System';
+    $directorInfo.Attributes += 'System';
 }
 
 if ($refreshChilds) {

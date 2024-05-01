@@ -52,12 +52,13 @@ function Hide {
 
 $directoryPath = $args[0]
 & Parse-Args.ps1 $args;
+$directory = Get-Item -LiteralPath $directoryPath -Force;
+$iconPath = "$($directory.FullName)\$($directory.Name).ico";
+
 if (!$imagePath) {
     $imagePath = GetIamgePath
 }
 
-$directory = Get-Item -LiteralPath $directoryPath -Force;
-$iconPath = "$($directory.FullName)\$($directory.Name).ico";
 & "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -imagePath """$imagePath""" -saveFilePath """$iconPath""";
 
 # Hide the Icon

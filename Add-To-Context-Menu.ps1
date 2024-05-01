@@ -74,6 +74,13 @@ $iconsPath = @(
         Key   = "999999 Icons" 
     }
 )
+
+$attributesPath = @(
+    @{
+        Title = "Attributes"
+        Key   = "9999999 Attributes"
+    }
+)
 # $windowsPath = @(
 #     @{
 #         Title = "Windows" 
@@ -177,12 +184,20 @@ $scripts = @(
         AdditionalArgs = @("true")
     },
     @{
-        Extensions     = @("Directory")
-        Title          = "Set Icon"
-        Key            = "Set Icon"
-        ScriptPath     = "Icons\Set-Folder-Icon.ps1"
-        Path           = $iconsPath
-        Icon           = "pwsh.exe"
+        Extensions = @("Directory")
+        Title      = "Set Icon"
+        Key        = "Set Icon"
+        ScriptPath = "Icons\Set-Folder-Icon.ps1"
+        Path       = $iconsPath
+        Icon       = "pwsh.exe"
+    },
+    @{
+        Extensions = @("*", "Directory")
+        Title      = "Display Attributes"
+        Key        = "Display Attributes"
+        ScriptPath = "Attributes\Display-Attributes.ps1"
+        Path       = $attributesPath
+        Icon       = "pwsh.exe"
     }
 ) 
 #endregion
