@@ -1,0 +1,7 @@
+{
+  "name": "com.at_dev.icon_downloader",
+  "description": "Icon Communicator native messaging host",
+  "path": "D:\\Programming\\Projects\\Personal Projects\\Shell-Scripts\\Icons\\Web\\Icon-Communicator.ps1",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://ndmfkoinicgngaiohfmicmgbipepiako/"]
+}

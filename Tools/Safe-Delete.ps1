@@ -10,7 +10,7 @@
 
 Write-Host $args
 if (!$args[1]) {
-    $continue = & Prompt.ps1 "-message=Are you sure you want to remove these files?";
+    $continue = & Prompt.ps1 -message "Are you sure you want to remove these files?";
     if (!$continue) {
         Write-Host "ABORTED" -ForegroundColor Red
         timeout 15;

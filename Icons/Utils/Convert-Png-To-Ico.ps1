@@ -1,5 +1,5 @@
 Add-Type -AssemblyName System.Drawing;
-& Parse-Args.ps1 $args;
+Write-Host "Convert-Png-To-Ico ARGS $($args)" -ForegroundColor Yellow;
 
 function ResizeImage {
     param (
@@ -22,6 +22,9 @@ function ConvertImageToIco  (
     $sizes = @(16, 24, 32, 48, 64, 96, 128, 256)
 ) {
     
+    Write-Host $args -ForegroundColor Green;
+    Write-Host "sourceImagePath = $sourceImagePath" -ForegroundColor Green;
+    Write-Host "newFilePath = $newFilePath" -ForegroundColor Green;
     # $sizes = 256, 128, 64, 48, 32, 16;
     # $sizes = 256, 128, 64, 48, 32, 16;
     # $sizes = 256, 128, 96, 64, 48, 32, 24, 16;
@@ -85,10 +88,9 @@ function ConvertImageToIco  (
     $sourceImage.Dispose();
 }
 
-$pngFilePath ??= $args[0];
-$saveFilePath ??= "$($env:TEMP)\$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss').ico";
+& Parse-Args.ps1 $args;
 ConvertImageToIco `
-    -sourceImagePath $pngFilePath `
+    -sourceImagePath $imagePath `
     -newFilePath $saveFilePath;
 
 return $saveFilePath;

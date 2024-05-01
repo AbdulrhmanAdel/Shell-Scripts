@@ -67,6 +67,13 @@ $safeDelete = @(
         Key   = "9999 Delete" 
     }
 );
+
+$iconsPath = @(
+    @{
+        Title = "Icons" 
+        Key   = "999999 Icons" 
+    }
+)
 # $windowsPath = @(
 #     @{
 #         Title = "Windows" 
@@ -89,7 +96,7 @@ $youtubePath = @(
 
 $scripts = @(
     @{
-        Extensions = @(".mp3", ".m4a")
+        Extensions = @(".mp3", ".m4a", ".mp4", ".mkv")
         Title      = "Crop"
         Key        = "999 Crop"
         ScriptPath = "Media\Crop.ps1"
@@ -168,7 +175,14 @@ $scripts = @(
         Path           = $safeDelete
         Icon           = "pwsh.exe"
         AdditionalArgs = @("true")
-        
+    },
+    @{
+        Extensions     = @("Directory")
+        Title          = "Set Icon"
+        Key            = "Set Icon"
+        ScriptPath     = "Icons\Set-Folder-Icon.ps1"
+        Path           = $iconsPath
+        Icon           = "pwsh.exe"
     }
 ) 
 #endregion

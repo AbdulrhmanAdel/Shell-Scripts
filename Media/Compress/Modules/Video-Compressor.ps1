@@ -27,7 +27,7 @@ $encoderPreset = (& $selector @(
         "faster",
         "fast",
         "medium"
-    ) "-title=Select Encoding Speed Preset") ?? "veryfast";
+    ) -title "Select Encoding Speed Preset") ?? "veryfast";
 
 
 $sharedArgs = @(
@@ -41,7 +41,7 @@ $sharedArgs = @(
     "--encoder-preset", $encoderPreset
 );
 
-$frame = (& $selector @("30", "60", "120", "As Source") "-title=Select Frame Rate") ?? "As Source";
+$frame = (& $selector @("30", "60", "120", "As Source") -title "Select Frame Rate") ?? "As Source";
 if ($frame -ne "As Source") {
     $sharedArgs += @("--rate", [double]$frame, "--pfr");
 }

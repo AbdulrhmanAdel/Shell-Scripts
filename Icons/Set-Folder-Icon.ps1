@@ -1,7 +1,4 @@
-Write-Output "$args";
-
-& Parse-Args.ps1 $args;
-
+Write-Host "Set-Folder-Icon ARGS $($args)" -ForegroundColor DarkMagenta;
 function DonwloadImage {
     param (
         $imageUrl
@@ -22,14 +19,14 @@ function DonwloadImage {
 }
 
 function GetIamgePath {
-    $imageSourceType ??= & Options-Selector.ps1 @("FromBrowser", "FromLink", "FromPath") -title="Select Icon Source" --mustSelectOne;
+    $imageSourceType ??= & Options-Selector.ps1 @("FromBrowser", "FromLink", "FromPath") -title "Select Icon Source" --mustSelectOne;
     switch ($imageSourceType) {
         "FromBrowser" {
             Start-Process "https://www.google.com/search?tbm=isch&q=$($directory.Name) Icon";
             return DonwloadImage -imageUrl (Read-Host "Please Enter Icon Url");
         }
         "FromLink" { 
-            $imageUrl = $args[2];
+            $imageUrl = Read-Host "Please Enter Icon Url";
             return DonwloadImage -imageUrl $imageUrl;
         }
         "FromPath" { 
@@ -52,15 +49,16 @@ function Hide {
     }
 }
 
+
+$directoryPath = $args[0]
+& Parse-Args.ps1 $args;
 if (!$imagePath) {
     $imagePath = GetIamgePath
 }
 
-Write-Host "Source Image Location = $imagePath" -ForegroundColor Green;
-$directoryPath ??= $args[0];
 $directory = Get-Item -LiteralPath $directoryPath -Force;
-$iconPath = "$directoryPath\$($directory.Name).ico";
-& "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" "$imagePath" -saveFilePath="$iconPath";
+$iconPath = "$($directory.FullName)\$($directory.Name).ico";
+& "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -imagePath """$imagePath""" -saveFilePath """$iconPath""";
 
 # Hide the Icon
 $iconFile = Get-Item -LiteralPath $iconPath -Force;
@@ -73,6 +71,10 @@ Set-Content -LiteralPath $desktopPathFile -Value $desktopFileContent -Force -Pas
 $desktopFileInfo = Get-Item -LiteralPath $desktopPathFile -Force;
 Hide -fileInfo $desktopFileInfo;
 Write-Host "DONE Image Converted Successfully" -ForegroundColor Green;
+
+if (!$directory.Attributes.HasFlag([System.IO.FileAttributes]::System)) {
+    $directory.Attributes += 'System';
+}
 
 if ($noTimeout) {
     EXIT;
