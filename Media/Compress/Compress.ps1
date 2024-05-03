@@ -7,7 +7,7 @@
 # %STAXRIP% -load-template %TEMPLATE% -encode -auto-exit -hide -output "%OUTPUT%" "%INPUT%"
 
 
-$source = & Options-Selector.ps1 -options @("All", "Videos", "Images", "Course") --multi;
+$source = & Options-Selector.ps1 -options @("All", "Videos", "Images", "Course");
 $modulesPath = "$($PSScriptRoot)\Modules";
 if ($source -eq "Course" ) {
     $scriptPath = "$modulesPath/Course-Compressor.ps1";

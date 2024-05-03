@@ -5,24 +5,44 @@ function Compress {
         $inputPath,
         $outputPath
     )
-    
-    $videoBitRate = 395;
-    $rate = 30;
     $audioFormat = "opus";
+    # 720x1280
+    $width = 1280;
+    $height = 720;
     $arguments = @(
-        "--encoder", "x265",
         "-T",
         "--optimize",
-        "--width", 1280,
-        "--height", 720,
-        "-b", $videoBitRate,
-        "--rate", $rate, "--cfr",
+        "--width", $width,
+        "--height", $height,
         "--verbose=0",
         "--encoder-preset", "fast",
         "--aencoder", $audioFormat,
         "--ab", 64,
         "--arate", 24
     );
+
+    $info = & MediaInfo --Output=JSON $inputPath | ConvertFrom-Json;
+    $videoTrack = $info.media.track[1];
+    
+    $frameRate = [double]$videoTrack.FrameRate;
+    if ($frameRate -gt 30) {
+        $arguments += @("--rate", 30, "--cfr");
+    }
+
+    $bitRate = ([double]$videoTrack.BitRate) / 1000;
+    $videoBitRate = 395;
+    if ($bitRate -gt $videoBitRate) {
+        $arguments += @("-b", $videoBitRate);
+    }
+
+    $encodedLibrary = $videoTrack.Encoded_Library_Name;
+    if ($encodedLibrary -eq "x264") {
+        $arguments += @("--encoder", "x264");
+    }
+    else {
+        $arguments += @("--encoder", "x265");
+    }
+    
     $arguments += @("-i", """$inputPath""", "-o", """$outputPath""");
     Start-Process handbrake -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
 }
@@ -53,6 +73,16 @@ function Handle {
 
 $coursePath = $args[0];
 $courseInfo = Get-Item -LiteralPath $coursePath;
+
+if ($courseInfo -isnot [System.IO.DirectoryInfo]) {
+    if ($courseInfo.Extension -notin @(".mkv", ".mp4")) {
+        EXIT;
+    }
+
+    $outputFile = "$($courseInfo.Directory.FullName)\" + $courseInfo.Name.Replace($courseInfo.Extension, " Converted$($courseInfo.Extension)");
+    Compress -inputPath $courseInfo.FullName -outputPath $outputFile;
+    EXIT;
+}
 
 $outputPath = $courseInfo.FullName.Replace($courseInfo.Name, $courseInfo.Name + " (Converted)");
 if (!(Test-Path -LiteralPath $outputPath)) {

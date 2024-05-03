@@ -7,9 +7,22 @@ if ($alreadyExists) {
     timeout.exe 5;
     Exit;
 }
-$pathes = $pathes | Where-Object { return Test-Path -LiteralPath $_ };
+
+
+Write-Host "Deleted Pathes:" -ForegroundColor Red;
+$pathes = $pathes | Foreach-Object { 
+    $isExists = Test-Path -LiteralPath $_ 
+    if ($isExists) {
+        return $_;
+    }
+
+    Write-Host $_  -ForegroundColor Red;
+};
+
+Write-Host "====================" -ForegroundColor Green;
 $pathes += "$folderPath";
+Write-Host "New Pathes:" -ForegroundColor Green;
+$pathes | Foreach-Object { Write-Host $_ -ForegroundColor Green; }
 $path = $pathes -join ";";
 [Environment]::SetEnvironmentVariable('Path', $path, [EnvironmentVariableTarget]::User);
-Write-Output "New Path Variable Is $path";
-Read-Host "PRESS ANY KEY TO EXIT."
+timeout.exe 10;
