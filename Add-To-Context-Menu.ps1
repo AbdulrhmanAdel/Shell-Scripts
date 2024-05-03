@@ -81,6 +81,13 @@ $attributesPath = @(
         Key   = "9999999 Attributes"
     }
 )
+
+$infoPath = @(
+    @{
+        Title = "Info"
+        Key   = "99999 Info"
+    }
+)
 # $windowsPath = @(
 #     @{
 #         Title = "Windows" 
@@ -189,6 +196,14 @@ $scripts = @(
         Key        = "Display Attributes"
         ScriptPath = "Attributes\Display-Attributes.ps1"
         Path       = $attributesPath
+        Icon       = "pwsh.exe"
+    },
+    @{
+        Extensions = @("Directory")
+        Title      = "Display Folder Content"
+        Key        = "Display Folder Content"
+        ScriptPath = "Tools\Display-Folder-Content.ps1"
+        Path       = $infoPath
         Icon       = "pwsh.exe"
     }
 ) 
