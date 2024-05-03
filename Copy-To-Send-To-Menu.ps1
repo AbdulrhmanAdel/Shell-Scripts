@@ -7,7 +7,7 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     exit;
 }
 
-Install-Package SharpShell;
+# Install-Package SharpShell;
 
 $sendToMenuFolder = "$($env:APPDATA)\Microsoft\Windows\SendTo";
 $scriptPath = $PSScriptRoot;
@@ -58,7 +58,7 @@ $menu = @(
         Arguments = "-File ""$scriptPath\Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"""
     },
     @{
-        Name      = "600- Compress.lnk"
+        Name      = "601- Compress.lnk"
         Arguments = "-File ""$scriptPath\Media\Compress\Compress.ps1"""
     }
 )

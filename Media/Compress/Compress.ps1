@@ -1,3 +1,11 @@
+$source = & Options-Selector.ps1 -options @("All", "Videos", "Images", "Course") --multi;
+$modulesPath = "$($PSScriptRoot)\Modules";
+if ($source -eq "Course" ) {
+    $scriptPath = "$modulesPath/Course-Compressor.ps1";
+    & $scriptPath $args[0];
+    EXIT;
+}
+
 $videos = @();
 $images = @();
 
@@ -32,9 +40,7 @@ $args | ForEach-Object {
     }
 };
 
-$source = & "Options-Selector.ps1" @("All", "Videos", "Images");
-$modulesPath = "$($PSScriptRoot)\Modules";
-if ($source -match "All|Images" -and $images.Count) {
+if ( -and $images.Count) {
     $command = (@("""$modulesPath\Image-Compressor.ps1""") + $images) -join " ";
     Write-Host "ENCODING IMAGES" -ForegroundColor Magenta;
     Start-Process  pwsh.exe -ArgumentList $command -Wait -NoNewWindow;
@@ -44,8 +50,11 @@ if ($source -match "All|Images" -and $images.Count) {
 
 if ($source -match "All|Videos" -and $videos.Count) {
     $command = (@("""$modulesPath\Video-Compressor.ps1""") + $videos) -join " ";
+
+    # & """$modulesPath\Video-Compressor.ps1""" 
     Write-Host "ENCODING Videos" -ForegroundColor Magenta;
     Start-Process  pwsh.exe -ArgumentList $command -Wait -NoNewWindow;
     CopyTransformedToOriginalFolder -files $videos;
     Write-Host "FINISH ENCODING VIDEOS" -ForegroundColor Blue;
 }
+

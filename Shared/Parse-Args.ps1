@@ -31,12 +31,12 @@ for ($i = 0; $i -lt $arguments.Count; $i++) {
     }
     if ($argument.ToString().StartsWith("--")) {
         $argument = $argument.ToString().Substring(2);
-        Set-Variable -Name $argument -Value $true -Scope Global -PassThru | Out-Null;
+        Set-Variable -Name $argument -Value $true -PassThru | Out-Null;
         continue;
     }
     elseif ($argument.ToString().StartsWith("-")) {
         $argument = $argument.ToString().Substring(1);
         $value = $arguments[++$i];
-        Set-Variable -Name $argument -Value (ParseValue -value $value) -Scope Global -PassThru | Out-Null;
+        Set-Variable -Name $argument -Value (ParseValue -value $value) -PassThru | Out-Null;
     }
 }

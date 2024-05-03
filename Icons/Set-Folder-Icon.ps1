@@ -51,7 +51,7 @@ function Hide {
 
 
 $directoryPath = $args[0]
-& Parse-Args.ps1 $args;
+. Parse-Args.ps1 $args;
 $directory = Get-Item -LiteralPath $directoryPath -Force;
 $iconPath = "$($directory.FullName)\$($directory.Name).ico";
 

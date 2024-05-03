@@ -1,5 +1,5 @@
 $directory = $args[0];
-& Parse-Args.ps1 $args;
+. Parse-Args.ps1 $args;
 
 if (!$directory) {
     $directory = Read-Host "Please enter directory path?";

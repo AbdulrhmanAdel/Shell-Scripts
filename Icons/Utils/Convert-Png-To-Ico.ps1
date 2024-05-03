@@ -88,7 +88,7 @@ function ConvertImageToIco  (
     $sourceImage.Dispose();
 }
 
-& Parse-Args.ps1 $args;
+. Parse-Args.ps1 $args;
 ConvertImageToIco `
     -sourceImagePath $imagePath `
     -newFilePath $saveFilePath;

@@ -1,7 +1,7 @@
 $file = $null;
 $delayMilliseconds = $null;
 $startFromSecond = $null;
-& Parse-Args.ps1 $args;
+. Parse-Args.ps1 $args;
 
 $delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds);
 Write-Output "Start Delaying By $delayTimeSpan $($delayTimeSpan.TotalMilliseconds), Start From $startFromSecond To File: $file";

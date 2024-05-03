@@ -1,8 +1,8 @@
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles();
-& Parse-Args.ps1 $args[0];
+. Parse-Args.ps1 $args[0];
 
-$options = $args[0][0];
+$options ??= $args[0][0];
 $title ??= 'Select an Option';
 $mustSelectOne ??= $false;
 
@@ -46,6 +46,16 @@ $options | ForEach-Object {
 }
 
 $result = $form.ShowDialog();
+if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+    $form.Dispose();
+    return $form.Tag;
+}
+
+if ($defaultValue) {
+    $form.Dispose();
+    return $defaultValue;
+}
+
 while ($mustSelectOne -and $result -ne [System.Windows.Forms.DialogResult]::OK) {
     Write-Host "You Must Select An Option" -ForegroundColor Red;
     $result = $form.ShowDialog();

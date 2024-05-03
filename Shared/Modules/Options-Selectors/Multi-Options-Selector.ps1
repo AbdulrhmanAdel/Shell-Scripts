@@ -2,7 +2,7 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles();
-& Parse-Args.ps1 $args[0];
+. Parse-Args.ps1 $args[0];
 
 # Create the form
 $form = New-Object System.Windows.Forms.Form

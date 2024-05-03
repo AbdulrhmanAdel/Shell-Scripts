@@ -1,3 +1,7 @@
+# DOCS URL https://handbrake.fr/docs/en/latest/cli/command-line-reference.html 
+
+#region function
+
 function Compress {
     param (
         $file
@@ -17,33 +21,39 @@ function Compress {
     Write-Host "Compressing $file" -ForegroundColor Green;
 }
 
+#endregion
+
 $selector = "Options-Selector.ps1";
-$width, $height = (((& $selector @("480x640", "720x1280", "1080x1920") "-title=Select Video Resoluation") -split "x") | ForEach-Object { return [int]$_ }) ?? @(720, 1280);
-$encoder = (& $selector @("x264", "x265", "x265_10bit") "-title=Select Encoder Target") ?? "x264";
-$encoderPreset = (& $selector @( 
-        "ultrafast",
-        "superfast",
-        "veryfast",
-        "faster",
-        "fast",
-        "medium"
-    ) -title "Select Encoding Speed Preset") ?? "veryfast";
+$width, $height = (& $selector -options @("480x640", "720x1280", "1080x1920") -title "Select Video Resoluation" -defaultValue "720x1280") -split "x" | ForEach-Object { return [int]$_ };
+
+$encoder = & $selector -options @("x264", "x265", "x265_10bit") -title "Select Encoder Target" -defaultValue "x265";
+
+$encoderPresetOptions = @( "ultrafast", "superfast", "veryfast", "faster", "fast", "medium")
+$encoderPreset = & $selector -options $encoderPresetOptions -defaultValue "veryfast" -title "Select Encoding Speed Preset" ;
 
 
+# $audioEncoder = 
 $sharedArgs = @(
     "--encoder", $encoder,
-    "-q", 23,
+    # "-q", 23,
+    "-b", 395,
     "-T",
     "--optimize",
     "--width", $height,
     "--height", $width,
     "--verbose=0",
-    "--encoder-preset", $encoderPreset
+    "--encoder-preset", $encoderPreset,
+    "--aencoder", "av_aac"
 );
 
-$frame = (& $selector @("30", "60", "120", "As Source") -title "Select Frame Rate") ?? "As Source";
+$frame = & $selector -options @(30, 60, 120, "As Source") -title "Select Frame Rate" -defaultValue "As Source";
 if ($frame -ne "As Source") {
-    $sharedArgs += @("--rate", [double]$frame, "--pfr");
+    $sharedArgs += @("--rate", $frame, "--pfr");
+}
+
+$keepSubtitles = & Prompt.ps1 -message "Do You Want To Keep Subtitles?" -defaultValue $true;
+if ($keepSubtitles) {
+    $sharedArgs += "--all-subtitles";
 }
 
 $allowedExtensions = "mkv$|mp4$";

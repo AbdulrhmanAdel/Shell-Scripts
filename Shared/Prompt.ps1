@@ -1,6 +1,6 @@
 $title = $null;
 $message = $null;
-& Parse-Args.ps1 $args;
+. Parse-Args.ps1 $args;
 
 # Load necessary assemblies
 Add-Type -AssemblyName System.Windows.Forms
@@ -27,7 +27,7 @@ $form.Controls.Add($flowLayoutPanel)
 
 # Label Configuration
 $label = New-Object System.Windows.Forms.Label
-$label.Text = $message ?? $args[0] ?? 'Are you sure you want to continue?'
+$label.Text = $message ?? 'Are you sure you want to continue?'
 $label.AutoSize = $true
 $label.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 10)
 $flowLayoutPanel.Controls.Add($label)
@@ -46,7 +46,8 @@ $buttonYes.Text = "Yes"
 $buttonNo.Text = "No"
 $btnWidth = $form.Width / 2;
 $buttonYes.Size = $buttonNo.Size = New-Object System.Drawing.Size($btnWidth, 40)
-$buttonYes.DialogResult = $buttonNo.DialogResult = [System.Windows.Forms.DialogResult]::OK
+$buttonYes.DialogResult = [System.Windows.Forms.DialogResult]::OK;
+$buttonNo.DialogResult = [System.Windows.Forms.DialogResult]::No;
 $buttonsFlowLayoutPanel.Controls.Add($buttonYes)
 $buttonsFlowLayoutPanel.Controls.Add($buttonNo)
 # $padding = $form.Width - $buttonYes.Width - $buttonNo.Width;
@@ -55,4 +56,9 @@ $buttonsFlowLayoutPanel.Controls.Add($buttonNo)
 # Show the form
 $result = $form.ShowDialog();
 $form.Dispose()
+if ($result -eq [System.Windows.Forms.DialogResult]::Cancel) {
+    return  $defaultValue ?? $false;
+}
+
 return $result -eq [System.Windows.Forms.DialogResult]::OK;
+
