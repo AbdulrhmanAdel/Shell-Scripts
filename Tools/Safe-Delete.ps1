@@ -9,11 +9,16 @@
 # -nobanner	Do not display the startup banner and copyright message.
 
 Write-Host $args
-if (!$args[1]) {
+. Parse-Args.ps1 $args;
+Write-Host "These Files Are going to be deleted:" -ForegroundColor Green;
+$files = @($args | Where-Object { return Test-Path -LiteralPath $_ -ErrorAction Ignore; });
+$files | ForEach-Object { Write-Host $_  -ForegroundColor Red; }
+
+if ($prompt) {
     $continue = & Prompt.ps1 -message "Are you sure you want to remove these files?";
     if (!$continue) {
         Write-Host "ABORTED" -ForegroundColor Red
-        timeout 15;
+        timeout 5;
         EXIT;
     }
 }
@@ -27,8 +32,6 @@ function Delete {
     Start-Process sdelete -ArgumentList $procesArgs -Wait -NoNewWindow;
 }
 
-$files = $args;
-# $files = @("F:""");
 $files | ForEach-Object {
     $isDrive = $_ -match '^(?<Drive>[a-z]:)"$';
     if ($isDrive) {

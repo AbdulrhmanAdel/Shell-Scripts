@@ -60,6 +60,11 @@ $menu = @(
     @{
         Name      = "601- Compress.lnk"
         Arguments = "-File ""$scriptPath\Media\Compress\Compress.ps1"""
+    },
+    @{
+        Name       = "999- Safe Delete.lnk"
+        Arguments  = "-File ""$scriptPath\Tools\Safe-Delete.ps1"" --prompt"
+        SuffixArgs = @();
     }
 )
      

@@ -173,15 +173,7 @@ $scripts = @(
         ScriptPath = "Tools\Safe-Delete.ps1"
         Path       = $safeDelete
         Icon       = "pwsh.exe"
-    },
-    @{
-        Extensions     = @("*", "Directory")
-        Title          = "Safe Delete (Without Prompt)"
-        Key            = "Safe Delete (Without Prompt)"
-        ScriptPath     = "Tools\Safe-Delete.ps1"
-        Path           = $safeDelete
-        Icon           = "pwsh.exe"
-        AdditionalArgs = @("true")
+        AdditionalArgs = @("--prompt")
     },
     @{
         Extensions = @("Directory")

@@ -1,3 +1,12 @@
+# @echo off
+# set STAXRIP="path\to\StaxRip.exe"
+# set TEMPLATE="path\to\your\template.srip"
+# set INPUT="path\to\input\video.mp4"
+# set OUTPUT="path\to\output\video.mp4"
+
+# %STAXRIP% -load-template %TEMPLATE% -encode -auto-exit -hide -output "%OUTPUT%" "%INPUT%"
+
+
 $source = & Options-Selector.ps1 -options @("All", "Videos", "Images", "Course") --multi;
 $modulesPath = "$($PSScriptRoot)\Modules";
 if ($source -eq "Course" ) {
