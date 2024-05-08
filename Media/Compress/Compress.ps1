@@ -49,7 +49,7 @@ $args | ForEach-Object {
     }
 };
 
-if ( -and $images.Count) {
+if ($source -match "All|Images" -and $images.Count) {
     $command = (@("""$modulesPath\Image-Compressor.ps1""") + $images) -join " ";
     Write-Host "ENCODING IMAGES" -ForegroundColor Magenta;
     Start-Process  pwsh.exe -ArgumentList $command -Wait -NoNewWindow;

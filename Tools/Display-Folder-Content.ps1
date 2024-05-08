@@ -1,15 +1,20 @@
 $currentLevel = ""
+$finalContent = New-Object System.Text.StringBuilder;
 function Display {
     param (
         $info
     )
     
     if ($info -is [System.IO.FileInfo]) {
-        Write-Host "- $currentLevel $($info.Name)" -ForegroundColor Green;
+        $line = "- $currentLevel $($info.Name)" 
+        $finalContent.AppendLine($line);
+        Write-Host $line -ForegroundColor Green;
         return;
     }
 
-    Write-Host "# $currentLevel $($info.Name)" -ForegroundColor Yellow;
+    $line = "# $currentLevel $($info.Name)" 
+    $finalContent.AppendLine($line);
+    Write-Host $line -ForegroundColor Yellow;
     $currentLevel += "    ";
     Get-ChildItem -LiteralPath $info.FullName -File | ForEach-Object {
         Display -info $_;
@@ -21,5 +26,5 @@ function Display {
 }
 $info = Get-Item -LiteralPath $args[0];
 Display -info $info;
-
+Set-Clipboard -Value $finalContent.ToString();
 timeout.exe 30;
