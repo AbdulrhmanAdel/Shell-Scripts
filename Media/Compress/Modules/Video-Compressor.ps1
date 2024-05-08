@@ -13,8 +13,9 @@ function Compress {
     $newFileName = $fileInfo.Name.Replace($fileInfo.Extension, " - $($height)x$($width)-$($encoder)-$($encoderPreset)$($fileInfo.Extension)")
     $newFilePath = "$($fileInfo.Directory)\$newFileName";
     if (Test-Path -LiteralPath $newFileName) {
-        Write-Host "Already Compressed $file" -ForegroundColor Red;
-        return;
+        if (!(& Prompt.ps1 -message "File Already Exists. Do You Want To Override it?" -defaultValue $false)) {
+            return;
+        }
     }
     $arguments = @($sharedArgs) + @("-i", """$file""", "-o", """$newFilePath""");
     Start-Process handbrake -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
