@@ -30,13 +30,12 @@ $encoder = & $selector -options @("x264", "x265", "x265_10bit") -title "Select E
 
 $encoderPresetOptions = @( "ultrafast", "superfast", "veryfast", "faster", "fast", "medium")
 $encoderPreset = & $selector -options $encoderPresetOptions -defaultValue "veryfast" -title "Select Encoding Speed Preset" ;
-
+$quality = & Range-Selector.ps1 -title "Quality" -message "Select Quality (Lower Is Better)" -minimum 0 -maximum 51  -defaultValue 22  -tickFrequency 1;
 
 # $audioEncoder = 
 $sharedArgs = @(
     "--encoder", $encoder,
-    # "-q", 23,
-    "-b", 395,
+    "-q", $quality,
     "-T",
     "--optimize",
     "--width", $height,
@@ -45,6 +44,7 @@ $sharedArgs = @(
     "--encoder-preset", $encoderPreset,
     "--aencoder", "av_aac"
 );
+
 
 $frame = & $selector -options @(30, 60, 120, "As Source") -title "Select Frame Rate" -defaultValue "As Source";
 if ($frame -ne "As Source") {

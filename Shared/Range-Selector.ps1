@@ -13,14 +13,12 @@ $form.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowOnly;
 $width = 250;
 $flowLayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
 $flowLayoutPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$flowLayoutPanel.Size = New-Object System.Drawing.Size(300, 150)
 $flowLayoutPanel.AutoScroll = $true
 $flowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding(10)  # Add padding
 $form.Controls.Add($flowLayoutPanel)
 
 
 # Create a TrackBar
-
 $tickFrequency = $tickFrequency ?? 10
 $trackBar = New-Object System.Windows.Forms.TrackBar
 $trackBar.Width = $width
@@ -40,15 +38,19 @@ $trackBar.Add_ValueChanged({
 
 # Create a label
 $label = New-Object System.Windows.Forms.Label
-$label.Text = "Selected Range: $($trackBar.Value)"
+$labelText ??= "Selected Range"
+$label.Text = "$($labelText): $($trackBar.Value)"
 $label.Width = $width;
 # Create a button
 $button = New-Object System.Windows.Forms.Button
 $button.Text = "Select Range"
+$button.Height = 30;
 $button.Width = $width;
-$button.Add_Click({
+$button.Add_Click(
+    {
         $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
-    })
+    }
+)
 
 # Add controls to the form
 $flowLayoutPanel.Controls.Add($label)
