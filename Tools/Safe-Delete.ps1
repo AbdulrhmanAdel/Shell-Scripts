@@ -11,7 +11,7 @@
 Write-Host $args
 . Parse-Args.ps1 $args;
 Write-Host "These Files Are going to be deleted:" -ForegroundColor Green;
-$files = @($args | Where-Object { return Test-Path -LiteralPath $_ -ErrorAction Ignore; });
+$files = @($args | Where-Object { return (Test-Path -LiteralPath $_ -ErrorAction Ignore) -or $_ -match '^(?<Drive>[a-z]:)"$'; });
 $files | ForEach-Object { Write-Host $_  -ForegroundColor Red; }
 
 if ($prompt) {
@@ -33,6 +33,8 @@ function Delete {
 }
 
 $files | ForEach-Object {
+    Write-Host $isDrive $_;
+
     $isDrive = $_ -match '^(?<Drive>[a-z]:)"$';
     if ($isDrive) {
         $drive = $Matches.Drive;
