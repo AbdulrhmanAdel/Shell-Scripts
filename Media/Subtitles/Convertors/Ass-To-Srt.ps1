@@ -41,7 +41,7 @@ function Convert($assFilePath) {
     $newContent | Set-Content -LiteralPath $srtFileName
 }
 
-$removeSource = (Read-Host "Remove Source?").ToLower() -eq "Y";
+$removeSource = & Prompt.ps1 -title "Remove Source?" -message "Do You Want To Remove Source?" -defaultValue $false;
 foreach ($file in $files) {
     Convert -assFilePath $file;
     if ($removeSource) {
