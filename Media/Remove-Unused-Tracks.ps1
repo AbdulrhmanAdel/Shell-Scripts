@@ -43,7 +43,8 @@ function RemoveUnusedTracks(
     $tracksOrder = @([int]$videoTrack.StreamOrder);
     $arguments = @(
         "-o", """$outputPath""",
-        "--video-tracks", [int]$videoTrack.StreamOrder
+        "--video-tracks", [int]$videoTrack.StreamOrder,
+        "--no-attachments"
     );
 
     #region Audio
