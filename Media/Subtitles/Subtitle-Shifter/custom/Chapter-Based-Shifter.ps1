@@ -14,7 +14,8 @@ $colors = @(
 );
 
 
-$base = (Get-Item -LiteralPath $PSScriptRoot).Directory;
+
+$base = Split-Path $PSScriptRoot
 $handlers = @{
     ".ass" = "$base/handlers/Ass-Subtitle-Shifter.ps1";
     ".srt" = "$base/handlers/Srt-Subtitle-Shifter.ps1";
@@ -43,7 +44,7 @@ function Handle {
             continue;
         }
 
-        if ($foundSegmentedChapter) {
+        if ($foundSegmentedChapter -and $delayMilliseconds -ne 0) {
             break;
         }
         
@@ -58,10 +59,10 @@ function Handle {
     $startFromSecond = $startFromSecond / 1000;
     if ($startFromSecond) {
         $startFromSecond = "startFromSecond=$($startFromSecond)";
-        & $handler  "file=$subFile" $startFromSecond "delayMilliseconds=$delayMilliseconds";
+        & $handler  -file $subFile -startFromSecond $startFromSecond -delayMilliseconds $delayMilliseconds;
     }
     else {
-        & $handler  "file=$subFile" "delayMilliseconds=$delayMilliseconds";
+        & $handler  -file $subFile -delayMilliseconds $delayMilliseconds;
     }
 }
 

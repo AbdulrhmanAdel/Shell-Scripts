@@ -19,9 +19,8 @@ function Get-Period() {
 
 $delayMilliseconds = (Get-Period) * 1000;
 Write-Host "The Delay Will Be $delayMilliseconds Milliseconds"
+
 # Function to adjust time
-
-
 function HandleFiles {
     param (
         $files
@@ -44,8 +43,8 @@ function HandleFiles {
         Write-Host "USING MODULE $extension => $handler";
         Write-Host "Start Handling $file";
         & $handler `
-            "-file=$file" `
-            "-delayMilliseconds=$delayMilliseconds";
+            -file "$file" `
+            -delayMilliseconds $delayMilliseconds;
 
         Write-Host "Finish Handling $file";
     }

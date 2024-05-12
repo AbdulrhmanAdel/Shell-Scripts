@@ -10,21 +10,13 @@ function GetDuration {
         Write-Output "FILE $videoPath DOESN'T EXITS";
     }
     
-    $json = & mediaInfo --Output=JSON """$videoPath""" | ConvertFrom-Json;
-    foreach ($track in $json.media.track) {
-        $trackType = $track.'@type'; 
-        if ($trackType -eq "Video") {
-            $duration = [int]$track.'Duration';
-            return $duration;
-        }
-
-        if ($trackType -eq "Audio") {
-            $duration = [int]$track.'Duration';
-            return $duration;
-        }
+    $info = & mediaInfo --Output=JSON $videoPath | ConvertFrom-Json;
+    $videoTrack = @($info.media.track | Where-Object { $_.'@type' -eq 'Video' })[0]
+    $audioTrack = @($info.media.track | Where-Object { $_.'@type' -eq 'Audio' })[0]
+    return @{
+        VideoDuration = [double]($videoTrack.Duration)
+        AudioDuration = [double]($audioTrack.Duration)
     }
-
-    return 0
 }
 
 
@@ -57,63 +49,49 @@ function IsVideo {
     return $videoInfo.Extension.ToLower() -in $videoExtensions
 }
 
-function CheckFile {
+
+function Check {
     param (
-        $sourceFilePath,
-        $destinitionFilePath
+        $source,
+        $target
     )
     
-    if (!(Test-Path -LiteralPath $destinitionFilePath)) {
-        Write-Output  "Destinition $destinitionFilePath Does't exist";
+    $sourceInfo = Get-Item -LiteralPath $source;
+    if ($sourceInfo -isnot [System.IO.DirectoryInfo]) {
+        if ($sourceInfo.Extension -notin @(".mp4", ".mkv")) { return; }
+        $sourceDurations = GetDuration -videoPath $source;
+        $targetDurations = GetDuration -videoPath $target;
+        $videoRange = $sourceDurations.VideoDuration - $targetDurations.VideoDuration;
+        $audioRange = $sourceDurations.AudioDuration - $targetDurations.AudioDuration;
+        if (($videoRange -le 1 -and $videoRange -ge -1) -or ($audioRange -le 1 -and $audioRange -ge -1)) {
+            Write-Host "$source MATCH $target $videoRange - $audioRange" -ForegroundColor Green
+            return 
+        }
+
+        Write-Host "$source NOT MATCH $target" -ForegroundColor Red
         return;
     }
 
-    $isSoruceVideo = IsVideo -videoPath $sourceFilePath;
-    if (!$isSoruceVideo) {
-        return;
-    }
-
-    $isDestVideo = IsVideo -videoPath $destinitionFilePath;
-    if (!$isDestVideo) {
-        Write-Output  "Destinition $destinitionFilePath Is't a video";
-        return;
-    }
-
-    $sourceLength = GetDuration -videoPath $sourceFilePath;
-    $destinitionLength = GetDuration -videoPath $destinitionFilePath;
-
-    $diff = ($sourceLength - $destinitionLength);
-    if ($sourceLength -ne $destinitionLength -and $diff -ne 1 -and $diff -ne -1) {
-        Write-Output  "ERROR SOURCE $sourceFilePath length is $sourceLength ===> DES $destinitionFilePath length is $destinitionLength";
-        return;
-    }
+    $childern = Get-ChildItem -LiteralPath $source;
+    $childern | ForEach-Object { 
+        $targetFilePath = "$target/" + $_.Name;
+        Check -source $_.FullName -target $targetFilePath 
+    };
 }
 
-function CheckDirectory {
-    param (
-        $sourceDirectory,
-        $destinitionDirectory
-    )
-    
-    $allFiles = Get-ChildItem -LiteralPath $sourceDirectory;
-    foreach ($file in $allFiles) {
-        $des = "$destinitionDirectory/" + $file.Name;
-        CheckFile -sourceFilePath $file.FullName -destinitionFilePath $des
-    }
-}
+Check -source $source -target  $destinition 
+# $soruceFileCount = CalculateFileCount -folderPath $source;
+# $destinitionFileCount = CalculateFileCount -folderPath $destinition;
+# Write-Output "SOURCE: $soruceFileCount => DESTINITION: $destinitionFileCount"
+# $childern = Get-ChildItem -LiteralPath $source;
+# foreach ($child in $childern) {
+#     $ouputChildDirectory = "$destinition/" + $child.Name;
+#     if ($child -is [System.IO.DirectoryInfo]) {
+#         CheckDirectory -sourceDirectory $child.FullName -destinitionDirectory  $ouputChildDirectory
+#         continue;
+#     }
 
-$soruceFileCount = CalculateFileCount -folderPath $source;
-$destinitionFileCount = CalculateFileCount -folderPath $destinition;
-Write-Output "SOURCE: $soruceFileCount => DESTINITION: $destinitionFileCount"
-$childern = Get-ChildItem -LiteralPath $source;
-foreach ($child in $childern) {
-    $ouputChildDirectory = "$destinition/" + $child.Name;
-    if ($child -is [System.IO.DirectoryInfo]) {
-        CheckDirectory -sourceDirectory $child.FullName -destinitionDirectory  $ouputChildDirectory
-        continue;
-    }
+#     CheckFile -sourceFilePath $child.FullName -destinitionFilePath $ouputChildDirectory;
+# }
 
-    CheckFile -sourceFilePath $child.FullName -destinitionFilePath $ouputChildDirectory;
-}
-
-Write-Output "DONE";
+# Write-Output "DONE";

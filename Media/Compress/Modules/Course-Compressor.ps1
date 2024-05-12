@@ -1,5 +1,9 @@
 #region Functions
 
+
+# $targetBitRate = [int](& Text-Input.ps1 -message "Please Enter Target BitRate in KB" -type "number")
+$targetBitRate = [int](Read-Host "Please Enter Target BitRate in KB");
+Write-Host "Target BitRate $targetBitRate";
 function Compress {
     param (
         $inputPath,
@@ -11,6 +15,7 @@ function Compress {
     $height = 720;
     $arguments = @(
         "-T",
+        "--multi-pass",
         "--optimize",
         "--width", $width,
         "--height", $height,
@@ -23,14 +28,14 @@ function Compress {
 
     $info = & MediaInfo --Output=JSON $inputPath | ConvertFrom-Json;
     $videoTrack = $info.media.track[1];
-    
+    # $videSize = ([double]$videoTrack.StreamSize) / (1024 * 1024);
     $frameRate = [double]$videoTrack.FrameRate;
     if ($frameRate -gt 30) {
         $arguments += @("--rate", 30, "--cfr");
     }
 
     $bitRate = ([double]$videoTrack.BitRate) / 1000;
-    $videoBitRate = 395;
+    $videoBitRate = $targetBitRate;
     if ($bitRate -gt $videoBitRate) {
         $arguments += @("-b", $videoBitRate);
     }

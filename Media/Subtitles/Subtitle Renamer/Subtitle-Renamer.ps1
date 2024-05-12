@@ -75,7 +75,7 @@ if ($isSomeEpisodeMissSubtitle) {
     exit;
 }
 
-$continue = & Prompt.ps1 "-message=Do You Want To Continue?"
+$continue = & Prompt.ps1 -message "Do You Want To Continue?"
 if (!$continue) {
     Write-Host "EXITING" -ForegroundColor Red
     Start-Sleep -Seconds 5;
