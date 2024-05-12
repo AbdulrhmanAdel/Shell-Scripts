@@ -112,3 +112,8 @@ foreach ($folder in $folders) {
         continue;
     }
 }
+
+Clear-Host;
+& "$($PSScriptRoot)/Verfiy-Durations.ps1" $coursePath;
+Read-Host "Press Any Key To Exit"
+timeout.exe 15;
