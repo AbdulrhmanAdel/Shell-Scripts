@@ -53,7 +53,13 @@ $files | ForEach-Object {
         return;
     }
 
+    if ($_ -eq "C:\`$Recycle.Bin") {
+        Delete -procesArgs @("-r", "-s", """$($_)\*""");
+        return;
+    }
+    
     Delete -procesArgs @("-r", "-s", """$($_)""");
+
 }    
 
 

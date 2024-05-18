@@ -98,6 +98,11 @@ function RemoveUnusedTracks(
     
     if ($p.ExitCode -eq 0) {
         Remove-Item -LiteralPath $inputPath -Force;
+        $zippedFilePath = $inputPath -replace '\.mkv$', '.zip';
+        if (Test-Path -LiteralPath $zippedFilePath) {
+            Write-Host "Removing ZIP File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
+            Remove-Item -LiteralPath $zippedFilePath -Force;
+        }
         Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
     }
     else {

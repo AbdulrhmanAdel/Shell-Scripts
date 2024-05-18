@@ -3,11 +3,13 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     exit;
 }
 
+$Recycle = "RecycleBin";
 $baseScriptsPath = $PSScriptRoot;
 function BuildScript {
     param (
         [string]$scriptPath,
-        [string[]] $additionalArgs
+        [string[]] $additionalArgs,
+        [string]$target
     )
 
     $finalArgs = "";
@@ -15,13 +17,15 @@ function BuildScript {
         $finalArgs = ($additionalArgs | ForEach-Object { return """$_""" }) -join " "
     }
 
-    return "pwsh.exe -file ""$baseScriptsPath\$scriptPath"" ""%1"" $finalArgs";
+    $target ??= "%1";
+    return "pwsh.exe -file ""$baseScriptsPath\$scriptPath"" ""$target"" $finalArgs";
 }
 
 function Handle {
     param (
         $base,
-        $element
+        $element,
+        $extension
     )
     
     foreach ($path in $element.Path) {
@@ -31,7 +35,8 @@ function Handle {
     }
 
     $key = $element.Key;
-    $command = BuildScript -scriptPath $element.ScriptPath -additionalArgs $element.AdditionalArgs;
+    $target = $extension -eq $Recycle ? "$($env:SystemDrive)\`$Recycle.bin" : "%1";
+    $command = BuildScript -scriptPath $element.ScriptPath -additionalArgs $element.AdditionalArgs -target $target; 
     reg add "$base\$key" /d $element.Title /t REG_SZ /f | Out-Null;
     if ($element.Icon) {
         reg add "$base\$key" /v "Icon" /d $element.Icon /t REG_SZ /f | Out-Null;
@@ -174,12 +179,12 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
-        Extensions = @("Drive", "*", "Directory")
-        Title      = "Safe Delete"
-        Key        = "Safe Delete"
-        ScriptPath = "Tools\Safe-Delete.ps1"
-        Path       = $safeDelete
-        Icon       = "pwsh.exe"
+        Extensions     = @("Drive", "*", "Directory", $Recycle)
+        Title          = "Safe Delete"
+        Key            = "Safe Delete"
+        ScriptPath     = "Tools\Safe-Delete.ps1"
+        Path           = $safeDelete
+        Icon           = "pwsh.exe"
         AdditionalArgs = @("--prompt")
     },
     @{
@@ -230,13 +235,17 @@ $scripts | ForEach-Object {
             $base = "HKEY_CURRENT_USER\Software\Classes\$extension\shell\0 Scripts";
             $title = "Scripts";
         }
+        if ($extension -eq $Recycle) {
+            $base = "HKEY_CLASSES_ROOT\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\shell\0 Scripts";
+            $title = "Scripts";
+        }
         else {
             $base = "HKEY_CLASSES_ROOT\SystemFileAssociations\$extension\shell\0 Special Scripts";
             $title = "Special Scripts";
         }
 
         CreateMenu -base $base -title $title;
-        Handle -base "$base\shell" -element $element;
+        Handle -base "$base\shell" -element $element -extension $extension;
     }
 };
 
