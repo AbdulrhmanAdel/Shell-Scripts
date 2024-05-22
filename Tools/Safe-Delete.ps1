@@ -14,6 +14,11 @@ Write-Host "These Files Are going to be deleted:" -ForegroundColor Green;
 $files = @($args | Where-Object { return (Test-Path -LiteralPath $_ -ErrorAction Ignore) -or $_ -match '^(?<Drive>[a-z]:)"$'; });
 $files | ForEach-Object { Write-Host $_  -ForegroundColor Red; }
 
+$passes = @();
+if ($promptPasses) { 
+    $noOfPasses = & Range-Selector.ps1 -title "Passes" -message "Select Number of passes" -minimum 1 -maximum 5  -defaultValue 1  -tickFrequency 1;
+    $passes += @("-p", $noOfPasses);
+}
 if ($prompt) {
     $continue = & Prompt.ps1 -message "Are you sure you want to remove these files?";
     if (!$continue) {
@@ -28,7 +33,7 @@ function Delete {
         $procesArgs
     )
     
-    $procesArgs = @("-nobanner") + $procesArgs;
+    $procesArgs = @("-nobanner") + $passes + $procesArgs;
     Start-Process sdelete -ArgumentList $procesArgs -Wait -NoNewWindow;
 }
 

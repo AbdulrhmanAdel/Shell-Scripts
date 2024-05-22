@@ -181,12 +181,21 @@ $scripts = @(
     @{
         Extensions     = @("Drive", "*", "Directory", $Recycle)
         Title          = "Safe Delete"
-        Key            = "Safe Delete"
+        Key            = "000 Safe Delete"
         ScriptPath     = "Tools\Safe-Delete.ps1"
         Path           = $safeDelete
         Icon           = "pwsh.exe"
         AdditionalArgs = @("--prompt")
     },
+    # @{
+    #     Extensions     = @("Drive", "*", "Directory", $Recycle)
+    #     Title          = "Safe Delete (Prompt For Passes)"
+    #     Key            = "999 Safe Delete (Prompt For Passes)"
+    #     ScriptPath     = "Tools\Safe-Delete.ps1"
+    #     Path           = $safeDelete
+    #     Icon           = "pwsh.exe"
+    #     AdditionalArgs = @("--prompt", "--promptPasses")
+    # },
     @{
         Extensions = @("Directory")
         Title      = "Set Icon"
@@ -227,7 +236,6 @@ $specialsExtensions = @("*", "Directory", "Drive");
 $scripts | ForEach-Object {
     $element = $_;
     $extensions = $element.Extensions;
-
     foreach ($extension in $extensions) {
         $base = "";
         $title = "";
@@ -235,7 +243,7 @@ $scripts | ForEach-Object {
             $base = "HKEY_CURRENT_USER\Software\Classes\$extension\shell\0 Scripts";
             $title = "Scripts";
         }
-        if ($extension -eq $Recycle) {
+        elseif ($extension -eq $Recycle) {
             $base = "HKEY_CLASSES_ROOT\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\shell\0 Scripts";
             $title = "Scripts";
         }

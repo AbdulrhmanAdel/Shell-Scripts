@@ -74,8 +74,13 @@ function Convert($path) {
     $finalContent | Set-Content -LiteralPath $fileName
 }
 
- 
-$removeSource = (Read-Host "Remove Source?").ToLower() -eq "Y";
+
+
+$removeSource = & Prompt.ps1 -title `
+    "Remove Source" `
+    -message "Do you want to remove source" `
+    -defaultValue $false;
+    
 foreach ($file in $files) {
     Convert -path $file;
     if ($removeSource) {

@@ -34,6 +34,10 @@ $menu = @(
         Arguments = "-File ""$scriptPath\Media\Subtitles\Convertors\Ass-To-Srt.ps1"""
     },
     @{
+        Name      = "02- Subtitle - Convert SRT To ASS.lnk"
+        Arguments = "-File ""$scriptPath\Media\Subtitles\Convertors\Srt-To-Ass.ps1"""
+    },
+    @{
         Name      = "02- Subtitle - Editor (ASS).lnk"
         Arguments = "-File ""$scriptPath\Media\Subtitles\Editors\Ass-Editor.ps1"""
     },
