@@ -21,22 +21,23 @@ enum SyncTarget {
     Cancel
 }
 
+
 $syncProgramPath = "D:\Programs\Tools\Free File Sync"
 $syncProgram = "$syncProgramPath\FreeFileSync.exe";
 $mirrorConfig = "$syncProgramPath\Configs\Mirror.ffs_gui";
 $updateConfig = "$syncProgramPath\Configs\Update.ffs_gui";
+$programmingProjectConfig = "$syncProgramPath\Configs\Programming Projects.ffs_gui";
+$workProjectConfig = "$syncProgramPath\Configs\Work Projects.ffs_gui";
+$personalProjectConfig = "$syncProgramPath\Configs\Personal Projects.ffs_gui";
+$programmingProgramsConfig = "$syncProgramPath\Configs\Programming Programs.ffs_gui";
 
-$programmingProjectConfig = "D:\Programs\Tools\Free File Sync\Configs\Programming Projects.ffs_gui";
-$programmingProgramsConfig = "D:\Programs\Tools\Free File Sync\Configs\Programming Programs.ffs_gui";
 function Sync {
-    $type = & Options-Selector.ps1 ([SyncTarget].GetEnumNames());
-    
-    if ($type) {
-        $type = [SyncTarget]::$($type);
+    $type = [SyncTarget]::$(& Options-Selector.ps1 ([SyncTarget].GetEnumNames()));
+    if ($null -eq $type -or $type -eq [SyncTarget]::Cancel) {
+        EXIT;
     }
     
     $command = ""
-    [SyncTarget]::Watch
     switch ($type) {
         ([SyncTarget]::Watch) {
             $command += " ""$updateConfig""";
@@ -55,12 +56,12 @@ function Sync {
             break;
         }
         ([SyncTarget]::PersonalProjects) { 
-            $command += " ""$mirrorConfig""";
+            $command += " ""$personalProjectConfig""";
             $command += " -DirPair ""D:\Programming\Projects\Personal Projects"" ""$($driveLetter):\Programming\Projects\Personal Projects"""; 
             break;
         }
         ([SyncTarget]::WorkProjects) { 
-            $command += " ""$programmingProjectConfig""";
+            $command += " ""$workProjectConfig""";
             $command += " -DirPair ""D:\Programming\Projects\Work"" ""$($driveLetter):\Programming\Projects\Work"""; 
             break;
         }
@@ -84,15 +85,13 @@ function Sync {
             $command += " -DirPair ""D:\Personal\Media\القرأن الكريم"" ""$($driveLetter):\Personal\Media\القرأن الكريم""";
             break;
         }
-        { ([SyncTarget]::Cancel) -or $null } {
-            Exit;
-        }
         Default {
             Sync
             return;
         }
     }
 
+    Write-Host "SYNCING $type" -ForegroundColor Green;
     Start-Process $syncProgram $command;
     Sync
 }
