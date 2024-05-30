@@ -163,6 +163,14 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
+        Extensions = @("*")
+        Title      = "Get Hash"
+        Key        = "999-Get Hash"
+        ScriptPath = "Tools\Display-Hash.ps1"
+        Path       = $toolsPath
+        Icon       = "pwsh.exe"
+    },
+    @{
         Extensions = @("Directory")
         Title      = "Single Video"
         Key        = "0 Single Video"
