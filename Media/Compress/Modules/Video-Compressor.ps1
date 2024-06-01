@@ -26,8 +26,24 @@ function Compress {
 
 $selector = "Options-Selector.ps1";
 $width, $height = (& $selector -options @("480x640", "720x1280", "1080x1920") -title "Select Video Resoluation" -defaultValue "720x1280") -split "x" | ForEach-Object { return [int]$_ };
-
-$encoder = & $selector -options @("x264", "x265", "x265_10bit") -title "Select Encoder Target" -defaultValue "x265";
+$encoder = & $selector -options @(
+    "svt_av1",
+    "svt_av1_10bit",
+    "x264",
+    "x264_10bit",
+    "x265",
+    "x265_10bit",
+    "x265_12bit"
+    # ,"nvenc_h264",
+    # "nvenc_h265",
+    # "nvenc_h265_10bit",
+    # "mpeg4",
+    # "mpeg2",
+    # "VP8",
+    # "VP9",
+    # "VP9_10bit",
+    # "theora"
+) -title "Select Encoder Target" -defaultValue "x265";
 
 $encoderPresetOptions = @( "ultrafast", "superfast", "veryfast", "faster", "fast", "medium")
 $encoderPreset = & $selector -options $encoderPresetOptions -defaultValue "veryfast" -title "Select Encoding Speed Preset" ;
