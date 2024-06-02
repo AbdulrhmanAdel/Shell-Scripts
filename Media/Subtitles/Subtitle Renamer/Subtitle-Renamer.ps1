@@ -16,7 +16,7 @@ if ($subtitles.Length -eq 0 -or $subtitles.Length -ne $videos.Length) {
 }
 
 $folderPath = (Get-Item -LiteralPath $videos[0]).DirectoryName;
-$episodeNumberRegex = "(?i)(Episode|Ep|E|[-,|,_,*,#,\.]|\[| )(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+)";
+$episodeNumberRegex = "(?i)(Episode|Ep|E|[-,|,_,*,#,\.]|\[| |\dx)(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+)";
 function Get-EpisodeNumber($fileName) {
     $matched = $fileName -match $episodeNumberRegex;
     if (!$matched) {
@@ -83,15 +83,26 @@ if (!$continue) {
 }
 
 $replaceRegex = "(?i)-PSA|\(Hi10\)(_| )*|\[AniDL\] *";
+
+$renameSource = & Options-Selector.ps1 -options @("Subtitles", "Videos") -title "Rename Source" -defaultValue "Videos";
 foreach ($files in $dic) {
-    $video = $files[0];
-    $newVideoName = $video.FileName -replace $replaceRegex, "";
-    Rename-Item -LiteralPath "$folderPath/$($video.FileName)" -NewName "$newVideoName";
-    $subtitle = $files[1];
-    $videoExt = [System.IO.Path]::GetExtension($newVideoName);
-    $subtitleExt = [System.IO.Path]::GetExtension($subtitle.FileName);
-    $newSubName = $newVideoName.Replace($videoExt, $subtitleExt);
-    Rename-Item -LiteralPath "$folderPath/$($subtitle.FileName)" -NewName "$newSubName";
+    $source = $null;
+    $target = $null;
+    if ($renameSource -eq "Subtitles") { 
+        $source = $files[1];
+        $target = $files[0];
+    }
+    else {
+        $source = $files[0];
+        $target = $files[1];
+    }
+
+    $newSourceName = $source.FileName -replace $replaceRegex, "";
+    Rename-Item -LiteralPath "$folderPath/$($source.FileName)" -NewName "$newSourceName";
+    $sourceExt = [System.IO.Path]::GetExtension($newSourceName);
+    $targetExt = [System.IO.Path]::GetExtension($target.FileName);
+    $newSubName = $newSourceName.Replace($sourceExt, $targetExt);
+    Rename-Item -LiteralPath "$folderPath/$($target.FileName)" -NewName "$newSubName";
 }
 
 timeout 5;
