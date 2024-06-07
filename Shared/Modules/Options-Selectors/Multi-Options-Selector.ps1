@@ -4,6 +4,7 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles();
 . Parse-Args.ps1 $args[0];
 
+$selectedOptions ??= @();
 # Create the form
 $form = New-Object System.Windows.Forms.Form
 $form.Text = $title ?? "Select Items"
@@ -30,6 +31,10 @@ foreach ($item in $options) {
     
     $form.Controls.Add($checkbox)
     $y += 20  # Increase y position for the next checkbox
+
+    if ($selectedOptions -contains $item) {
+        $checkbox.Checked = $true
+    }
 }
 
 # Add a submit button

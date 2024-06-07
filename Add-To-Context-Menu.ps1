@@ -221,6 +221,14 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
+        Extensions = @("*", "Directory")
+        Title      = "Change Attributes"
+        Key        = "Change Attributes"
+        ScriptPath = "Attributes\Change-Attributes.ps1"
+        Path       = $attributesPath
+        Icon       = "pwsh.exe"
+    },
+    @{
         Extensions = @("Directory")
         Title      = "Display Folder Content"
         Key        = "Display Folder Content"

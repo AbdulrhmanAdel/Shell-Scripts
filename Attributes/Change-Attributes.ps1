@@ -1,9 +1,4 @@
-$path = $args[0];
-$operationType = $args[1];
-
-Write-Output "Handling File: $path, Operation $operationType";
-$file = Get-Item -LiteralPath $path -Force;
-
+#region Functions
 
 function AddFlagIfNotExits {
     param (
@@ -38,18 +33,41 @@ function ToggleFlag {
     }
 }
 
+#endregion
 
-switch ($operationType) {
-    'System' { 
-        ToggleFlag -flag 'System'; 
-        AddFlagIfNotExits -flag 'Hidden'; 
-        break;
+$path = $args[0];
+Write-Output "Handling File: $path, Operation $operationType";
+$file = Get-Item -LiteralPath $path -Force;
+$flags = @(
+    # 'None',
+    'ReadOnly',
+    'Hidden',
+    'System'
+    # 'Directory',
+    # 'Archive',
+    # 'Device',
+    # 'Normal',
+    # 'Temporary',
+    # 'SparseFile',
+    # 'ReparsePoint',
+    # 'Compressed',
+    # 'Offline',
+    # 'NotContentIndexed',
+    # 'Encrypted',
+    # 'IntegrityStream',
+    # 'NoScrubData'
+);
+
+$selected = @($flags | Where-Object { return $file.Attributes.HasFlag([System.IO.FileAttributes]$_); });
+$newAttributes = & Options-Selector.ps1 -options $flags --multi -selectedOptions $selected;
+$newAttributes | ForEach-Object { AddFlagIfNotExits $_; };
+
+$flags | ForEach-Object {
+    if ($newAttributes.Contains($_)) {
+        return;
     }
-    'Hidden' {
-        ToggleFlag -flag 'Hidden';
-        break;
-    }
+
+    RemoveFlagIfExits -flag $_;
 }
 
-Write-Output "Done, Closing in 1s.";
-Start-Sleep -Seconds 1;
+timeout.exe 15;
