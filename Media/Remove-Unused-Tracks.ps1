@@ -117,6 +117,11 @@ foreach ($inputPath in $inputFiles) {
     if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
         $newName = $pathAsAfile.Name.Replace($removeSent, "");
         $outputFilePath = "$outputPath\$newName";
+
+        # if ($pathAsAfile.Extension -eq ".zip") {
+
+        # }
+
         RemoveUnusedTracks -inputPath $inputPath -outputPath $outputFilePath;
     }
     else {

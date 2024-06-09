@@ -172,17 +172,9 @@ $scripts = @(
     },
     @{
         Extensions = @("Directory")
-        Title      = "Single Video"
-        Key        = "0 Single Video"
-        ScriptPath = "Youtube\Download-Single-video.ps1"
-        Path       = $youtubePath
-        Icon       = "pwsh.exe"
-    },
-    @{
-        Extensions = @("Directory")
-        Title      = "Playlist"
-        Key        = "1 Playlist"
-        ScriptPath = "Youtube\Download-Playlist.ps1"
+        Title      = "Download Video"
+        Key        = "0 Download Video"
+        ScriptPath = "Youtube\Download-Video.ps1"
         Path       = $youtubePath
         Icon       = "pwsh.exe"
     },
