@@ -112,9 +112,11 @@ function RemoveUnusedTracks(
     Write-Host "==========================" -ForegroundColor DarkBlue;
 }
 
+$directories = @();
 foreach ($inputPath in $inputFiles) {
     $pathAsAfile = Get-Item -LiteralPath $inputPath;
     if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
+        $directories += $pathAsAfile.DirectoryName;
         $newName = $pathAsAfile.Name.Replace($removeSent, "");
         $outputFilePath = "$outputPath\$newName";
 
@@ -125,6 +127,7 @@ foreach ($inputPath in $inputFiles) {
         RemoveUnusedTracks -inputPath $inputPath -outputPath $outputFilePath;
     }
     else {
+        $directories += $inputPath;
         $filter = Read-Host "Start with?";
         if (!$filter) { $filter = ""; }
         Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
@@ -140,6 +143,14 @@ foreach ($inputPath in $inputFiles) {
         if ($childens.Length -eq 0) {
             Remove-Item -LiteralPath $inputPath -Force;
         }
+    }
+}
+
+$directories | ForEach-Object {
+    $measures = Get-ChildItem -LiteralPath $_ -Force | Measure-Object
+    $removeDirectory = & Prompt.ps1 -title  "Remove Directory" -message $_;
+    if ($measures.Count -eq 0 -and $removeDirectory) {
+        Remove-Item -LiteralPath $_ -Force;
     }
 }
 
