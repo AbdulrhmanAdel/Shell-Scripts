@@ -5,6 +5,9 @@ if (!$outputPath) {
     return;
 }
 
+#region Functions
+
+
 function ForceRename {
     param (
         $path,
@@ -112,44 +115,76 @@ function RemoveUnusedTracks(
     Write-Host "==========================" -ForegroundColor DarkBlue;
 }
 
-$directories = @();
-foreach ($inputPath in $inputFiles) {
-    $pathAsAfile = Get-Item -LiteralPath $inputPath;
-    if ($pathAsAfile -isnot [System.IO.DirectoryInfo]) {
-        $directories += $pathAsAfile.DirectoryName;
-        $newName = $pathAsAfile.Name.Replace($removeSent, "");
-        $outputFilePath = "$outputPath\$newName";
+function GetFileFromDirectory {
+    param (
+        $directoryPath
+    )
 
-        # if ($pathAsAfile.Extension -eq ".zip") {
+    $script:filter = Read-Host "Start with?";
+    if (!$script:filter) { $script:filter = ""; }
+    return Get-ChildItem -Path $directoryPath -Filter "$script:filter*.mkv";
+}
 
-        # }
+function HandleFile {
+    param (
+        $pathAsAfile
+    )
 
-        RemoveUnusedTracks -inputPath $inputPath -outputPath $outputFilePath;
+
+    if ($pathAsAfile -is [System.IO.DirectoryInfo]) { 
+        $childern = GetFileFromDirectory -directoryPath $pathAsAfile.FullName;
+        $childern | ForEach-Object { HandleFile -pathAsAfile $_; };
+        return;
     }
-    else {
-        $directories += $inputPath;
-        $filter = Read-Host "Start with?";
-        if (!$filter) { $filter = ""; }
-        Get-ChildItem -Path $inputPath -Filter "$filter*.mkv" | Foreach-Object {
-            $outputFilePath = "$outputPath\$_";
-            if ($removeSent) {
-                $outputFilePath = "$outputPath\" + $_.Name.Replace($removeSent, "");
+
+    $directories += $pathAsAfile.DirectoryName;
+    $filePath = $inputPath;
+    $newName = $pathAsAfile.Name.Replace($removeSent, "");
+    $isArchive = $pathAsAfile.Extension -eq ".zip";
+    if ($isArchive) {
+        $fileName = $pathAsAfile.Name -replace '\.zip$', '.mkv';
+        $filePath = "$temp/$fileName";
+        if (!(Test-Path -LiteralPath $filePath)) {
+            Expand-Archive -LiteralPath $inputPath -DestinationPath $temp -Force;
+            if (!(Test-Path -LiteralPath $filePath)) {
+                Write-Host "INVALID FILE $inputPath" -ForegroundColor Red
+                return; 
             }
-    
-            RemoveUnusedTracks -inputPath $_.FullName -outputPath $outputFilePath;
         }
 
-        $childens = Get-ChildItem -Path $inputPath;
-        if ($childens.Length -eq 0) {
-            Remove-Item -LiteralPath $inputPath -Force;
-        }
+        $newName = $newName -replace '\.zip$', '.mkv';
+    }
+
+    $outputFilePath = "$outputPath\$newName";
+    RemoveUnusedTracks -inputPath $filePath -outputPath $outputFilePath;
+    if ($isArchive) {
+        Remove-Item -LiteralPath $pathAsAfile.FullName -Force;
     }
 }
 
-$directories | ForEach-Object {
-    $measures = Get-ChildItem -LiteralPath $_ -Force | Measure-Object
+#endregion
+$temp = $env:TEMP;
+$directories = @();
+foreach ($inputPath in $inputFiles) {
+    $pathAsAfile = Get-Item -LiteralPath $inputPath;
+    HandleFile -pathAsAfile $pathAsAfile;
+}
+
+$ignoredFiles = @("PSArips.com.txt");
+$directories | Select-Object -Unique | ForEach-Object {
+    $measures = Get-ChildItem -LiteralPath $_ -Force | ForEach-Object {
+        if ($_.Name -notin $ignoredFiles) {
+            return $_;
+        }
+    } | Measure-Object;
+
+    if ($measures.Count -ne 0) {
+        return;
+    }
+
     $removeDirectory = & Prompt.ps1 -title  "Remove Directory" -message $_;
-    if ($measures.Count -eq 0 -and $removeDirectory) {
+    if ($removeDirectory) {
+
         Remove-Item -LiteralPath $_ -Force;
     }
 }
