@@ -99,20 +99,14 @@ function RemoveUnusedTracks(
 
     $p = Start-Process mkvmerge -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
     
-    if ($p.ExitCode -eq 0) {
-        Remove-Item -LiteralPath $inputPath -Force;
-        $zippedFilePath = $inputPath -replace '\.mkv$', '.zip';
-        if (Test-Path -LiteralPath $zippedFilePath) {
-            Write-Host "Removing ZIP File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
-            Remove-Item -LiteralPath $zippedFilePath -Force;
-        }
-        Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
-    }
-    else {
+    if ($p.ExitCode -gt 0) {
         Write-Host "FAILD Processing File. ExitCode: $($p.ExitCode)" -ForegroundColor Red;
+        return $false;
     }
 
-    Write-Host "==========================" -ForegroundColor DarkBlue;
+    Remove-Item -LiteralPath $inputPath -Force;
+    Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
+    return $true;
 }
 
 function GetFileFromDirectory {
@@ -156,10 +150,12 @@ function HandleFile {
     }
 
     $outputFilePath = "$outputPath\$newName";
-    RemoveUnusedTracks -inputPath $filePath -outputPath $outputFilePath;
-    if ($isArchive) {
+    $isSuccessed = RemoveUnusedTracks -inputPath $filePath -outputPath $outputFilePath;
+    if ($isArchive -and $isSuccessed) {
         Remove-Item -LiteralPath $pathAsAfile.FullName -Force;
     }
+
+    Write-Host "==========================" -ForegroundColor DarkBlue;
 }
 
 #endregion
