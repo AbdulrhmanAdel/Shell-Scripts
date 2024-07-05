@@ -1,0 +1,64 @@
+$inputFiles = @($args | ForEach-Object { return Get-Item -LiteralPath $_ } | Where-Object { $_ -is [System.IO.FileInfo] });
+if ($inputFiles.Length -le 0) { Exit; };
+
+$replaceRegex = "\.|-|_|\(|\)";
+function RemoveSigns {
+    param (
+        $text
+    )
+
+    return $text -replace $replaceRegex, " " -replace "  +", " "
+}
+
+function GetMovieName {
+    param (
+        $fileName
+    )
+
+    $match = [regex]::Match($fileName, "720|480|1080")
+    if ($match.Success) {
+        $Index = $Match.Index;
+        $name = RemoveSigns -text $fileName.Substring(0, $Index);
+        $name = $name.Trim();
+        return $name;
+
+    }
+
+    return $fileName;
+}
+
+$subtitles = @($inputFiles | Where-Object {
+        return $_.Extension -eq ".ass" -or $_.Extension -eq ".srt";
+    });
+
+$videos = @($inputFiles | Where-Object {
+        return $_.Extension -eq ".mkv" -or $_.Extension -eq ".mp4";
+    });
+
+
+$videos | ForEach-Object {
+    $fileInfo = $_;
+    $movieName = GetMovieName -fileName ($fileInfo.Name);
+    $subFile = $subtitles | Where-Object { 
+        $subName = $_.Name;
+        $subName = RemoveSigns -text $subName ;
+        return $subName -match $movieName
+    }
+
+    if ($subFile) {
+        $newSubName = $fileInfo.Name -replace $fileInfo.Extension, $subFile.Extension;
+        Write-Host "$($fileInfo.Name) -> $($subFile)" -ForegroundColor Green
+        if ($newSubName -eq $subFile.Name) {
+            return;
+        }
+
+        Rename-Item -LiteralPath $subFile -NewName $newSubName
+    }
+    else {
+        Write-Host "$($fileInfo.Name) -> Not Found" -ForegroundColor Red
+    }
+}
+
+Write-Host "Done. Exiting in 15s" -ForegroundColor Yellow;
+
+Start-Sleep -Seconds 15;

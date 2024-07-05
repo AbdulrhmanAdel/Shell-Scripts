@@ -25,6 +25,7 @@ function SerializeTimeSpan ($timeSpan) {
 
 function ParseDialogue {
     param ($line)
+    $line[0] -match $timeRegex | Out-Null;
     return @{
         StartTime       = ParseTimeSpan -time $Matches["StartTime"]
         EndTime         = ParseTimeSpan -time $Matches["EndTime"]
@@ -71,15 +72,29 @@ function AddOriginalDialogue {
 
 $timeRegex = "(?<StartTime>\d+:\d+:\d+,\d+) --> (?<EndTime>\d+:\d+:\d+,\d+)"
 $dialogues = New-Object System.Collections.Generic.List[System.Object];
-$content = (Get-Content -LiteralPath $file);
+$content = Get-Content -LiteralPath $file;
+$firstCharIndex = -1;
 for ($i = 0; $i -lt $content.Count; $i++) {
+    if ($content[$i] -ne "") {
+        $firstCharIndex = $i;
+        break;
+    }
+}
+
+for ($i = $firstCharIndex; $i -lt $content.Count; $i++) {
     if ($content[$i] -eq "") {
         continue;
     }
 
     $endTextIndex = [Array]::IndexOf($content, "", $i);
+    if ($endTextIndex -eq -1) {
+        $line = $content[($i + 1)..($content.Count - 1)];
+        $dialogues.Add((ParseDialogue -line $line));
+        Write-Host "END OF FILE";
+        break;
+    }
+
     $line = $content[($i + 1)..($endTextIndex - 1)];
-    $line[0] -match $timeRegex | Out-Null;
     $dialogues.Add((ParseDialogue -line $line))
     $i = $endTextIndex;
 }
@@ -109,4 +124,4 @@ $dialogues | Sort-Object -Property StartTime | ForEach-Object {
     AddDialogue -adjustedContent $adjustedContent -dialogue $dialogue;
 }
 
-$adjustedContent | Set-Content -LiteralPath $file; 
+$adjustedContent | Out-File -LiteralPath $file -Encoding utf8; 

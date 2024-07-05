@@ -1,5 +1,6 @@
-$sharedArgs = @();
-
+$sharedArgs = @(
+    "-interlace", "JPEG"
+);
 
 $strip = & Prompt.ps1 -title "Remove Metadata" -message "Do You Want To Remove Metadata?" -defaultValue $true;
 if ($strip) {
@@ -7,19 +8,13 @@ if ($strip) {
 }
 
 $quality = & Range-Selector.ps1 -title "Quality" -message "Select Quality" -minimum 75 -maximum 100  -defaultValue 100  -tickFrequency 5;
-if ($quality -ne 100) {
-    $sharedArgs += @("-quality", [int]$quality);
-}
+$sharedArgs += @("-quality", [int]$quality);
 
-$newSize = & Options-Selector.ps1 @("AsSource" , "2560x1440", "1920x1080", "1024x768") "-title" "Select Image Resoluation" -defaultValue "AsSource";
+$newSize = & Options-Selector.ps1 @("AsSource" , "2560x1440", "1920x1080", "1024x768") -title "Select Image Resoluation" -defaultValue "AsSource";
 if ($newSize -ne "AsSource") {
     $sharedArgs += @("-resize", "$newSize");
 }
 
-
-$sharedArgs += @(
-    "-interlace", "JPEG"
-);
 $args | ForEach-Object {
     $file = $_;
     Write-Host "Compressing $file" -ForegroundColor Green;

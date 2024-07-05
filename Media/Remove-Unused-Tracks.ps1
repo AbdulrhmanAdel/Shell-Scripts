@@ -7,6 +7,14 @@ if (!$outputPath) {
 
 #region Functions
 
+$englishRegex = "(?i)en|eng|English";
+function isEnglishTrack {
+    param (
+        $track
+    )
+    
+    return $track.Language -match $englishRegex -or $track.Title -match $englishRegex;
+}
 
 function ForceRename {
     param (
@@ -25,6 +33,7 @@ function ForceRename {
 }
 
 $removeSent = "-PSA";
+$preferEnglishTrack = @("hi");
 function RemoveUnusedTracks(
     $inputPath,
     $outputPath
@@ -54,9 +63,13 @@ function RemoveUnusedTracks(
     $audioTracks = @($tracks | Where-Object { $_.'@type' -eq 'Audio' });
     $audioId = $null;
     if ($audioTracks.Length -gt 1) {
-        $nonEnglishTrack = $audioTracks | Where-Object { $_.Language -ne "en" -and $_.Language -ne "eng" -and $_.Title -ne "English" };
-        if ($nonEnglishTrack) {
+        $nonEnglishTrack = $audioTracks | Where-Object { !(isEnglishTrack -track $_) };
+        if ($nonEnglishTrack -and $preferEnglishTrack -notcontains $nonEnglishTrack.Language) {
             $audioId = [int]$nonEnglishTrack.StreamOrder;
+        }
+        else {
+            $englishTrack = $audioTracks | Where-Object { isEnglishTrack -track $_ };
+            $audioId = [int]$englishTrack.StreamOrder
         }
     }
     if (!$audioId) {
@@ -79,7 +92,7 @@ function RemoveUnusedTracks(
         $tracksOrder += $arSubTrackId;
     }
 
-    $engSubTracks = @($subtitleTracks | Where-Object { $_.Language -match "(?i)en|eng|English" });
+    $engSubTracks = @($subtitleTracks | Where-Object { isEnglishTrack -track $_ });
     if ($engSubTracks.Length -gt 0) {
         $engSubTrack = $engSubTracks[0];
         $engSubTrackId = [int]$engSubTrack.StreamOrder;
