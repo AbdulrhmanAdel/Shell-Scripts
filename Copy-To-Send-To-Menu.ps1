@@ -87,6 +87,6 @@ $menu | ForEach-Object {
     $path = "$sendToMenuFolder/$($_.Name)";
     $shortCut = $sh.CreateShortcut($path);
     $shortCut.TargetPath = "pwsh.exe";
-    $shortCut.Arguments = "$($_.Arguments)";
+    $shortCut.Arguments = "-WindowStyle Maximized $($_.Arguments)";
     $shortCut.Save();
 }

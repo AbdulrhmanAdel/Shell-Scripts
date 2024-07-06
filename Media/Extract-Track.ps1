@@ -20,13 +20,18 @@ function GetTrackInfo($inputPath) {
     $json = & mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json;
     $tracks = $json.media.track | Where-Object { $_.'@type' -eq "Text" -or $_.'@type' -eq "Audio" }
     foreach ($track in $tracks) {
-        Write-Host "$($track.StreamOrder) =>  $($track.Title) - $($track.'@type') - $($track.Language)";
+        Write-Host "$($track.StreamOrder) =>  $($track.Title) - $($track.'@type') - $($track.Language) - $($track.Format)";
     }
     $streamOrder = (Read-Host "Please Enter StreamOrder") -as [int];
     $selectedTrack = $tracks | Where-Object { $_.StreamOrder -eq $streamOrder };
+    $format = $selectedTrack.Format.ToLower();
+    if ($format -notin @("srt", "ass")) {
+        $format = "srt";
+    }
+    
     return @{
         index     = $selectedTrack.StreamOrder
-        extension = $selectedTrack.Format.ToLower()
+        extension = $format
     };
 }
 

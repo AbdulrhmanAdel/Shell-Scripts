@@ -18,7 +18,7 @@ function BuildScript {
     }
 
     $target ??= "%1";
-    return "pwsh.exe -file ""$baseScriptsPath\$scriptPath"" ""$target"" $finalArgs";
+    return "pwsh.exe -WindowStyle Maximized -file ""$baseScriptsPath\$scriptPath"" ""$target"" $finalArgs";
 }
 
 function Handle {
