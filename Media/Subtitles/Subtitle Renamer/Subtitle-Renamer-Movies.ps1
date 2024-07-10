@@ -29,6 +29,11 @@ function GetMovieName {
 
 $subtitles = @($inputFiles | Where-Object {
         return $_.Extension -eq ".ass" -or $_.Extension -eq ".srt";
+    } | Foreach-Object {
+        return @{
+            FileInfo = $_
+            Name     = RemoveSigns -text $_.Name
+        };
     });
 
 $videos = @($inputFiles | Where-Object {
@@ -40,12 +45,11 @@ $videos | ForEach-Object {
     $fileInfo = $_;
     $movieName = GetMovieName -fileName ($fileInfo.Name);
     $subFile = $subtitles | Where-Object { 
-        $subName = $_.Name;
-        $subName = RemoveSigns -text $subName ;
-        return $subName -match $movieName
+        return $_.Name -match $movieName
     }
 
     if ($subFile) {
+        $subFile = $subFile.FileInfo;
         $newSubName = $fileInfo.Name -replace $fileInfo.Extension, $subFile.Extension;
         Write-Host "$($fileInfo.Name) -> $($subFile)" -ForegroundColor Green
         if ($newSubName -eq $subFile.Name) {

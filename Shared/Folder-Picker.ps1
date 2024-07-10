@@ -1,6 +1,6 @@
 Add-Type -AssemblyName System.Windows.Forms;
 
-$intialDirectory = $args[0];
+. Parse-Args.ps1 $args;
 if (!$intialDirectory) {
     $intialDirectory = [Environment]::GetFolderPath('MyDocuments');
 }

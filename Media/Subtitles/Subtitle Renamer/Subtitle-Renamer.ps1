@@ -82,9 +82,10 @@ if (!$continue) {
     EXIT;
 }
 
-$replaceRegex = "(?i)-PSA|\(Hi10\)(_| )*|\[AniDL\] *";
-
-$renameSource = & Options-Selector.ps1 -options @("Subtitles", "Videos") -title "Rename Source" -defaultValue "Videos";
+$replaceRegex = "(?i)-PSA|\(Hi10\)(_| )*|\[AniDL\] ";
+$signsRegex = "_"
+# $renameSource = & Options-Selector.ps1 -options @("Subtitles", "Videos") -title "Rename Source" -defaultValue "Videos";
+$renameSource = "Videos";
 foreach ($files in $dic) {
     $source = $null;
     $target = $null;
@@ -97,7 +98,7 @@ foreach ($files in $dic) {
         $target = $files[1];
     }
 
-    $newSourceName = $source.FileName -replace $replaceRegex, "";
+    $newSourceName = $source.FileName -replace $replaceRegex, "" -replace $signsRegex, " ";
     Rename-Item -LiteralPath "$folderPath/$($source.FileName)" -NewName "$newSourceName";
     $sourceExt = [System.IO.Path]::GetExtension($newSourceName);
     $targetExt = [System.IO.Path]::GetExtension($target.FileName);

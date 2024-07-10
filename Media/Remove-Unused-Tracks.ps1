@@ -1,12 +1,9 @@
-$prefix = "D:\Watch";
-$inputFiles = $args;
-$outputPath = & Folder-Picker.ps1 $prefix;
+$outputPath = & Folder-Picker.ps1 -intialDirectory "D:\Watch";
 if (!$outputPath) {
     return;
 }
 
 #region Functions
-
 $englishRegex = "(?i)en|eng|English";
 function isEnglishTrack {
     param (
@@ -145,21 +142,32 @@ function HandleFile {
     }
 
     $directories += $pathAsAfile.DirectoryName;
+    $inputPath = $pathAsAfile.FullName;
     $filePath = $inputPath;
     $newName = $pathAsAfile.Name.Replace($removeSent, "");
-    $isArchive = $pathAsAfile.Extension -eq ".zip";
+    $isArchive = $pathAsAfile.Extension -in $archiveExtensions
     if ($isArchive) {
-        $fileName = $pathAsAfile.Name -replace '\.zip$', '.mkv';
+        $fileName = $pathAsAfile.Name -replace '(\.zip|\.rar)$', '.mkv';
         $filePath = "$temp/$fileName";
         if (!(Test-Path -LiteralPath $filePath)) {
-            Expand-Archive -LiteralPath $inputPath -DestinationPath $temp -Force;
+            $archiveProcess = Start-Process "C:\Program Files\7-Zip\7z.exe" -ArgumentList @(
+                "x", 
+                $inputPath, 
+                "-o$temp"
+            ) -NoNewWindow -PassThru -Wait;
+
+            if ($archiveProcess.ExitCode -gt 0) {
+                Write-Host "CAN'T Extract FILE $inputPath" -ForegroundColor Red
+                return;
+            }
+
             if (!(Test-Path -LiteralPath $filePath)) {
                 Write-Host "INVALID FILE $inputPath" -ForegroundColor Red
                 return; 
             }
         }
 
-        $newName = $newName -replace '\.zip$', '.mkv';
+        $newName = $newName -replace '(\.zip|\.rar)$', '.mkv';
     }
 
     $outputFilePath = "$outputPath\$newName";
@@ -172,10 +180,18 @@ function HandleFile {
 }
 
 #endregion
+
 $temp = $env:TEMP;
 $directories = @();
-foreach ($inputPath in $inputFiles) {
-    $pathAsAfile = Get-Item -LiteralPath $inputPath;
+$archiveExtensions = @('.rar', '.zip')
+$filesExtensions = @('.mkv')
+$allowedExtensions = $archiveExtensions + $filesExtensions;
+$args | Where-Object { 
+    if (!(Test-Path -LiteralPath $_ )) { return $false }
+    $extension = [System.IO.Path]::GetExtension($_);
+    return $extension -in $allowedExtensions 
+} | ForEach-Object {
+    $pathAsAfile = Get-Item -LiteralPath $_;
     HandleFile -pathAsAfile $pathAsAfile;
 }
 
