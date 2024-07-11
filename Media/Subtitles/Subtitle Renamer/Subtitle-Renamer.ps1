@@ -8,12 +8,12 @@ $videos = @($inputFiles | Where-Object {
         return $_.EndsWith(".mkv") -or $_.EndsWith(".mp4");
     })
 
-if ($subtitles.Length -eq 0 -or $subtitles.Length -ne $videos.Length) {
-    Write-Host "Missmatch Numbers: Subtitles Count $($subtitles.Length), Videos Count $($videos.Length)" -ForegroundColor Red
-    if ((Read-Host "Continue? Press 'N' to cancel And Any Key To Continue").ToUpper() -eq "N") {
-        exit;
-    }
-}
+# if ($subtitles.Length -eq 0 -or $subtitles.Length -ne $videos.Length) {
+#     Write-Host "Missmatch Numbers: Subtitles Count $($subtitles.Length), Videos Count $($videos.Length)" -ForegroundColor Red
+#     if ((Read-Host "Continue? Press 'N' to cancel And Any Key To Continue").ToUpper() -eq "N") {
+#         exit;
+#     }
+# }
 
 $folderPath = (Get-Item -LiteralPath $videos[0]).DirectoryName;
 $episodeNumberRegex = "(?i)(Episode|Ep|E|[-,|,_,*,#,\.]|\[| |\dx)(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+)";
@@ -52,6 +52,7 @@ $subtitles = $subtitles | Foreach-Object { return } {
     # Output the custom object
     return $obj
 };
+
 $isSomeEpisodeMissSubtitle = $false;
 $dic = New-Object System.Collections.ArrayList;
 foreach ($video in $videos) {
@@ -71,15 +72,13 @@ foreach ($video in $videos) {
 }
 
 if ($isSomeEpisodeMissSubtitle) {
-    timeout 15;
+    $continue = & Prompt.ps1 -message "Do You Want To Continue?"
+    if (!$continue) {
+        Write-Host "EXITING" -ForegroundColor Red
+        Start-Sleep -Seconds 5;
+        EXIT;
+    }
     exit;
-}
-
-$continue = & Prompt.ps1 -message "Do You Want To Continue?"
-if (!$continue) {
-    Write-Host "EXITING" -ForegroundColor Red
-    Start-Sleep -Seconds 5;
-    EXIT;
 }
 
 $replaceRegex = "(?i)-PSA|\(Hi10\)(_| )*|\[AniDL\] ";

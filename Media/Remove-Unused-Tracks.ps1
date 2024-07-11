@@ -13,6 +13,30 @@ function isEnglishTrack {
     return $track.Language -match $englishRegex -or $track.Title -match $englishRegex;
 }
 
+function GetMediaFilesFromArchive {
+    param (
+        [System.IO.FileInfo]$archiveFileInfo
+    )
+
+    $folderName = $archiveFileInfo.Name -replace $archiveFileInfo.Extension, '';
+    $outputPath = "$temp/$folderName";
+    if (Test-Path -LiteralPath $outputPath) {
+        Remove-Item -LiteralPath $outputPath -Recurse -Force;
+    }
+
+    $archiveProcess = Start-Process "C:\Program Files\7-Zip\7z.exe" -ArgumentList @(
+        "x", 
+        $archiveFileInfo.FullName,
+        "-o$outputPath"
+    ) -NoNewWindow -PassThru -Wait;
+    
+    if ($archiveProcess.ExitCode -gt 0) {
+        return @();
+    }
+
+    return Get-ChildItem -LiteralPath $outputPath -Filter "*.mkv" -Recurse;
+}
+
 function ForceRename {
     param (
         $path,
@@ -111,11 +135,13 @@ function RemoveUnusedTracks(
     
     if ($p.ExitCode -gt 0) {
         Write-Host "FAILD Processing File. ExitCode: $($p.ExitCode)" -ForegroundColor Red;
+        Write-Host "==========================" -ForegroundColor DarkBlue;
         return $false;
     }
 
     Remove-Item -LiteralPath $inputPath -Force;
     Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
+    Write-Host "==========================" -ForegroundColor DarkBlue;
     return $true;
 }
 
@@ -134,84 +160,71 @@ function HandleFile {
         $pathAsAfile
     )
 
-
-    if ($pathAsAfile -is [System.IO.DirectoryInfo]) { 
+    if ($pathAsAfile -is [System.IO.DirectoryInfo]) {
         $childern = GetFileFromDirectory -directoryPath $pathAsAfile.FullName;
         $childern | ForEach-Object { HandleFile -pathAsAfile $_; };
         return;
     }
 
-    $directories += $pathAsAfile.DirectoryName;
+    $directories.Add($pathAsAfile.DirectoryName);
     $inputPath = $pathAsAfile.FullName;
     $filePath = $inputPath;
     $newName = $pathAsAfile.Name.Replace($removeSent, "");
-    $isArchive = $pathAsAfile.Extension -in $archiveExtensions
-    if ($isArchive) {
-        $fileName = $pathAsAfile.Name -replace '(\.zip|\.rar)$', '.mkv';
-        $filePath = "$temp/$fileName";
-        if (!(Test-Path -LiteralPath $filePath)) {
-            $archiveProcess = Start-Process "C:\Program Files\7-Zip\7z.exe" -ArgumentList @(
-                "x", 
-                $inputPath, 
-                "-o$temp"
-            ) -NoNewWindow -PassThru -Wait;
-
-            if ($archiveProcess.ExitCode -gt 0) {
-                Write-Host "CAN'T Extract FILE $inputPath" -ForegroundColor Red
-                return;
-            }
-
-            if (!(Test-Path -LiteralPath $filePath)) {
-                Write-Host "INVALID FILE $inputPath" -ForegroundColor Red
-                return; 
-            }
-        }
-
-        $newName = $newName -replace '(\.zip|\.rar)$', '.mkv';
-    }
-
     $outputFilePath = "$outputPath\$newName";
-    $isSuccessed = RemoveUnusedTracks -inputPath $filePath -outputPath $outputFilePath;
-    if ($isArchive -and $isSuccessed) {
-        Remove-Item -LiteralPath $pathAsAfile.FullName -Force;
-    }
-
-    Write-Host "==========================" -ForegroundColor DarkBlue;
+    return RemoveUnusedTracks -inputPath $filePath -outputPath $outputFilePath;
 }
 
 #endregion
 
 $temp = $env:TEMP;
-$directories = @();
-$archiveExtensions = @('.rar', '.zip')
-$filesExtensions = @('.mkv')
-$allowedExtensions = $archiveExtensions + $filesExtensions;
+$directories = [System.Collections.Generic.HashSet[string]]::new();
+$archiveExtensions = @('.rar', '.zip');
 $args | Where-Object { 
-    if (!(Test-Path -LiteralPath $_ )) { return $false }
-    $extension = [System.IO.Path]::GetExtension($_);
-    return $extension -in $allowedExtensions 
+    return Test-Path -LiteralPath $_
 } | ForEach-Object {
     $pathAsAfile = Get-Item -LiteralPath $_;
-    HandleFile -pathAsAfile $pathAsAfile;
-}
-
-$ignoredFiles = @("PSArips.com.txt");
-$directories | Select-Object -Unique | ForEach-Object {
-    $measures = Get-ChildItem -LiteralPath $_ -Force | ForEach-Object {
-        if ($_.Name -notin $ignoredFiles) {
-            return $_;
-        }
-    } | Measure-Object;
-
-    if ($measures.Count -ne 0) {
+    if (!$pathAsAfile.Extension -or $pathAsAfile.Extension -eq ".mkv") {
+        HandleFile -pathAsAfile $pathAsAfile;
         return;
     }
 
-    $removeDirectory = & Prompt.ps1 -title  "Remove Directory" -message $_;
-    if ($removeDirectory) {
+    $isArchive = $pathAsAfile.Extension -in $archiveExtensions
+    if (!$isArchive) {
+        return;
+    }
 
-        Remove-Item -LiteralPath $_ -Force;
+    $mediaFromArchive = GetMediaFilesFromArchive -archiveFileInfo $pathAsAfile;
+    $results = $mediaFromArchive | ForEach-Object {
+        $removeTracksResult = HandleFile -pathAsAfile $_;
+        if ($removeTracksResult ) {
+            return $true;
+        }
+
+        return $false;
+    }
+        
+    if ($results -notcontains $false) {
+        Remove-Item -LiteralPath $_;    
     }
 }
+
+# $ignoredFiles = @("PSArips.com.txt");
+# $directories | ForEach-Object {
+#     $measures = Get-ChildItem -LiteralPath $_ -Force | ForEach-Object {
+#         if ($_.Name -notin $ignoredFiles) {
+#             return $_;
+#         }
+#     } | Measure-Object;
+
+#     if ($measures.Count -ne 0) {
+#         return;
+#     }
+
+#     $removeDirectory = & Prompt.ps1 -title  "Remove Directory" -message $_;
+#     if ($removeDirectory) {
+
+#         Remove-Item -LiteralPath $_ -Force;
+#     }
+# }
 
 timeout.exe 5;
