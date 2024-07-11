@@ -33,7 +33,7 @@ function Get-Chapters {
     $fileInfo = Get-Item -LiteralPath $file;
     $chapterOutput = "$($env:TEMP)\$($fileInfo.Name)($(Get-Random ))_chapters.xml";
     & mkvextract chapters $file > $chapterOutput;
-    [xml]$xml = Get-Content $chapterOutput;
+    [xml]$xml = Get-Content -LiteralPath $chapterOutput;
     if (!$xml) {
         return @();
     }

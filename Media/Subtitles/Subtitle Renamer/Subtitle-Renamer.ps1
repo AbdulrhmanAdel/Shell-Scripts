@@ -78,10 +78,11 @@ if ($isSomeEpisodeMissSubtitle) {
         Start-Sleep -Seconds 5;
         EXIT;
     }
-    exit;
 }
 
-$replaceRegex = "(?i)-PSA|\(Hi10\)(_| )*|\[AniDL\] ";
+
+
+$replaceRegex = "(?i)-PSA|(\(|\[)(Hi10|AniDL)(\)|\])(_| |-)*";
 $signsRegex = "_"
 # $renameSource = & Options-Selector.ps1 -options @("Subtitles", "Videos") -title "Rename Source" -defaultValue "Videos";
 $renameSource = "Videos";

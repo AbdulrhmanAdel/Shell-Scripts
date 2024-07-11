@@ -56,6 +56,7 @@ function Handle {
     }
 
     $delayMilliseconds = -1 * $delayMilliseconds;
+    $delayMilliseconds = -90000;
     $startFromSecond = $startFromSecond / 1000;
     if ($startFromSecond) {
         & $handler  -file $subFile -startFromSecond $startFromSecond -delayMilliseconds $delayMilliseconds;
