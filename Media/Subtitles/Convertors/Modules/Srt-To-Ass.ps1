@@ -1,4 +1,4 @@
-$files = $args | Where-Object { $_ -match "\.srt" };
+$files = $args[0] | Where-Object { $_ -match "\.srt" };
 
 #region functions 
 function ParseTimeSpan {

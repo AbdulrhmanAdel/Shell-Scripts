@@ -1,4 +1,4 @@
-$inputFiles = @($args | ForEach-Object { return Get-Item -LiteralPath $_ } | Where-Object { $_ -is [System.IO.FileInfo] });
+$inputFiles = @($args[0] | ForEach-Object { return Get-Item -LiteralPath $_ } | Where-Object { $_ -is [System.IO.FileInfo] });
 if ($inputFiles.Length -le 0) { Exit; };
 
 $replaceRegex = "\.|-|_|\(|\)";
@@ -46,7 +46,8 @@ $videos | ForEach-Object {
     $movieName = GetMovieName -fileName ($fileInfo.Name);
     $subFile = $subtitles | Where-Object { 
         return $_.Name -match $movieName
-    }
+    } | Select-Object -First 1
+
 
     if ($subFile) {
         $subFile = $subFile.FileInfo;
@@ -63,6 +64,5 @@ $videos | ForEach-Object {
     }
 }
 
-Write-Host "Done. Exiting in 15s" -ForegroundColor Yellow;
-
-Start-Sleep -Seconds 15;
+Write-Host "Done" -ForegroundColor Yellow;
+timeout.exe 15;

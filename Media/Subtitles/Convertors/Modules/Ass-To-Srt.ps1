@@ -1,4 +1,4 @@
-$files = $args | Where-Object { $_ -match "\.ass" };
+$files = $args[0] | Where-Object { $_ -match "\.ass" };
 
 function ToTimeSpan {
     param (

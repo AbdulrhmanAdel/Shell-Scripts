@@ -17,37 +17,29 @@ $menu = @(
         Name      = "01- Remove Unused Tracks.lnk"
         Arguments = "-File ""$scriptPath\Media\Remove-Unused-Tracks.ps1"""
     },
-    @{
-        Name      = "02- Media - Display Chapters Info.lnk"
-        Arguments = "-File ""$scriptPath\Media\Display-Chapter-Info.ps1"""
-    },
-    @{
-        Name      = "02- Media - Remove Linked Segements.lnk"
-        Arguments = "-File ""$scriptPath\Media\Remove-Segment-Link.ps1"""
-    },
+    # @{
+    #     Name      = "02- Media - Display Chapters Info.lnk"
+    #     Arguments = "-File ""$scriptPath\Media\Display-Chapter-Info.ps1"""
+    # },
+    # @{
+    #     Name      = "02- Media - Remove Linked Segements.lnk"
+    #     Arguments = "-File ""$scriptPath\Media\Remove-Segment-Link.ps1"""
+    # },
     @{
         Name      = "02- Media - Tracks Extractor.lnk"
         Arguments = "-File ""$scriptPath\Media\Extract-track.ps1"""
     },
     @{
-        Name      = "02- Subtitle - Convert ASS To SRT.lnk"
-        Arguments = "-File ""$scriptPath\Media\Subtitles\Convertors\Ass-To-Srt.ps1"""
+        Name      = "02- Subtitle - Convertor.lnk"
+        Arguments = "-File ""$scriptPath\Media\Subtitles\Convertors\Subtitle-Convertor.ps1"""
     },
     @{
-        Name      = "02- Subtitle - Convert SRT To ASS.lnk"
-        Arguments = "-File ""$scriptPath\Media\Subtitles\Convertors\Srt-To-Ass.ps1"""
+        Name      = "02- Subtitle - Editor.lnk"
+        Arguments = "-File ""$scriptPath\Media\Subtitles\Editors\Subtitle-Editor.ps1"""
     },
     @{
-        Name      = "02- Subtitle - Editor (ASS).lnk"
-        Arguments = "-File ""$scriptPath\Media\Subtitles\Editors\Ass-Editor.ps1"""
-    },
-    @{
-        Name      = "02- Subtitle - Renamer (Series).lnk"
+        Name      = "02- Subtitle - Renamer.lnk"
         Arguments = "-File ""$scriptPath\Media\Subtitles\Subtitle Renamer\Subtitle-Renamer.ps1"""
-    },
-    @{
-        Name      = "02- Subtitle - Renamer (Movies).lnk"
-        Arguments = "-File ""$scriptPath\Media\Subtitles\Subtitle Renamer\Subtitle-Renamer-Movies.ps1"""
     },
     @{
         Name      = "02- Subtitle - Shifter (Chapter Based).lnk"
@@ -58,13 +50,18 @@ $menu = @(
         Arguments = "-File ""$scriptPath\Media\Subtitles\Subtitle-Shifter\Subtitle-Shifter.ps1"""
     },
     @{
+        Name       = "03- Download Subtitle.lnk"
+        Arguments  = "-File ""$scriptPath\Media\Subtitles\Downloader\Search-Subtitle.ps1"""
+        SuffixArgs = @();
+    },
+    @{
         Name      = "500- Copy Paths To Clipboard.lnk"
         Arguments = "-File ""$scriptPath\Tools\Copy-Paths-To-Clipboard.ps1"""
     },
-    @{
-        Name      = "500- Copy To Different Drive With The Same Hierarchy.lnk"
-        Arguments = "-File ""$scriptPath\Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"""
-    },
+    # @{
+    #     Name      = "500- Copy To Different Drive With The Same Hierarchy.lnk"
+    #     Arguments = "-File ""$scriptPath\Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"""
+    # },
     @{
         Name      = "601- Compress.lnk"
         Arguments = "-File ""$scriptPath\Media\Compress\Compress.ps1"""
