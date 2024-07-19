@@ -18,10 +18,10 @@ function GetMediaFilesFromArchive {
         [System.IO.FileInfo]$archiveFileInfo
     )
 
-    $folderName = $archiveFileInfo.Name -replace $archiveFileInfo.Extension, '';
-    $outputPath = "$temp/$folderName";
+    # $folderName = $archiveFileInfo.Name -replace $archiveFileInfo.Extension, '';
+    $outputPath = "$temp/RUT-$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss')";
     if (Test-Path -LiteralPath $outputPath) {
-        Remove-Item -LiteralPath $outputPath -Recurse -Force;
+        & Remove-To-Rycle-Bin.ps1 $outputPath;
     }
 
     $archiveProcess = Start-Process "C:\Program Files\7-Zip\7z.exe" -ArgumentList @(
@@ -139,7 +139,7 @@ function RemoveUnusedTracks(
         return $false;
     }
 
-    Remove-Item -LiteralPath $inputPath -Force;
+    & Remove-To-Rycle-Bin.ps1 $inputPath;
     Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
     Write-Host "==========================" -ForegroundColor DarkBlue;
     return $true;
@@ -178,7 +178,7 @@ function HandleFile {
 
 $temp = $env:TEMP;
 $directories = [System.Collections.Generic.HashSet[string]]::new();
-$archiveExtensions = @('.rar', '.zip');
+$archiveExtensions = @('.rar', '.zip', '.7z');
 $args | Where-Object { 
     return Test-Path -LiteralPath $_
 } | ForEach-Object {
@@ -204,7 +204,14 @@ $args | Where-Object {
     }
         
     if ($results -notcontains $false) {
-        Remove-Item -LiteralPath $_;    
+        & Remove-To-Rycle-Bin.ps1 $_;
+
+        if ($isArchive) {
+            $hasParts = $_ -match "(?<Name>.*)part/d+";
+            if ($hasParts) {
+                & Remove-To-Rycle-Bin.ps1 $_;
+            }
+        }
     }
 }
 
@@ -223,7 +230,7 @@ $args | Where-Object {
 #     $removeDirectory = & Prompt.ps1 -title  "Remove Directory" -message $_;
 #     if ($removeDirectory) {
 
-#         Remove-Item -LiteralPath $_ -Force;
+#         & Remove-To-Rycle-Bin.ps1 $_
 #     }
 # }
 

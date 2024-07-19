@@ -62,6 +62,9 @@ $args | ForEach-Object {
     elseif ($_ -match "\.(mp3|opus|m4a)$") {
         $audio += """$($_)""";   
     }
+    elseif (Test-Path -LiteralPath $_ -PathType Container) {
+        $audio += """$($_)"""; 
+    }
 };
 
 if ($source -match "All|Images" -and $images.Count) {
