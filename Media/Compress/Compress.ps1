@@ -6,8 +6,20 @@
 
 # %STAXRIP% -load-template %TEMPLATE% -encode -auto-exit -hide -output "%OUTPUT%" "%INPUT%"
 
+function Run {
+    param (
+        $files,
+        $scriptPath
+    )
+    
+    $command = (@("""$modulesPath\$scriptPath""") + $files) -join " ";
+    Write-Host "ENCODING Using $scriptPath" -ForegroundColor Magenta;
+    Start-Process  pwsh.exe -ArgumentList $command -Wait -NoNewWindow;
+    # CopyTransformedToOriginalFolder -files $images;
+    Write-Host "FINISH ENCODING" -ForegroundColor Magenta;
+}
 
-$source = & Options-Selector.ps1 -options @("All", "Videos", "Images", "Course");
+$source = & Options-Selector.ps1 -options @("All", "Videos", "Images", "Course", "Audio");
 $modulesPath = "$($PSScriptRoot)\Modules";
 if ($source -eq "Course" ) {
     $scriptPath = "$modulesPath/Course/Course-Compressor.ps1";
@@ -17,7 +29,7 @@ if ($source -eq "Course" ) {
 
 $videos = @();
 $images = @();
-
+$audio = @();
 function CopyTransformedToOriginalFolder {
     param (
         $files
@@ -47,23 +59,18 @@ $args | ForEach-Object {
     elseif ($_ -match "\.(jpg|jpeg|png|gif|bmp|heic)$") {
         $images += """$($_)""";   
     }
+    elseif ($_ -match "\.(mp3|opus|m4a)$") {
+        $audio += """$($_)""";   
+    }
 };
 
 if ($source -match "All|Images" -and $images.Count) {
-    $command = (@("""$modulesPath\Image-Compressor.ps1""") + $images) -join " ";
-    Write-Host "ENCODING IMAGES" -ForegroundColor Magenta;
-    Start-Process  pwsh.exe -ArgumentList $command -Wait -NoNewWindow;
-    CopyTransformedToOriginalFolder -files $images;
-    Write-Host "FINISH ENCODING IMAGES" -ForegroundColor Magenta;
+    Run -files $images -scriptPath "Image-Compressor.ps1";
 }
-
+if ($source -match "All|Audio" -and $audio.Count) {
+    Run -files $audio -scriptPath "Audio-Compressor.ps1";
+}
 if ($source -match "All|Videos" -and $videos.Count) {
-    $command = (@("""$modulesPath\Video-Compressor.ps1""") + $videos) -join " ";
-
-    # & """$modulesPath\Video-Compressor.ps1""" 
-    Write-Host "ENCODING Videos" -ForegroundColor Magenta;
-    Start-Process  pwsh.exe -ArgumentList $command -Wait -NoNewWindow;
-    CopyTransformedToOriginalFolder -files $videos;
-    Write-Host "FINISH ENCODING VIDEOS" -ForegroundColor Blue;
+    Run -files $videos -scriptPath "Video-Compressor.ps1";
 }
 
