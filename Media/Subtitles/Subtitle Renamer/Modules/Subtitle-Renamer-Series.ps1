@@ -18,8 +18,13 @@ $videos = @($inputFiles | Where-Object {
 $folderPath = (Get-Item -LiteralPath $videos[0]).DirectoryName;
 $episodeNumberRegex = "(?i)(Episode|Ep|E|[-,|,_,*,#,\.]|\[| |\dx)(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+)";
 function Get-EpisodeNumber($fileName) {
+    $episodeNumber = $null;
     $matched = $fileName -match $episodeNumberRegex;
     if (!$matched) {
+        $fileNameWithoutExt = $fileName -replace [System.IO.Path]::GetExtension($fileName), "";
+        if ([int]::TryParse($fileNameWithoutExt, [ref]$episodeNumber)) {
+            return $episodeNumber
+        }
         Write-Host "Can't Extract Episode Number From $fileName";
         return; 
     }
@@ -37,17 +42,17 @@ $videos = $videos | Foreach-Object { return } {
     $fileName = (Get-Item -LiteralPath $_).Name;
     $obj = New-Object PSObject -Property @{
         FileName      = $fileName
-        EpisodeNumber = Get-EpisodeNumber($fileName)
+        EpisodeNumber = Get-EpisodeNumber -fileName $fileName
     }
     # Output the custom object
     return $obj
 } | Sort-Object -Property EpisodeNumber;
 
-$subtitles = $subtitles | Foreach-Object { return } {
+$subtitles = $subtitles | Foreach-Object {
     $fileName = (Get-Item -LiteralPath $_).Name;
     $obj = New-Object PSObject -Property @{
         FileName      = $fileName
-        EpisodeNumber = Get-EpisodeNumber($fileName)
+        EpisodeNumber = Get-EpisodeNumber -fileName $fileName
     }
     # Output the custom object
     return $obj
