@@ -1,8 +1,5 @@
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process pwsh.exe -Verb RunAs "-Command ""$($MyInvocation.Line)""";
-    exit;
-}
-
+& Run-As-Admin.ps1;
+Write-Host "Starting" -ForegroundColor Green;
 $Recycle = "RecycleBin";
 $baseScriptsPath = $PSScriptRoot;
 function BuildScript {
@@ -265,3 +262,5 @@ $scripts | ForEach-Object {
     }
 };
 
+Write-Host "Done" -ForegroundColor Green;
+timeout.exe 10;

@@ -1,14 +1,7 @@
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    $script = $MyInvocation.MyCommand.Path;
-    $arguments = @(
-        "-File", """$script"""
-    );
-    Start-Process pwsh.exe -Verb RunAs -ArgumentList $arguments;
-    exit;
-}
-
+& Run-As-Admin.ps1;
 # Install-Package SharpShell;
 
+Write-Host "Copying To Send To Menu" -ForegroundColor Green;
 $sendToMenuFolder = "$($env:APPDATA)\Microsoft\Windows\SendTo";
 $scriptPath = $PSScriptRoot;
 #region Menu
@@ -39,15 +32,15 @@ $menu = @(
     },
     @{
         Name      = "02- Subtitle - Renamer.lnk"
-        Arguments = "-File ""$scriptPath\Media\Subtitles\Subtitle Renamer\Subtitle-Renamer.ps1"""
+        Arguments = "-File ""$scriptPath\Media\Subtitles\Renamer\Renamer.ps1"""
     },
     @{
         Name      = "02- Subtitle - Shifter (Chapter Based).lnk"
-        Arguments = "-File ""$scriptPath\Media\Subtitles\Subtitle-Shifter\Custom\Chapter-Based-Shifter.ps1"""
+        Arguments = "-File ""$scriptPath\Media\Subtitles\Shifter\Custom\Chapter-Based-Shifter.ps1"""
     },
     @{
         Name      = "02- Subtitle - Shifter.lnk"
-        Arguments = "-File ""$scriptPath\Media\Subtitles\Subtitle-Shifter\Subtitle-Shifter.ps1"""
+        Arguments = "-File ""$scriptPath\Media\Subtitles\Shifter\Shifter.ps1"""
     },
     @{
         Name       = "03- Download Subtitle.lnk"
@@ -87,3 +80,6 @@ $menu | ForEach-Object {
     $shortCut.Arguments = "-WindowStyle Maximized $($_.Arguments)";
     $shortCut.Save();
 }
+
+Write-Host "Done" -ForegroundColor Green;
+timeout.exe 10;
