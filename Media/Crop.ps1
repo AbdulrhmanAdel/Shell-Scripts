@@ -30,14 +30,21 @@ function Prompt {
 
 $start = Prompt -key "Start?"
 $end = Prompt -key "End?"
-if ($end -eq 0) {
-    exit;
-}
+# if ($end -eq 0) {
+#     exit;
+# }
 $commandArgs = @(
     "-y",
-    "-ss", $start, 
-    "-to", $end, 
+    "-ss", $start
+);
+
+if ($end) {
+    $commandArgs += @("-to", $end)
+}
+
+$commandArgs += @(
     "-i", """$filePath""",
-    """$outputPath""");
+    """$outputPath"""
+    );
 
 Start-Process ffmpeg -ArgumentList $commandArgs -NoNewWindow;

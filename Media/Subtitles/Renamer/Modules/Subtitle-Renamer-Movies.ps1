@@ -21,7 +21,6 @@ function GetMovieName {
         $name = RemoveSigns -text $fileName.Substring(0, $Index);
         $name = $name.Trim();
         return $name;
-
     }
 
     return $fileName;
