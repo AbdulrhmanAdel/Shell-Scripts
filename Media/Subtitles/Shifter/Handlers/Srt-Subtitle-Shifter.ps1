@@ -72,7 +72,7 @@ function AddOriginalDialogue {
 
 $timeRegex = "(?<StartTime>\d+:\d+:\d+,\d+) --> (?<EndTime>\d+:\d+:\d+,\d+)"
 $dialogues = New-Object System.Collections.Generic.List[System.Object];
-$content = Get-Content -LiteralPath $file;
+$content = Get-Content -LiteralPath $file -Encoding $encoding;
 $firstCharIndex = -1;
 for ($i = 0; $i -lt $content.Count; $i++) {
     if ($content[$i] -ne "") {
@@ -124,4 +124,5 @@ $dialogues | Sort-Object -Property StartTime | ForEach-Object {
     AddDialogue -adjustedContent $adjustedContent -dialogue $dialogue;
 }
 
-$adjustedContent | Out-File -LiteralPath $file -Encoding utf8; 
+# $adjustedContent | Out-File -LiteralPath $file -Encoding utf8; 
+$adjustedContent | Set-Content -LiteralPath $file -Encoding $encoding;

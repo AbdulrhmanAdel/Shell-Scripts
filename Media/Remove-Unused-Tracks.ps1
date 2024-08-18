@@ -152,17 +152,24 @@ function GetFileFromDirectory {
 
     $script:filter = Read-Host "Start with?";
     if (!$script:filter) { $script:filter = ""; }
-    return Get-ChildItem -Path $directoryPath -Filter "$script:filter*.mkv";
+    $files = Get-ChildItem -Path $directoryPath -Filter "$script:filter*.mkv";
+    $directories = Get-ChildItem -Path $directoryPath -Directory;
+    return $files + $directories;
 }
 
 function HandleFile {
     param (
-        $pathAsAfile
+        $pathAsAfile,
+        $outputPath
     )
 
     if ($pathAsAfile -is [System.IO.DirectoryInfo]) {
+        $outputFolderPath = "$outputPath/$($pathAsAfile.Name)";
+        if (!(Test-Path -LiteralPath $outputFolderPath)) {
+            New-Item -ItemType Directory -Path $outputFolderPath;
+        }
         $childern = GetFileFromDirectory -directoryPath $pathAsAfile.FullName;
-        $childern | ForEach-Object { HandleFile -pathAsAfile $_; };
+        $childern | ForEach-Object { HandleFile -pathAsAfile $_ -outputPath  $outputFolderPath; };
         return;
     }
 
@@ -183,8 +190,8 @@ $args | Where-Object {
     return Test-Path -LiteralPath $_
 } | ForEach-Object {
     $pathAsAfile = Get-Item -LiteralPath $_;
-    if (!$pathAsAfile.Extension -or $pathAsAfile.Extension -eq ".mkv") {
-        HandleFile -pathAsAfile $pathAsAfile;
+    if ($pathAsAfile -is [System.IO.DirectoryInfo] -or $pathAsAfile.Extension -eq ".mkv") {
+        HandleFile -pathAsAfile $pathAsAfile -outputPath $outputPath;
         return;
     }
 
@@ -195,7 +202,7 @@ $args | Where-Object {
 
     $mediaFromArchive = GetMediaFilesFromArchive -archiveFileInfo $pathAsAfile;
     $results = $mediaFromArchive | ForEach-Object {
-        $removeTracksResult = HandleFile -pathAsAfile $_;
+        $removeTracksResult = HandleFile -pathAsAfile $_ -outputPath $outputPath;
         if ($removeTracksResult ) {
             return $true;
         }

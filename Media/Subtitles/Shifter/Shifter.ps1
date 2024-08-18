@@ -20,6 +20,20 @@ function Get-Period() {
 $delayMilliseconds = (Get-Period) * 1000;
 Write-Host "The Delay Will Be $delayMilliseconds Milliseconds"
 
+$encoding = & Options-Selector.ps1 -options @(
+    "ascii",
+    "ansi",
+    "bigendianunicode",
+    "bigendianutf32",
+    "oem",
+    "unicode",
+    "utf7",
+    "utf8",
+    "utf8BOM",
+    "utf8NoBOM",
+    "utf32"
+) -defaultValue utf8;
+
 # Function to adjust time
 function HandleFiles {
     param (
@@ -44,7 +58,8 @@ function HandleFiles {
         Write-Host "Start Handling $file";
         & $handler `
             -file "$file" `
-            -delayMilliseconds $delayMilliseconds;
+            -delayMilliseconds $delayMilliseconds `
+            -encoding $encoding;
 
         Write-Host "Finish Handling $file";
     }

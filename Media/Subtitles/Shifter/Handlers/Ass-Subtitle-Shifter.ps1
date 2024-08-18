@@ -65,7 +65,7 @@ function AddOriginalDialogue {
 #endregion
 
 $dialogues = New-Object System.Collections.Generic.List[System.Object];
-$content = Get-Content -LiteralPath $file | ForEach-Object {
+$content = Get-Content -LiteralPath $file -Encoding $encoding | ForEach-Object {
     if ($_ -match "Dialogue: (?<Layer>\d+),(?<StartTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<EndTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<Style>[^,]*),(?<Name>[^,]*),(?<MarginL>\d+),(?<MarginR>\d+),(?<MarginV>\d+),(?<Effect>[^,]*),(?<Text>.+)") {
         $dialogues.Add((SerializeDialogue -line $_)) | Out-Null | Out-Null;
     }
@@ -106,4 +106,4 @@ $content | ForEach-Object {
     }
 }
 
-$adjustedContent | Set-Content -LiteralPath $file; 
+$adjustedContent | Set-Content -LiteralPath $file -Encoding $encoding;; 
