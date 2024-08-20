@@ -150,11 +150,22 @@ function GetFileFromDirectory {
         $directoryPath
     )
 
-    $script:filter = Read-Host "Start with?";
+    $script:filter = ""; # Read-Host "Start with?";
     if (!$script:filter) { $script:filter = ""; }
     $files = Get-ChildItem -Path $directoryPath -Filter "$script:filter*.mkv";
     $directories = Get-ChildItem -Path $directoryPath -Directory;
     return $files + $directories;
+}
+
+function RemoveDirectoryIfEmpty {
+    param (
+        $directoryPath
+    )
+
+    $items = Get-ChildItem -Path $directoryPath;
+    if ($items.Length -eq 0) {
+        Remove-Item -LiteralPath $directoryPath -Force;
+    }
 }
 
 function HandleFile {
@@ -170,6 +181,7 @@ function HandleFile {
         }
         $childern = GetFileFromDirectory -directoryPath $pathAsAfile.FullName;
         $childern | ForEach-Object { HandleFile -pathAsAfile $_ -outputPath  $outputFolderPath; };
+        RemoveDirectoryIfEmpty -directoryPath $pathAsAfile.FullName;
         return;
     }
 

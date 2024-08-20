@@ -8,9 +8,9 @@ function ExtractTrack {
     $output = "$fileDirectoryName\$fileName";
     
     $processArgs = @(
-        "tracks",
         """$($fileInfo.FullName)""",
-        "$($trackInfo["index"]):""$output"""
+        "tracks",
+        """$($trackInfo["index"]):$output"""
     );
     Start-Process mkvextract -NoNewWindow -Wait `
         -ArgumentList $processArgs;
