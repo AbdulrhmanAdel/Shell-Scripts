@@ -120,6 +120,14 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
+        Extensions = @(".mkv", ".mp4")
+        Title      = "Display Chapters Info"
+        Key        = "000 Display Chapters Info"
+        ScriptPath = "Media\Display-Chapter-Info.ps1"
+        Path       = $mediaPath
+        Icon       = "pwsh.exe"
+    },
+    @{
         Extensions = @("*")
         Title      = "Pin To Start"
         Key        = "Pin To Start"

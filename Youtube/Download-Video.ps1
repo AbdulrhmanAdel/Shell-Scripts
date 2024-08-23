@@ -25,7 +25,9 @@ if ($format -eq "Cancel") {
     EXIT;
 }
 
+
 $selectedOptions = $options[$format] ?? $defaultHandler;
+
 function HandlePlaylist {
     param (
         $url
@@ -41,7 +43,7 @@ function HandlePlaylist {
         $arguments += @("--playlist-end", $to);
     }
 
-    $arguments += @("-o", """$destinitionPath\\%(playlist_index)s - %(title)s""", $url);
+    $arguments += @("-o", """$destinitionPath\%(playlist_index)s - %(title)s""", $url);
     Start-Process yt-dlp -ArgumentList $arguments  -Wait -NoNewWindow;
 }
 
@@ -59,7 +61,7 @@ function download {
         HandlePlaylist -url $url;
     }
     else {
-        $arguments = $selectedOptions + @("-o", "$destinitionPath\\%(title)s.%(ext)s", $url);
+        $arguments = $selectedOptions + @("-o", """$destinitionPath\%(title)s.%(ext)s""", $url);
         Start-Process yt-dlp -ArgumentList $arguments  -Wait -NoNewWindow;
     }
 

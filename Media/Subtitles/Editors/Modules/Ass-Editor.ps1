@@ -1,4 +1,4 @@
-$files = @($args | Where-Object { $_.ToString().EndsWith(".ass") });
+. Parse-Args.ps1 $args;
 
 #region Keys
 $NameKey = "Name";
@@ -25,53 +25,49 @@ $MarginRKey = "MarginR";
 $MarginVKey = "MarginV";
 $EncodingKey = "Encoding";
 
-$allEdits = @(
-    $FontnameKey,
-    $FontsizeKey,
-    $PrimaryColourKey,
-    $SecondaryColourKey,
-    $OutlineColourKey,
-    $BackColourKey,
-    $BoldKey,
-    $ItalicKey,
-    $UnderlineKey,
-    $StrikeOutKey,
-    $ScaleXKey,
-    $ScaleYKey,
-    $SpacingKey,
-    $AngleKey,
-    $BorderStyleKey,
-    $OutlineKey,
-    $ShadowKey,
-    $AlignmentKey,
-    $MarginLKey,
-    $MarginRKey,
-    $MarginVKey,
-    $EncodingKey
-);
+
+$edits = @{
+    $PrimaryColourKey   = "&H00FCFCFB"
+    $SecondaryColourKey = "&H00BFA88A"
+    $OutlineColourKey   = "&H00454545"
+    $BackColourKey      = "&H00000000"
+};
+
+$edits = @{
+    $PrimaryColourKey   = "FFFFFF"
+    $SecondaryColourKey = "FFFFFF"
+    $OutlineColourKey   = "FFFFFF"
+    $BackColourKey      = "FFFFFF"
+};
+
 
 $supportedEdits = @(
-    $MarginVKey ,
-    $FontSizeKey
+    @{
+        Name         = $MarginVKey 
+        DefaultValue = 22
+    },
+    @{
+        Name         = $FontSizeKey
+        DefaultValue = 22
+    },
+    @{
+        Name         = $PrimaryColourKey
+        DefaultValue = $edits[$PrimaryColourKey]
+    }
 );
 
-$edits = @{};
+
 #endRegion
 
 $styleRegex = "^Style: (?<$NameKey>[^,]+),\s*(?<$FontnameKey>[^,]+),\s*(?<$FontsizeKey>[^,]+),\s*(?<$PrimaryColourKey>[^,]+),\s*(?<$SecondaryColourKey>[^,]+),\s*(?<$OutlineColourKey>[^,]+),\s*(?<$BackColourKey>[^,]+),\s*(?<$BoldKey>[^,]+),\s*(?<$ItalicKey>[^,]+),\s*(?<$UnderlineKey>[^,]+),\s*(?<$StrikeOutKey>[^,]+),\s*(?<$ScaleXKey>[^,]+),\s*(?<$ScaleYKey>[^,]+),\s*(?<$SpacingKey>[^,]+),\s*(?<$AngleKey>[^,]+),\s*(?<$BorderStyleKey>[^,]+),\s*(?<$OutlineKey>[^,]+),\s*(?<$ShadowKey>[^,]+),\s*(?<$AlignmentKey>[^,]+),\s*(?<$MarginLKey>[^,]+),\s*(?<$MarginRKey>[^,]+),\s*(?<$MarginVKey>[^,]+),\s*(?<$EncodingKey>[^,]+)$"
-$startFrom = Read-Host "StartFrom?";
-if ($startFrom) {
-    if ($startFrom -match $styleRegex) {
-        $allEdits | ForEach-Object {
-            $edits[$_] = $Matches[$_];
-        }
-    }
-}
 
 $supportedEdits | ForEach-Object {
-    $value = Read-Host "$($_)?";
+    $value = Read-Host "$($_.Name) - Default is $($_.DefaultValue)?";
     if ($value) {
-        $edits[$_] = $value;
+        $edits[$_.Name] = $value;
+    }
+    else {
+        $edits[$_.Name] = $_.DefaultValue;
     }
 }
 
@@ -94,7 +90,7 @@ function Edit {
     )
 
     Write-Host "Editing $($path)" -ForegroundColor Green;
-    $content = Get-Content -LiteralPath $path;
+    $content = Get-Content -LiteralPath $path -Encoding $encoding;
     $content = $content | ForEach-Object {
         if ($_ -match $styleRegex) {
             if (!($Matches["Name"].Contains("Default"))) { 
@@ -109,13 +105,13 @@ function Edit {
         return $_;
     }
 
-    $content | Set-Content -LiteralPath $path -Encoding utf8;
+    $content | Set-Content -LiteralPath $path  -Encoding $encoding;
     Write-Host "Ended $($path)" -ForegroundColor Blue;
     Write-Host "=========================" -ForegroundColor Yellow;
 }
 #endregion
 
 
-$files | ForEach-Object { Edit -path $_ };
+@($files) | ForEach-Object { Edit -path $_ };
 
 timeout 15;
