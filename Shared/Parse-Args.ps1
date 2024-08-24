@@ -6,6 +6,8 @@ function ParseValue {
     param (
         $value
     )
+
+    if ($null -eq $value) { return $value; }
     if ($value.GetType().Name -eq "Object[]") {
         return $value;
     }

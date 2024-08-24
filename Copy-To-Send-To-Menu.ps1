@@ -44,7 +44,7 @@ $menu = @(
     },
     @{
         Name       = "03- Download Subtitle.lnk"
-        Arguments  = "-File ""$scriptPath\Media\Subtitles\Downloader\Search-Subtitle.ps1"""
+        Arguments  = "-File ""$scriptPath\Media\Subtitles\Downloader\Downloader.ps1"""
         SuffixArgs = @();
     },
     @{
