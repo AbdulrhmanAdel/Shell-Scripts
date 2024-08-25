@@ -46,13 +46,19 @@ function GetSubtitles {
         EXIT;
     }
 
-    $movieInfo = $searchResult[0];
+    $subsourceType = $type -eq "S" ? "TVSeries": "Movie";
+    $movieInfo = $searchResult | Where-Object {
+        $_.type -eq $subsourceType
+    } | Select-Object -First 1;
+    $movieInfo ??= $searchResult[0];
+    
     $global:subtitlePageLink = "https://subsource.net/subtitles/$($movieInfo.linkName)"
 
     $body = @{
         langs     = @("Arabic")
         movieName = $movieInfo.linkName
     };
+
     if ($season -and $type -eq "S") {
         $body["season"] = "season-$season";
         $global:subtitlePageLink += "/season-$season"

@@ -1,4 +1,4 @@
-$specialChars = "[-,|,_,*,#,\.]";
+$specialChars = "[-,|,_,*,#,\.,\],\[]";
 $seriesRegex = "(?<Name>.*)(S|Season|S(?<SeasonNumber>\d+))(Episode|Ep|E|$specialChars|\[| |\dx)(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+)(?<ExtraInfo>.*)(?<Quality>(720|480|1080)P?)(?<Rest>.*)"; ;
 $moviesRegex = "(?<Name>.*)(?<Year>\d\d\d\d)(?<ExtraInfo>.*)(?<Quality>(720|480|1080)P?)(?<Rest>.*)";
 
@@ -28,7 +28,7 @@ function GetQuailty {
         $rest = "(720|480|1080)P $rest"
     }
 
-    return $rest.Trim() -replace " +", "(\.| |-)?"
+    return $rest.Trim() -replace " +", "(\.| |-|)?"
 }
 
 function GetSeriesOrMovieDetails {
