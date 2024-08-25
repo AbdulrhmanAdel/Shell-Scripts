@@ -32,11 +32,80 @@ function Invoke-Request {
     return $content;
 }
 
+
+function CopySubtitle {
+    param (
+        $subtitlePath,
+        $details,
+        $savePath,
+        $renameTo,
+        $episodeRegex,
+        $qualityRegex
+    )
+
+    $files = @(Get-ChildItem -LiteralPath $subtitlePath -Include *.ass, *.srt);
+    $fileIndex = 0;
+
+    if ($episodeRegex) {
+        $files = @($files | Where-Object { $_.Name -match $episodeRegex })
+    }
+
+    if ($qualityRegex -and $files.Length -gt 1) {
+        $primaryFile = $files | Where-Object { $_.Name -match $qualityRegex } | Select-Object -First 1;
+        if ($primaryFile) {
+            $files = @($primaryFile);
+        }
+    }
+
+    $files | ForEach-Object {
+        $file = $files[$fileIndex];
+        $finalName = $file.Name -replace $file.Extension, "";
+        if ($renameTo) {
+            $finalName = $renameTo;
+        }
+        if ($files.Length -gt 1) {
+            $finalName += ".$fileIndex"
+            $fileIndex++;
+        }
+
+        Copy-Item -LiteralPath $file.FullName `
+            -Destination "$savePath/$($finalName)$($file.Extension)";
+    }
+
+    Remove-Item -LiteralPath $subtitlePath -Recurse -Force;
+}
+
+
+function GetSubtitles {
+    $searchResult = Invoke-Request -path "searchMovie" -body @{
+        query = $name
+    } -property "found";
+    
+    if ($searchResult.Length -eq 0) {
+        Start-Process "https://subsource.net/search/$name"
+        EXIT;
+    }
+
+    $movieInfo = $searchResult[0];
+    $subtitlePageLink = "https://subsource.net/subtitles/$($movieInfo.linkName)"
+
+    $body = @{
+        langs     = @("Arabic")
+        movieName = $movieInfo.linkName
+    };
+    if ($season -and $type -eq "S") {
+        $body["season"] = "season-$season";
+        $subtitlePageLink += "/season-$season"
+    }
+
+    Write-Host "Subtitle Page $subtitlePageLink" -ForegroundColor Green;
+
+    return Invoke-Request -path "getMovie" -Body $body -property "subs";
+}
+
 function DownloadSubtitle {
     param (
-        $sub,
-        $savePath,
-        $renameTo
+        $sub
     )
 
     Write-Host "Downloading Subtitle: $($sub.releaseName)" -ForegroundColor Yellow;
@@ -57,91 +126,40 @@ function DownloadSubtitle {
         -DestinationPath $extractLocation `
         -Force;
 
-    $files = @(Get-ChildItem -LiteralPath $extractLocation -Include *.ass, *.srt);
-    
-
-    $fileIndex = 0;
-    $files | ForEach-Object {
-        $file = $files[$fileIndex];
-        $finalName = $file.Name -replace $file.Extension, "";
-        if ($renameTo) {
-            $finalName = $renameTo;
-        }
-
-        if ($fileIndex -gt 0) {
-            $finalName += "($fileIndex)"
-        }
-
-        Copy-Item -LiteralPath $file.FullName `
-            -Destination "$savePath/$($finalName)$($file.Extension)";
-
-        $fileIndex++;
-    }
-
-    Remove-Item -LiteralPath $extractLocation -Recurse -Force;
     Remove-Item -LiteralPath $tempPath -Recurse -Force;
+    return $extractLocation;
 }
 
-$searchResult = Invoke-Request -path "searchMovie" -body @{
-    query = $name
-} -property "found";
 
-if ($searchResult.Length -eq 0) {
-    Start-Process "https://subsource.net/search/$name"
-    EXIT;
-}
-
-$movieInfo = $searchResult[0];
- 
-$body = @{
-    langs     = @("Arabic")
-    movieName = $movieInfo.linkName
-};
-
-if ($season) {
-    $body["season"] = "season-$season";
-}
-
-$subtitles = Invoke-Request -path "getMovie" -Body $body -property "subs";
+$subtitles = GetSubtitles;
 $arabicSubs = $subtitles | Where-Object {
     return $_.lang -eq "Arabic" 
 }
 
 if ($type -eq "M") {
-    $sub = $arabicSubs | Where-Object {
+    $matchedSubtitle = $arabicSubs | Where-Object {
         $_.releaseName -match $Quality
-    };
-    DownloadSubtitle -sub $sub[0] `
+    } | Select-Object -First 1;
+
+    if (!$matchedSubtitle) {
+        Write-Host "No Matching Subtitle For $name with Qualtiy $Quality, Picking First Available One" -ForegroundColor Red;
+        $matchedSubtitle = $arabicSubs[0];
+    }
+
+    $subtitlePath = DownloadSubtitle -sub $matchedSubtitle;
+    CopySubtitle -subtitlePath  $subtitlePath `
         -savePath $savePath `
-        -renameTO $renameTo;
+        -renameTO $renameTo `
+        -qualityRegex $Quality;
+
     Exit;
 }
-
-# $subs = $arabicSubs | Group-Object -Property subId | Foreach-Object {
-#     $subs = $_. Group;
-
-#     return @{
-#         SubId    = $_.Name
-#         LinkName = $subs[0].linkName
-#         Subs     = $subs
-#     }
-# } | ForEach-Object {
-#     $episodeRegex = "(S?0?$season)(E|X)0?$($_.Episode)";
-#     $sub = $_.Subs[0];
-#     $sub.releaseName -match $episodeRegex;
-#     return @{
-#         SubId    = $_.SubId
-#         LinkName = $_.LinkName
-#         Releases = $_.Releases
-#         Episode  = $_.Episode
-#     }
-# }
 
 $Episodes | ForEach-Object {
     $episode = $_;
     $episodeRegex = "(S?0?$season)(E|X)0?$($_.Episode)";
     $qualityRegex = "$($_.Quality)"
-    Write-Host "Episode $($_.Episode)" -ForegroundColor Red;
+    Write-Host "Episode $($_.Episode) => Quality $qualityRegex" -ForegroundColor Red;
     $sub = $null;
     foreach ($arabicSub in $arabicSubs) {
         if ($arabicSub.releaseName -match $episodeRegex) {
@@ -150,15 +168,19 @@ $Episodes | ForEach-Object {
             }
 
             if ($arabicSub.releaseName -match $qualityRegex) {
+                Write-Host "FOUND EXACT Quality => $($arabicSub.releaseName)" -ForegroundColor Cyan;
                 $sub = $arabicSub;
                 break;
             }
         }
     }
 
-    DownloadSubtitle -sub $sub `
+    $subtitlePath = DownloadSubtitle -sub $sub;
+    CopySubtitle -subtitlePath  $subtitlePath `
         -savePath $episode.SavePath `
-        -renameTO $episode.RenameTo;
+        -renameTO $episode.RenameTo `
+        -episodeRegex $episodeRegex `
+        -qualityRegex "$qualityRegex";
 }
 
 Write-Host "==============================" -ForegroundColor Red;

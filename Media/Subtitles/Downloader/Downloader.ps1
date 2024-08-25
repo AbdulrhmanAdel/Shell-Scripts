@@ -1,5 +1,6 @@
-$seriesRegex = "(?<Name>.*)(S|Season|S(?<SeasonNumber>\d+))(Episode|Ep|E|[-,|,_,*,#,\.]|\[| |\dx)(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+).*(?<Quality>(720|480|1080)P?)(?<Rest>.*)"; ;
-$moviesRegex = "(?<Name>.*)(?<Quality>(720|480|1080)P?)(?<Rest>.*)";
+$specialChars = "[-,|,_,*,#,\.]";
+$seriesRegex = "(?<Name>.*)(S|Season|S(?<SeasonNumber>\d+))(Episode|Ep|E|$specialChars|\[| |\dx)(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+)(?<ExtraInfo>.*)(?<Quality>(720|480|1080)P?)(?<Rest>.*)"; ;
+$moviesRegex = "(?<Name>.*)(?<Year>\d\d\d\d)(?<ExtraInfo>.*)(?<Quality>(720|480|1080)P?)(?<Rest>.*)";
 
 
 # https://en.wikipedia.org/wiki/Pirated_movie_release_types
@@ -11,7 +12,6 @@ $qualitiesRegex = @(
     "DVD(-| )Rip",
     "HDTV"
 );
-
 function GetQuailty {
     param (
         $name
@@ -31,7 +31,7 @@ function GetQuailty {
     return $rest.Trim() -replace " +", "(\.| |-)?"
 }
 
-function Parse {
+function GetSeriesOrMovieDetails {
     param (
         $name
     )
@@ -40,32 +40,51 @@ function Parse {
 
     if ($isSeries) {
         return @{
-            Type    = "S"
-            Name    = $Matches["Name"].Trim()
-            Season  = [Int32]::Parse( $Matches["SeasonNumber"].Trim())
-            Episode = [Int32]::Parse( $Matches["EpisodeNumber"].Trim())
-            Quality = GetQuailty -name $Matches["Rest"]
+            Type      = "S"
+            Name      = $Matches["Name"].Trim()
+            Season    = [Int32]::Parse( $Matches["SeasonNumber"].Trim())
+            Episode   = [Int32]::Parse( $Matches["EpisodeNumber"].Trim())
+            Quality   = GetQuailty -name $Matches["Rest"]
+            ExtraInfo = $Matches["ExtraInfo"].Trim()
         }
     }
 
     $isMovie = $name -match $moviesRegex;
     if ($isMovie) {
         return @{
-            Type    = "M"
-            Name    = $Matches["Name"].Trim()
-            Quality = GetQuailty -name $Matches["Rest"]
+            Type      = "M"
+            Name      = $Matches["Name"].Trim()
+            Quality   = GetQuailty -name $Matches["Rest"]
+            ExtraInfo = $Matches["ExtraInfo"].Trim()
         }
     }
 
     return $null;
 }
 
-$subs = $args | Where-Object {
-    $_ -match "\.(mkv|mp4)" -and (Test-Path -LiteralPath $_);
-} | ForEach-Object {
-    $info = Get-Item -LiteralPath $_;
+$files = @();
+$args | ForEach-Object {
+    $info = Get-Item -LiteralPath $_ -ErrorAction Ignore;
+    if (!$info) {
+        return;
+    }
+
+    if ($info -is [System.IO.FileInfo]) {
+        if ($info.Extension -in @(".mkv", ".mp4")) {
+            $files += $info;
+        }
+        return;
+    }
+
+
+    $childern = Get-ChildItem -LiteralPath $info.FullName -Recurse -Include *.mkv, *.mp4;
+    $files += $childern;
+}
+
+$subs = $files | ForEach-Object {
+    $info = $_;
     $name = $info.Name -replace $info.Extension, "";
-    $details = Parse -name $name;
+    $details = GetSeriesOrMovieDetails -name $name;
     if (!$details) { return $null; }
    
     return @{
@@ -86,7 +105,8 @@ $movies | Where-Object {
         -Name $details.Name `
         -Quality $details.Quality `
         -SavePath $info.Directory.FullName `
-        -RenameTo $_.Name;
+        -RenameTo $_.Name `
+        -ExtraInfo $details.ExtraInfo;
 }
 
 
@@ -103,10 +123,11 @@ function GroupSeries {
     )
     $details = $episode.Details;
     $episodeInfo = @{
-        Episode  = $details.Episode
-        Quality  = $details.Quality
-        SavePath = $episode.Info.Directory.FullName;
-        RenameTo = $episode.Name;
+        Episode   = $details.Episode
+        Quality   = $details.Quality
+        SavePath  = $episode.Info.Directory.FullName;
+        RenameTo  = $episode.Name;
+        ExtraInfo = $details.ExtraInfo;
     };
 
     $serie = $final[$details.Name];
