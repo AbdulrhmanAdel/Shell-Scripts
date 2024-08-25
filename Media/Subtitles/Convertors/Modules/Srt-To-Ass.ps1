@@ -1,5 +1,5 @@
 $files = $args[0] | Where-Object { $_ -match "\.srt" };
-
+$encoding = $args[1];
 #region functions 
 function ParseTimeSpan {
     param (
@@ -47,8 +47,9 @@ $header = @(
 
 $timeRegex = "(?<StartTime>\d+:\d+:\d+,\d+) --> (?<EndTime>\d+:\d+:\d+,\d+)"
 function Convert($path) {
+    $encoding = & Get-File-Encoding.ps1 $path;
     $dialogues = New-Object System.Collections.Generic.List[System.Object];
-    $content = (Get-Content -LiteralPath $file);
+    $content = (Get-Content -LiteralPath $file -Encoding $encoding);
     for ($i = 0; $i -lt $content.Count; $i++) {
         if ($content[$i] -eq "") {
             continue;
@@ -71,7 +72,7 @@ function Convert($path) {
 
     $finalContent = $header + $newContent;
     $fileName = $file -replace ".srt", ".ass";
-    $finalContent | Set-Content -LiteralPath $fileName
+    $finalContent | Set-Content -LiteralPath $fileName -Encoding $encoding
 }
 
 

@@ -10,7 +10,7 @@ $args | Group-Object {
     $extension = $_.Name;
     $module = $modules[$extension];
     if ($module) {
-        & $module $_.Group;
+        & $module $_.Group $encoding;
     }
     else {
         Write-Host "UnSupported Extension: $extension" -ForegroundColor Red;

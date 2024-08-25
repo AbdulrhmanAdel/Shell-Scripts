@@ -114,11 +114,7 @@ function DownloadSubtitle {
     $tempPath = "$downloadPath/$($downloadSubDetails.fileName)";
     Invoke-WebRequest -Uri $downloadLink -OutFile $tempPath;
     $extractLocation = "$downloadPath\$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss')"
-    Expand-Archive `
-        -Path $tempPath `
-        -DestinationPath $extractLocation `
-        -Force;
-
+    & 7z.exe  x $tempPath -aoa -bb0 -o"$extractLocation" | Out-Null;
     $downloadSubtitleCache[$sub.subId] = $extractLocation;
     Start-Sleep -Milliseconds 500;
     return $extractLocation;
@@ -137,7 +133,7 @@ function CopySubtitle {
     $files = @(Get-ChildItem -LiteralPath $subtitlePath -Include *.ass, *.srt);
     $fileIndex = 0;
 
-    if ($episodeRegex) {
+    if ($episodeRegex -and $files.Length -gt 1) {
         $files = @($files | Where-Object { $_.Name -match $episodeRegex })
     }
 
@@ -201,7 +197,7 @@ $Episodes | ForEach-Object {
     $episode = $_;
     $episodeNumber = $episode.Episode;
     $qualityRegex = "$($episode.Quality)"
-    $episodeRegex = "(S?0*$season)(E|X)0*$($episodeNumber)\D+";
+    $episodeRegex = "(S?0*$season)(E|X)0*$($episodeNumber)\D*$";
     $matchedSubtitle = $null;
     Write-Host "-----" -ForegroundColor Yellow;
     Write-Host "Episode $episodeNumber" -ForegroundColor Yellow;
@@ -232,10 +228,7 @@ $Episodes | ForEach-Object {
         }
         $matchedSubtitle = $matchedWholeSeasonSubtitles;
     }
-
-    
-
-    
+ 
     $subtitlePath = DownloadSubtitle -sub  $matchedSubtitle;
     CopySubtitle -subtitlePath  $subtitlePath `
         -savePath $episode.SavePath `

@@ -12,7 +12,8 @@ function ParseTimeSpan ($timeSpan) {
     return '{0:00}:{1:00}:{2:00},{3:000}' -f $timeSpan.Hours, $timeSpan.Minutes, $timeSpan.Seconds, $timeSpan.Milliseconds
 }
 function Convert($assFilePath) {
-    $content = Get-Content -LiteralPath $assFilePath | ForEach-Object {
+    $encoding = & Get-File-Encoding.ps1 $assFilePath;
+    $content = Get-Content -LiteralPath $assFilePath -Encoding $encoding | ForEach-Object {
         if ($_ -match "Dialogue: (?<Layer>\d+),(?<StartTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<EndTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<Style>[^,]*),(?<Name>[^,]*),(?<MarginL>\d+),(?<MarginR>\d+),(?<MarginV>\d+),(?<Effect>[^,]*),(?<Text>.+)") {
             return @{
                 Text      = $Matches["Text"] 
@@ -38,11 +39,12 @@ function Convert($assFilePath) {
     }
 
     $srtFileName = $file -replace ".ass", ".srt";
-    $newContent | Set-Content -LiteralPath $srtFileName
+    $newContent | Set-Content -LiteralPath $srtFileName -Encoding $encoding;
 }
 
 $removeSource = & Prompt.ps1 -title "Remove Source?" -message "Do You Want To Remove Source?" -defaultValue $false;
 foreach ($file in $files) {
+    
     Convert -assFilePath $file;
     if ($removeSource) {
         Remove-Item -LiteralPath $file -Force;

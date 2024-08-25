@@ -2,19 +2,6 @@ $files = $args | Where-Object {
     $_ -match "\.ass|\.srt"
 };
 
-$encoding = & Options-Selector.ps1 -options @(
-    "ascii",
-    "ansi",
-    "bigendianunicode",
-    "bigendianutf32",
-    "oem",
-    "unicode",
-    "utf7",
-    "utf8",
-    "utf8BOM",
-    "utf8NoBOM",
-    "utf32"
-) -defaultValue utf8;
 $assFiles = @($files | Where-Object { $_.EndsWith(".ass") });
 $srtFiles = @($files | Where-Object { $_.EndsWith(".srt") });
 

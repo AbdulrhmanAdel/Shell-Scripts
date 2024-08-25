@@ -101,7 +101,6 @@ function HandleSeries {
     
     $series = $subs | Where-Object { $_.Details.Type -eq "S" };
     if ($series.Length -eq 0) {
-        timeout.exe 15;
         return;
     }
 

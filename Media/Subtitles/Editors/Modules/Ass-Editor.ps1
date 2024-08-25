@@ -89,6 +89,7 @@ function Edit {
         [string]$path
     )
 
+    $encoding = & Get-File-Encoding.ps1 $path;
     Write-Host "Editing $($path)" -ForegroundColor Green;
     $content = Get-Content -LiteralPath $path -Encoding $encoding;
     $content = $content | ForEach-Object {
