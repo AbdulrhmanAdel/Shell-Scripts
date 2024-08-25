@@ -5,21 +5,36 @@ $moviesRegex = "(?<Name>.*)(?<Year>\d\d\d\d)(?<ExtraInfo>.*)(?<Quality>(720|480|
 
 # https://en.wikipedia.org/wiki/Pirated_movie_release_types
 $qualitiesRegex = @(
-    "WEB(-| )?DL",
+    "WEB(-| )?(DL|HD)",
     "WEB(-| )?RIP",
     "Blu(-| )?ray|BD|BR(-| )?Rip",
     "HD(-| )Rip",
     "DVD(-| )Rip",
-    "HDTV"
+    "HDTV",
+    @{
+        KEY   = "WEB"
+        Value = "WEB(-| )?(DL|RIP)"
+    },
+    @{
+        Key   = "HEVC"
+        Value = "WEB(-| )?(DL|RIP).*HEVC"
+    }
 );
+
 function GetQuailty {
     param (
         $name
     )
 
     foreach ($quality in $qualitiesRegex) {
-        if ($name -match $quality) {
-            return $quality;
+        $key = $quality;
+        $value = $quality;
+        if ($quality.Key) {
+            $key = $quality.Key;
+            $value = $quality.Value;
+        }
+        if ($name -match $key) {
+            return  $value;
         }
     }
 
