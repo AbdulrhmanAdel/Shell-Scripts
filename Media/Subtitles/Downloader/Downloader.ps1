@@ -156,4 +156,5 @@ $final.Keys | ForEach-Object {
     }
 }
 
-Write-Host " ";
+
+timeout.exe 30;
