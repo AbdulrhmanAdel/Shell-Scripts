@@ -48,6 +48,7 @@ $header = @(
 $timeRegex = "(?<StartTime>\d+:\d+:\d+,\d+) --> (?<EndTime>\d+:\d+:\d+,\d+)"
 function Convert($path) {
     $encoding = & Get-File-Encoding.ps1 $path;
+    Write-Host "USED ENCODING $encoding" -ForegroundColor Green;
     $dialogues = New-Object System.Collections.Generic.List[System.Object];
     $content = (Get-Content -LiteralPath $file -Encoding $encoding);
     for ($i = 0; $i -lt $content.Count; $i++) {

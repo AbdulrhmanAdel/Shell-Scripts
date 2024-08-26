@@ -13,6 +13,7 @@ function ParseTimeSpan ($timeSpan) {
 }
 function Convert($assFilePath) {
     $encoding = & Get-File-Encoding.ps1 $assFilePath;
+    Write-Host "USED ENCODING $encoding" -ForegroundColor Green;
     $content = Get-Content -LiteralPath $assFilePath -Encoding $encoding | ForEach-Object {
         if ($_ -match "Dialogue: (?<Layer>\d+),(?<StartTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<EndTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<Style>[^,]*),(?<Name>[^,]*),(?<MarginL>\d+),(?<MarginR>\d+),(?<MarginV>\d+),(?<Effect>[^,]*),(?<Text>.+)") {
             return @{
