@@ -130,7 +130,7 @@ function CopySubtitle {
         $qualityRegex
     )
 
-    $files = @(Get-ChildItem -LiteralPath $subtitlePath -Include *.ass, *.srt);
+    $files = @(Get-ChildItem -LiteralPath $subtitlePath -Include *.ass, *.srt, *.sub);
     $fileIndex = 0;
 
     if ($episodeRegex -and $files.Length -gt 1) {
@@ -165,7 +165,7 @@ function CopySubtitle {
 $subtitles = GetSubtitles;
 $arabicSubs = $subtitles | Where-Object {
     return $_.lang -eq "Arabic" 
-}
+};
 
 if ($type -eq "M") {
     $matchedSubtitle = $arabicSubs | Where-Object {
@@ -186,10 +186,12 @@ if ($type -eq "M") {
     Exit;
 }
 
-$wholeSeasonRegex = "(S0*$season)[^EX0-9]\D+"
+$wholeSeasonRegex = "(S0*$season)([^EX0-9]|$)|(S0*$season)(.\| )?(1080P|720P|480P)"
 $wholeSeasonSubtitles = @(
     $arabicSubs | Where-Object {
-        return $_.releaseName -match $wholeSeasonRegex
+        return $_.releaseName -replace "\.| ", "" -match $wholeSeasonRegex `
+            -or $_.commentary -contains "الموسم كامل" `
+            -or $_releaseName -match "Complete(\.| )?Season"
     }
 );
 
@@ -197,7 +199,7 @@ $Episodes | ForEach-Object {
     $episode = $_;
     $episodeNumber = $episode.Episode;
     $qualityRegex = "$($episode.Quality)"
-    $episodeRegex = "(S?0*$season)(E|X)0*$($episodeNumber)\D*$";
+    $episodeRegex = "(S?0*$season)(\.| )*(E|X)0*$episodeNumber(\D+|$)";
     $matchedSubtitle = $null;
     Write-Host "-----" -ForegroundColor Yellow;
     Write-Host "Episode $episodeNumber" -ForegroundColor Yellow;
@@ -209,7 +211,7 @@ $Episodes | ForEach-Object {
             }
 
             if ($arabicSub.releaseName -match $qualityRegex) {
-                Write-Host "FOUND EXACT Quality => $($arabicSub.releaseName)" -ForegroundColor Cyan;
+                Write-Host "FOUND EXACT Quality => $($arabicSub.originalReleaseName)" -ForegroundColor Cyan;
                 $matchedSubtitle = $arabicSub;
                 break;
             }
