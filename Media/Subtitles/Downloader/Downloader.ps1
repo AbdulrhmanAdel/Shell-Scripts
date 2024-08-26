@@ -6,9 +6,9 @@ $qualitiesRegex = @(
     "WEB(-| )?(DL|HD)",
     "WEB(-| )?RIP",
     "Blu(-| )?ray|BD|BR(-| )?Rip",
-    "HD(-| )Rip",
-    "DVD(-| )Rip",
-    "HDTV",
+    "HD(-| )?Rip",
+    "DVD(-| )?Rip",
+    "HD(-| )?TV",
     @{
         KEY   = "WEB"
         Value = "WEB(-| )?(DL|RIP)"
@@ -135,13 +135,13 @@ function HandleSeries {
         $serieName = $_;
         $serie = $final[$_];
         $serie.Keys | ForEach-Object {
-            $season = $serie[$_];
+            $seasonEpisodes = $serie[$_];
             & "$($PSScriptRoot)/Sites/Subsource.ps1" `
                 -DownloadPath $downloadPath `
                 -Type "S" `
                 -Name $serieName `
                 -Season $_ `
-                -Episodes $season; 
+                -Episodes $seasonEpisodes; 
         }
     }
 }

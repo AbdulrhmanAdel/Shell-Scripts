@@ -130,7 +130,7 @@ function CopySubtitle {
         $qualityRegex
     )
 
-    $files = @(Get-ChildItem -LiteralPath $subtitlePath -Include *.ass, *.srt, *.sub);
+    $files = @(Get-ChildItem -LiteralPath $subtitlePath -Force -Include *.ass, *.srt, *.sub);
     $fileIndex = 0;
 
     if ($episodeRegex -and $files.Length -gt 1) {
@@ -153,6 +153,10 @@ function CopySubtitle {
         if ($files.Length -gt 1) {
             $finalName += ".$fileIndex"
             $fileIndex++;
+        }
+        
+        if ($file.Attributes.HasFlag([System.IO.FileAttributes]::Hidden)) {
+            $file.Attributes -= "Hidden";
         }
 
         Copy-Item -LiteralPath $file.FullName `
@@ -186,7 +190,7 @@ if ($type -eq "M") {
     Exit;
 }
 
-$wholeSeasonRegex = "(S0*$season)([^EX0-9]|$)|(S0*$season)(.\| )?(1080P|720P|480P)"
+$wholeSeasonRegex = "(S0*$season)([^EX0-9]|$)|(S0*$season)(\.| \[)?(1080P|720P|480P)"
 $wholeSeasonSubtitles = @(
     $arabicSubs | Where-Object {
         return $_.releaseName -replace "\.| ", "" -match $wholeSeasonRegex `
@@ -219,14 +223,18 @@ $Episodes | ForEach-Object {
     }
 
     if (!$matchedSubtitle) {
+        if ($wholeSeasonSubtitles.Length -eq 0) {
+            Write-Host "CAN'T FIND Subtitle FOR $name => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
+            Write-Host "$global:subtitlePageLink" -ForegroundColor Blue;
+            return;
+        }
+
         $matchedWholeSeasonSubtitles = $wholeSeasonSubtitles | Where-Object {
             return $_.releaseName -match $qualityRegex;
         } | Select-Object -First 1;
     
         if (!$matchedWholeSeasonSubtitles) {
-            Write-Host "CAN'T FIND Subtitle FOR $name => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
-            Write-Host "$global:subtitlePageLink" -ForegroundColor Blue;
-            return;
+            $matchedWholeSeasonSubtitles = $wholeSeasonSubtitles[0];
         }
         $matchedSubtitle = $matchedWholeSeasonSubtitles;
     }
