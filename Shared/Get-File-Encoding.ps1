@@ -58,8 +58,7 @@ if ($encoding) {
 
 $encodings = @(
     "UTF8",    
-    "ansi",
-    "ascii"
+    "ansi"
 );
 
 foreach ($encoding in $encodings) {
@@ -67,7 +66,6 @@ foreach ($encoding in $encodings) {
         return $encoding;
     }
 }
-
 
 return "UTF8";
 
