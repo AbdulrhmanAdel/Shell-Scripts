@@ -38,7 +38,7 @@ function Invoke-Request {
             return;
         }
         $remainging = $null;
-        if (!$reponse.Headers.TryGetValues("RateLimit-Remaining", [ref] $remainging)) {
+        if (!$reponse.Headers.TryGetValues("RateLimit-Remaining", [ref]$remainging)) {
             return;
         }
         $remainging = [Int32]::Parse($remainging) * 2;
@@ -61,10 +61,13 @@ function GetSubtitles {
     }
     $subsourceType = $type -eq "S" ? "TVSeries": "Movie";
     $movieInfo = $searchResult | Where-Object {
-        $_.type -eq $subsourceType
+        $isTheSameType = $_.type -eq $subsourceType
+        return !!$Year `
+            ? $isTheSameType -and $_.releaseYear -eq $Year `
+            : $isTheSameType;
     } | Select-Object -First 1;
-    $movieInfo ??= $searchResult[0];
-    $global:subtitlePageLink = "$subsourceSiteDomain/subtitles/$($movieInfo.linkName)"
+    $movieInfo = $movieInfo ?? $searchResult[0];
+    $global:subtitlePageLink = "$subsourceSiteDomain/subtitles/$( $movieInfo.linkName )"
     $body = @{
         langs     = @("Arabic")
         movieName = $movieInfo.linkName
@@ -77,12 +80,12 @@ function GetSubtitles {
     return Invoke-Request -path "getMovie" -Body $body -property "subs";
 }
 
-$downloadSubtitleCache = @{};
+$downloadSubtitleCache = @{ };
 function DownloadSubtitle {
     param (
         $sub
     )
-    Write-Host "Downloading Subtitle From => $subsourceSiteDomain/$($sub.fullLink)" -ForegroundColor Blue;
+    Write-Host "Downloading Subtitle From => $subsourceSiteDomain/$( $sub.fullLink )" -ForegroundColor Blue;
     if ($downloadSubtitleCache[$sub.subId]) {
         return $downloadSubtitleCache[$sub.subId];
     }
@@ -93,9 +96,9 @@ function DownloadSubtitle {
     } -property "sub";
     $downloadToken = $downloadSubDetails.downloadToken;
     $downloadLink = "$baseUrl/downloadSub/$downloadToken";
-    $tempPath = "$downloadPath/$($downloadSubDetails.fileName)";
+    $tempPath = "$downloadPath/$( $downloadSubDetails.fileName )";
     Invoke-WebRequest -Uri $downloadLink -OutFile $tempPath;
-    $extractLocation = "$downloadPath\$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss')"
+    $extractLocation = "$downloadPath\$( Get-Date -Format 'yyyy-MM-dd-HH-mm-ss' )"
     & 7z.exe  x $tempPath -aoa -bb0 -o"$extractLocation" | Out-Null;
     $downloadSubtitleCache[$sub.subId] = $extractLocation;
     Start-Sleep -Milliseconds 500;
@@ -111,7 +114,7 @@ function CopySubtitle {
         $episodeRegex,
         $qualityRegex
     )
-
+    
     $files = @(Get-ChildItem -LiteralPath $subtitlePath -Force -Include *.ass, *.srt, *.sub);
     $fileIndex = 0;
 
@@ -136,13 +139,13 @@ function CopySubtitle {
             $finalName += ".$fileIndex"
             $fileIndex++;
         }
-        
-        if ($file.Attributes.HasFlag([System.IO.FileAttributes]::Hidden)) {
+
+        if ( $file.Attributes.HasFlag([System.IO.FileAttributes]::Hidden)) {
             $file.Attributes -= "Hidden";
         }
 
         Copy-Item -LiteralPath $file.FullName `
-            -Destination "$savePath/$($finalName)$($file.Extension)";
+            -Destination "$savePath/$( $finalName )$( $file.Extension )";
     }
 }
 
@@ -150,7 +153,7 @@ function CopySubtitle {
 
 $subtitles = GetSubtitles;
 $arabicSubs = $subtitles | Where-Object {
-    return $_.lang -eq "Arabic" 
+    return $_.lang -eq "Arabic"
 };
 
 if ($type -eq "M") {
@@ -186,7 +189,7 @@ $Episodes | ForEach-Object {
     $episode = $_;
     $episodeNumber = $episode.Episode;
     $episodeRegex = "(S?0*$season)(\.| )*(E|X)0*$episodeNumber(\D+|$)";
-    $qualityRegex = "$($episode.Quality)"
+    $qualityRegex = "$( $episode.Quality )"
     Write-Host "Episode $episodeNumber" -ForegroundColor Yellow;
     $firstMatchedSubtitle = $null;
     $qualityMatchedSubtitle = $null;
@@ -197,7 +200,7 @@ $Episodes | ForEach-Object {
             }
 
             if ($arabicSub.releaseName -match $qualityRegex) {
-                Write-Host "FOUND EXACT Quality => $($arabicSub.releaseName)" -ForegroundColor Cyan;
+                Write-Host "FOUND EXACT Quality => $( $arabicSub.releaseName )" -ForegroundColor Cyan;
                 $qualityMatchedSubtitle = $arabicSub;
                 break;
             }
@@ -217,7 +220,7 @@ $Episodes | ForEach-Object {
     if (!$qualityMatchedSubtitle) {
         $qualityMatchedSubtitle = $firstMatchedSubtitle;
     }
- 
+
     if (!$qualityMatchedSubtitle) {
         Write-Host "CAN'T FIND Subtitle FOR $name => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
         Write-Host "$global:subtitlePageLink" -ForegroundColor Blue;

@@ -16,7 +16,8 @@ $videos = @($inputFiles | Where-Object {
 # }
 
 $folderPath = (Get-Item -LiteralPath $videos[0]).DirectoryName;
-$episodeNumberRegex = "(Episode|Ep|E|[-,|,_,*,#,\.]|\[| |\dx)(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+)";
+$specialChars = "[-|_*#.\\[\] ]"
+$episodeNumberRegex = "(S|Season)(?<SeasonNumber>\d+)(Episode|Ep|E|\d+X|$specialChars)(?<EpisodeNumber>\d+)"; ;
 function Get-EpisodeNumber($fileName) {
     $episodeNumber = $null;
     $matched = $fileName -match $episodeNumberRegex;

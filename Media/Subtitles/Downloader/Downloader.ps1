@@ -1,6 +1,20 @@
-$specialChars = "[-,|,_,*,#,\.,\],\[]";
-$seriesRegex = "(?<Name>.*)(S|Season|S(?<SeasonNumber>\d+))(Episode|Ep|E|$specialChars|\[| |\dx)(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+)(?<ExtraInfo>.*)(?<Quality>(720|480|1080)P?)(?<Rest>.*)"; ;
-$moviesRegex = "(?<Name>.*)(?<Year>\d\d\d\d)(?<ExtraInfo>.*)(?<Quality>(720|480|1080)P?)(?<Rest>.*)";
+$specialChars = "[-|_*#.\\[\] ]"
+$seriesRegex = "(?<Name>.*)(S|Season)(?<SeasonNumber>\d+)(Episode|Ep|E|\d+X|$specialChars)(?<EpisodeNumber>\d+)(?<Rest>.*)"; ;
+$moviesRegex = "(?<Name>.*)(?<Rest>(720|480|1080)P?.*)";
+
+$regex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
+function GetYear {
+    param (
+        $name
+    )
+
+    $result = $regex.Match($name);
+
+    return $result.Success `
+        ? $result.ToString() `
+        : $null
+}
+
 # https://en.wikipedia.org/wiki/Pirated_movie_release_types
 $qualitiesRegex = @(
     "WEB(-| )?(DL|HD)",
@@ -19,6 +33,7 @@ $qualitiesRegex = @(
     }
 );
 
+$res
 function GetQuailty {
     param (
         $name
@@ -37,38 +52,39 @@ function GetQuailty {
     }
 
     $rest = $Matches["Rest"];
-    if ($Matches["Quality"]) {
-        $rest = "(720|480|1080)P $rest"
-    }
-
-    return $rest.Trim() -replace " +", "(\.| |-|)?"
+    $rest = $rest -replace "(720|480|1080)P?", " " -replace " +", "(\. | | - | )?";
+    return $rest.Trim();
 }
 
 function GetSeriesOrMovieDetails {
     param (
         $name
     )
-    $name = $name -replace "\.|-|_|\(|\)", " ";
+    $name = $name -replace "\.| - | _ | \( | \)", " ";
     $isSeries = $name -match $seriesRegex;
 
     if ($isSeries) {
+        $movieName = $Matches["Name"].Trim();
+        $year = GetYear -name $movieName;
         return @{
-            Type      = "S"
-            Name      = $Matches["Name"].Trim()
-            Season    = [Int32]::Parse( $Matches["SeasonNumber"].Trim())
-            Episode   = [Int32]::Parse( $Matches["EpisodeNumber"].Trim())
-            Quality   = GetQuailty -name $Matches["Rest"]
-            ExtraInfo = $Matches["ExtraInfo"].Trim()
+            Type    = "S"
+            Name    = $movieName
+            Year    = $year
+            Season  = [Int32]::Parse( $Matches["SeasonNumber"].Trim())
+            Episode = [Int32]::Parse( $Matches["EpisodeNumber"].Trim())
+            Quality = GetQuailty -name $Matches["Rest"]
         }
     }
 
     $isMovie = $name -match $moviesRegex;
     if ($isMovie) {
+        $movieName = $Matches["Name"].Trim();
+        $year = GetYear -name $movieName;
         return @{
-            Type      = "M"
-            Name      = $Matches["Name"].Trim()
-            Quality   = GetQuailty -name $Matches["Rest"]
-            ExtraInfo = $Matches["ExtraInfo"].Trim()
+            Type    = "M"
+            Name    = $movieName
+            Year    = $year
+            Quality = GetQuailty -name $Matches["Rest"]
         }
     }
 
@@ -89,7 +105,7 @@ function HandleMovies {
             -Quality $details.Quality `
             -SavePath $info.Directory.FullName `
             -RenameTo $_.Name `
-            -ExtraInfo $details.ExtraInfo;
+            -Year $details.Year;
     }
 }
 
@@ -97,13 +113,10 @@ function HandleSeries {
     param (
         $subs
     )
-
-    
     $series = $subs | Where-Object { $_.Details.Type -eq "S" };
     if ($series.Length -eq 0) {
         return;
     }
-
     $final = @{};
     function GroupSeries {
         param (
@@ -111,11 +124,11 @@ function HandleSeries {
         )
         $details = $episode.Details;
         $episodeInfo = @{
-            Episode   = $details.Episode
-            Quality   = $details.Quality
-            SavePath  = $episode.Info.Directory.FullName;
-            RenameTo  = $episode.Name;
-            ExtraInfo = $details.ExtraInfo;
+            Episode  = $details.Episode
+            Quality  = $details.Quality
+            SavePath = $episode.Info.Directory.FullName;
+            RenameTo = $episode.Name;
+            Year     = $details.Year
         };
 
         $serie = $final[$details.Name];
@@ -136,11 +149,13 @@ function HandleSeries {
         $serie = $final[$_];
         $serie.Keys | ForEach-Object {
             $seasonEpisodes = $serie[$_];
+            $episodeWithYear = $seasonEpisodes | Where-Object { !!$_.Year } | Select-Object -First  1;
             & "$($PSScriptRoot)/Sites/Subsource.ps1" `
                 -DownloadPath $downloadPath `
                 -Type "S" `
                 -Name $serieName `
                 -Season $_ `
+                -Year $episodeWithYear.Year `
                 -Episodes $seasonEpisodes; 
         }
     }

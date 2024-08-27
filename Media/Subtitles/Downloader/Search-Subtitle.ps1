@@ -7,6 +7,7 @@ function RemoveSigns {
     return ($text -replace $replaceRegex, " " -replace "  +", " ").Trim();
 }
 
+
 function IsSubtitleExists {
     param (
         $info

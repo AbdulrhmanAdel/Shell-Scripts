@@ -72,4 +72,4 @@ switch ($mode) {
 $files = $args | Where-Object { $_.EndsWith(".ass") -or $_.EndsWith(".srt") }
 HandleFiles -files $files;
 Write-Host "Subtitles adjusted."
-timeout.exe 15;
+timeout.exe  20 /nobreak;
