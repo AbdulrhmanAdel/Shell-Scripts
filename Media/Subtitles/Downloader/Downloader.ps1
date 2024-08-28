@@ -123,7 +123,7 @@ function HandleSeries {
             $episode
         )
         $details = $episode.Details;
-        $episodeInfo = @{
+        $episodeInfo = [PSCustomObject]@{
             Episode  = $details.Episode
             Quality  = $details.Quality
             SavePath = $episode.Info.Directory.FullName;
@@ -148,7 +148,7 @@ function HandleSeries {
         $serieName = $_;
         $serie = $final[$_];
         $serie.Keys | ForEach-Object {
-            $seasonEpisodes = $serie[$_];
+            $seasonEpisodes = $serie[$_] | Sort-Object -Property Episode;
             $episodeWithYear = $seasonEpisodes | Where-Object { !!$_.Year } | Select-Object -First  1;
             & "$($PSScriptRoot)/Sites/Subsource.ps1" `
                 -DownloadPath $downloadPath `

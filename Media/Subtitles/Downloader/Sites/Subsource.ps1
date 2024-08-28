@@ -175,7 +175,10 @@ if ($type -eq "M") {
     Exit;
 }
 
-$wholeSeasonRegex = "(S0*$season)([^EX0-9]|$)|(S0*$season)(\.| \[)?(1080P|720P|480P)"
+$wholeSeasonRegex = "(S0$season)([^EX0-9]|$)|" +
+"(S0$season)(\.| \[)?(1080P|720P|480P)|" +
+"(S0$season)E\d\d*(>|~)E\d\d*";
+
 $wholeSeasonSubtitles = @(
     $arabicSubs | Where-Object {
         return $_.releaseName -replace "\.| ", "" -match $wholeSeasonRegex `
