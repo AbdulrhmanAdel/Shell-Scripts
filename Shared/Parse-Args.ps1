@@ -8,7 +8,7 @@ function ParseValue {
     )
 
     if ($null -eq $value) { return $value; }
-    if ($value.GetType().Name -eq "Object[]") {
+    if ($value -isnot [System.String] -and !$value.GetType().IsValueType) {
         return $value;
     }
     

@@ -1,6 +1,6 @@
 $specialChars = "[-|_*#.\\[\] ]"
-$seriesRegex = "(?<Name>.*)(S|Season)(?<SeasonNumber>\d+)(Episode|Ep|E|\d+X|$specialChars)(?<EpisodeNumber>\d+)(?<Rest>.*)"; ;
-$moviesRegex = "(?<Name>.*)(?<Rest>(720|480|1080)P?.*)";
+$seriesRegex = "(^\[.*\] )?(?<Name>.*)(S|Season)$specialChars*(?<SeasonNumber>\d+)$specialChars*(Episode|Ep|E|\d+X|$specialChars)(?<EpisodeNumber>\d+)(?<Rest>.*)"; ;
+$moviesRegex = "(^\[.*\] )?(?<Name>.*)(?<Rest>(720|480|1080)P?.*)";
 
 $regex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
 function GetYear {
@@ -60,11 +60,9 @@ function GetSeriesOrMovieDetails {
     param (
         $name
     )
-    $name = $name -replace "\.| - | _ | \( | \)", " ";
     $isSeries = $name -match $seriesRegex;
-
     if ($isSeries) {
-        $movieName = $Matches["Name"].Trim();
+        $movieName = $Matches["Name"].Trim() -replace "\.| - | _ | \( | \)", " ";
         $year = GetYear -name $movieName;
         return @{
             Type    = "S"
@@ -78,7 +76,7 @@ function GetSeriesOrMovieDetails {
 
     $isMovie = $name -match $moviesRegex;
     if ($isMovie) {
-        $movieName = $Matches["Name"].Trim();
+        $movieName = $Matches["Name"].Trim() -replace "\.| - | _ | \( | \)", " "; ;
         $year = GetYear -name $movieName;
         return @{
             Type    = "M"
