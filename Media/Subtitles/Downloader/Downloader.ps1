@@ -62,11 +62,11 @@ function GetSeriesOrMovieDetails {
     )
     $isSeries = $name -match $seriesRegex;
     if ($isSeries) {
-        $movieName = $Matches["Name"].Trim() -replace "\.| - | _ | \( | \)", " ";
+        $movieName = $Matches["Name"] -replace "\.| - | _ | \( | \)", " ";
         $year = GetYear -name $movieName;
         return @{
             Type    = "S"
-            Name    = $movieName
+            Name    = $movieName.Trim()
             Year    = $year
             Season  = [Int32]::Parse( $Matches["SeasonNumber"].Trim())
             Episode = [Int32]::Parse( $Matches["EpisodeNumber"].Trim())
@@ -76,11 +76,11 @@ function GetSeriesOrMovieDetails {
 
     $isMovie = $name -match $moviesRegex;
     if ($isMovie) {
-        $movieName = $Matches["Name"].Trim() -replace "\.| - | _ | \( | \)", " "; ;
+        $movieName = $Matches["Name"] -replace "\.| - | _ | \( | \)", " "; ;
         $year = GetYear -name $movieName;
         return @{
             Type    = "M"
-            Name    = $movieName
+            Name    = $movieName.Trim()
             Year    = $year
             Quality = GetQuailty -name $Matches["Rest"]
         }

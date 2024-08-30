@@ -60,12 +60,31 @@ function GetSubtitles {
         EXIT;
     }
     $subsourceType = $type -eq "S" ? "TVSeries": "Movie";
-    $movieInfo = $searchResult | Where-Object {
-        $isTheSameType = $_.type -eq $subsourceType
-        return !!$Year `
-            ? $isTheSameType -and $_.releaseYear -eq $Year `
-            : $isTheSameType;
-    } | Select-Object -First 1;
+    $matchShows = @($searchResult | Where-Object {
+            $isTheSameType = $_.type -eq $subsourceType -and $_.title -eq $name; ;
+                
+            return !!$Year `
+                ? $isTheSameType -and $_.releaseYear -eq $Year `
+                : $isTheSameType;
+        })
+
+    $movieInfo = $null;
+    if ($matchShows.Length -gt 1 -and !$year) {
+        $matchShows | ForEach-Object {
+            Write-Host "$($_.title) -> $($_.releaseYear)"
+        }
+        $year = Read-Host "Multi matched Shows please enter correct Year";
+        $movieInfo = $matchShows | Where-Object {
+            return $_.releaseYear -eq $year
+        } | Select-Object -First 1
+    }
+    elseif ($matchShows.Length -eq 1) {
+        $movieInfo = $matchShows[0]
+    }
+    else {
+        $movieInfo = $searchResult[0]
+    }
+
     $movieInfo = $movieInfo ?? $searchResult[0];
     $global:subtitlePageLink = "$subsourceSiteDomain/subtitles/$( $movieInfo.linkName )"
     $body = @{
@@ -86,6 +105,7 @@ function DownloadSubtitle {
         $sub
     )
     Write-Host "Downloading Subtitle From => $subsourceSiteDomain/$( $sub.fullLink )" -ForegroundColor Blue;
+    Write-Host "Release Name $($sub.releaseName)" -ForegroundColor Blue;
     if ($downloadSubtitleCache[$sub.subId]) {
         return $downloadSubtitleCache[$sub.subId];
     }
@@ -191,7 +211,7 @@ $Episodes | ForEach-Object {
     Write-Host "-----" -ForegroundColor Yellow;
     $episode = $_;
     $episodeNumber = $episode.Episode;
-    $episodeRegex = "(S?0*$season)(\.| )*(E|X)0*$episodeNumber(\D+|$)";
+    $episodeRegex = "(S?0*$season)?(\.| )*(E|\d+X|Episode|EP)0*$episodeNumber(\D+|$)";
     $qualityRegex = "$( $episode.Quality )"
     Write-Host "Episode $episodeNumber" -ForegroundColor Yellow;
     $firstMatchedSubtitle = $null;
@@ -227,6 +247,8 @@ $Episodes | ForEach-Object {
     if (!$qualityMatchedSubtitle) {
         Write-Host "CAN'T FIND Subtitle FOR $name => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
         Write-Host "$global:subtitlePageLink" -ForegroundColor Blue;
+        
+        [Console]::Beep(1000, 500);
         return;
     }
 
