@@ -104,8 +104,10 @@ function DownloadSubtitle {
     param (
         $sub
     )
-    Write-Host "Downloading Subtitle From => $subsourceSiteDomain/$( $sub.fullLink )" -ForegroundColor Blue;
-    Write-Host "Release Name $($sub.releaseName)" -ForegroundColor Blue;
+    Write-Host "Downloading Subtitle From => "  -NoNewLine;
+    Write-Host "$subsourceSiteDomain/$( $sub.fullLink )" -ForegroundColor Blue;
+    Write-Host "Release Name " -NoNewLine;
+    Write-Host "$($sub.releaseName)" -ForegroundColor Blue;
     if ($downloadSubtitleCache[$sub.subId]) {
         return $downloadSubtitleCache[$sub.subId];
     }

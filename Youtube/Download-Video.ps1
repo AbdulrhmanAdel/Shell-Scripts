@@ -4,6 +4,7 @@ $defaultHandler = @( "-f", "ba" , "-x", "--audio-format", "m4a", "--audio-qualit
 $options = @{
     "mp3"    = @( "-f", "ba", "-x", "--audio-format", "mp3", "--audio-quality", "160K") 
     "m4a"    = @( "-f", "ba" , "-x", "--audio-format", "m4a", "--audio-quality", "160K") 
+    "opus"   = @( "-f", "ba" , "-x", "--audio-format", "opus", "--audio-quality", "56K") 
     "480p"   = @( "-f", "bestvideo[height<=480]+bestaudio[ext=m4a]")
     "720p"   = @( "-f", "bestvideo[height<=720]+bestaudio[ext=m4a]")
     "Cancel" = { EXIT }
@@ -16,6 +17,7 @@ if (!$destinitionPath) {
 $format = & Options-Selector.ps1 -options @(
     "mp3",
     "m4a",
+    "opus",
     "480p",
     "720p",
     "Cancel"

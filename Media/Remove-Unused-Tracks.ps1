@@ -152,8 +152,8 @@ function GetFileFromDirectory {
 
     $script:filter = ""; # Read-Host "Start with?";
     if (!$script:filter) { $script:filter = ""; }
-    $files = Get-ChildItem -Path $directoryPath -Filter "$script:filter*.mkv";
-    $directories = Get-ChildItem -Path $directoryPath -Directory;
+    $files = Get-ChildItem -LiteralPath $directoryPath -Filter "$script:filter*.mkv";
+    $directories = Get-ChildItem -LiteralPath $directoryPath -Directory;
     return $files + $directories;
 }
 
@@ -185,7 +185,6 @@ function HandleFile {
         return;
     }
 
-    $directories.Add($pathAsAfile.DirectoryName);
     $inputPath = $pathAsAfile.FullName;
     $filePath = $inputPath;
     $newName = $pathAsAfile.Name.Replace($removeSent, "");
@@ -196,7 +195,6 @@ function HandleFile {
 #endregion
 
 $temp = $env:TEMP;
-$directories = [System.Collections.Generic.HashSet[string]]::new();
 $archiveExtensions = @('.rar', '.zip', '.7z');
 $args | Where-Object { 
     return Test-Path -LiteralPath $_
@@ -233,24 +231,4 @@ $args | Where-Object {
         }
     }
 }
-
-# $ignoredFiles = @("PSArips.com.txt");
-# $directories | ForEach-Object {
-#     $measures = Get-ChildItem -LiteralPath $_ -Force | ForEach-Object {
-#         if ($_.Name -notin $ignoredFiles) {
-#             return $_;
-#         }
-#     } | Measure-Object;
-
-#     if ($measures.Count -ne 0) {
-#         return;
-#     }
-
-#     $removeDirectory = & Prompt.ps1 -title  "Remove Directory" -message $_;
-#     if ($removeDirectory) {
-
-#         & Remove-To-Rycle-Bin.ps1 $_
-#     }
-# }
-
 timeout.exe 5;
