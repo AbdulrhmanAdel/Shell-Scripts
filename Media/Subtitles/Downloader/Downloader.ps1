@@ -1,18 +1,29 @@
-$specialChars = "[-|_*#.\\[\] ]"
-$seriesRegex = "(^\[.*\] )?(?<Name>.*)(S|Season)$specialChars*(?<SeasonNumber>\d+)$specialChars*(Episode|Ep|E|\d+X|$specialChars)(?<EpisodeNumber>\d+)(?<Rest>.*)"; ;
-$moviesRegex = "(^\[.*\] )?(?<Name>.*)(?<Rest>(720|480|1080)P?.*)";
-
-$regex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
+$seriesRegex = "(?<Name>.*) *(S|Season) *(?<SeasonNumber>\d{1,2}) *(Episode|Ep|E|\d+X)(?<EpisodeNumber>\d+) *(?<Rest>.*)"; ;
+$moviesRegex = "(?<Name>.*)(?<Rest>(720|480|1080)P?.*)";
+$yearRegex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
 function GetYear {
     param (
         $name
     )
 
-    $result = $regex.Match($name);
+    $result = $yearRegex.Match($name);
 
     return $result.Success `
         ? $result.ToString() `
         : $null
+}
+
+# Allowed special characters in NTFS filenames
+$pattern = '!|#|\$|%|&|''|\(|\)|-|@|\^|_|`|{|}|~|\+|=|,|;|\.|\[|\]'
+function NormalizeName() {
+    param (
+        [string]$Name
+    )
+    
+    $normalizedName = $Name -replace "^\[.*?\]", "" `
+        -replace $pattern, " " `
+        -replace " +", " ";
+    return $normalizedName.Trim();
 }
 
 # https://en.wikipedia.org/wiki/Pirated_movie_release_types
@@ -32,8 +43,6 @@ $qualitiesRegex = @(
         Value = "WEB(-| )?(DL|RIP).*HEVC"
     }
 );
-
-$res
 function GetQuailty {
     param (
         $name
@@ -56,39 +65,45 @@ function GetQuailty {
     return $rest.Trim();
 }
 
+
+$versions = @("Repack", "Internal");
 function GetSeriesOrMovieDetails {
     param (
         $name
     )
+    $name = NormalizeName -name $name;
+
+    $ignoredVersions = @($versions | Where-Object { $name -notcontains $_ })
     $isSeries = $name -match $seriesRegex;
     if ($isSeries) {
-        $movieName = $Matches["Name"] -replace "\.| - | _ | \( | \)", " ";
+        $movieName = $Matches["Name"].Trim();
         $year = GetYear -name $movieName;
         return @{
-            Type    = "S"
-            Name    = $movieName.Trim()
-            Year    = $year
-            Season  = [Int32]::Parse( $Matches["SeasonNumber"].Trim())
-            Episode = [Int32]::Parse( $Matches["EpisodeNumber"].Trim())
-            Quality = GetQuailty -name $Matches["Rest"]
+            Type            = "S"
+            Name            = $movieName.Trim()
+            Year            = $year
+            Season          = [Int32]::Parse( $Matches["SeasonNumber"])
+            Episode         = [Int32]::Parse( $Matches["EpisodeNumber"])
+            Quality         = GetQuailty -name $Matches["Rest"]
+            IgnoredVersions = $ignoredVersions
         }
     }
 
     $isMovie = $name -match $moviesRegex;
     if ($isMovie) {
-        $movieName = $Matches["Name"] -replace "\.| - | _ | \( | \)", " "; ;
+        $movieName = NormalizeName -name $Matches["Name"];
         $year = GetYear -name $movieName;
         return @{
-            Type    = "M"
-            Name    = $movieName.Trim()
-            Year    = $year
-            Quality = GetQuailty -name $Matches["Rest"]
+            Type            = "M"
+            Name            = $movieName.Trim()
+            Year            = $year
+            Quality         = GetQuailty -name $Matches["Rest"]
+            IgnoredVersions = $ignoredVersions
         }
     }
 
     return $null;
 }
-
 
 function HandleMovies {
     param($subs)
@@ -103,7 +118,8 @@ function HandleMovies {
             -Quality $details.Quality `
             -SavePath $info.Directory.FullName `
             -RenameTo $_.Name `
-            -Year $details.Year;
+            -Year $details.Year `
+            -IgnoredVersions $details.IgnoredVersions;
     }
 }
 
@@ -122,11 +138,12 @@ function HandleSeries {
         )
         $details = $episode.Details;
         $episodeInfo = [PSCustomObject]@{
-            Episode  = $details.Episode
-            Quality  = $details.Quality
-            SavePath = $episode.Info.Directory.FullName;
-            RenameTo = $episode.Name;
-            Year     = $details.Year
+            Episode         = $details.Episode
+            Quality         = $details.Quality
+            SavePath        = $episode.Info.Directory.FullName;
+            RenameTo        = $episode.Name;
+            Year            = $details.Year
+            IgnoredVersions = $details.IgnoredVersions
         };
 
         $serie = $final[$details.Name];

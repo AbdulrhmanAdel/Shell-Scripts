@@ -127,6 +127,22 @@ function DownloadSubtitle {
     return $extractLocation;
 }
 
+function MatchRelease {
+    param (
+        [string]$releaseName,
+        [string]$qualityRegex,
+        [string[]]$ignoredVersions
+    )
+
+    $isQualityMatched = $releaseName -match $qualityRegex;
+    if (!$ignoredVersions -and $ignoredVersions.Length) {
+        return $isQualityMatched
+    }
+
+    $isIgnoredVersion = @($ignoredVersions | Where-Object { $releaseName -match $_ }).Length -gt 0;
+
+    return !$isIgnoredVersion -and $isQualityMatched;
+}
 function CopySubtitle {
     param (
         $subtitlePath,
@@ -180,7 +196,9 @@ $arabicSubs = $subtitles | Where-Object {
 
 if ($type -eq "M") {
     $matchedSubtitle = $arabicSubs | Where-Object {
-        $_.releaseName -match $Quality
+        return MatchRelease -releaseName $_.releaseName `
+            -qualityRegex $Quality `
+            -ignoredVersions $ignoredVersions;
     } | Select-Object -First 1;
 
     if (!$matchedSubtitle) {
@@ -214,7 +232,7 @@ $Episodes | ForEach-Object {
     $episode = $_;
     $episodeNumber = $episode.Episode;
     $episodeRegex = "(S?0*$season)?(\.| )*(E|\d+X|Episode|EP)0*$episodeNumber(\D+|$)";
-    $qualityRegex = "$( $episode.Quality )"
+    $qualityRegex = $episode.Quality
     Write-Host "Episode $episodeNumber" -ForegroundColor Yellow;
     $firstMatchedSubtitle = $null;
     $qualityMatchedSubtitle = $null;
@@ -224,7 +242,10 @@ $Episodes | ForEach-Object {
                 $firstMatchedSubtitle = $arabicSub;
             }
 
-            if ($arabicSub.releaseName -match $qualityRegex) {
+            $isMatchedRelease = MatchRelease -releaseName $arabicSub.releaseName`
+                -qualityRegex $qualityRegex `
+                -ignoredVersions $episode.IgnoredVersions;
+            if ($isMatchedRelease) {
                 Write-Host "FOUND EXACT Quality => $( $arabicSub.releaseName )" -ForegroundColor Cyan;
                 $qualityMatchedSubtitle = $arabicSub;
                 break;
