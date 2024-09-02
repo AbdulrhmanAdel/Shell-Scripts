@@ -65,15 +65,14 @@ function GetQuailty {
     return $rest.Trim();
 }
 
-
-$versions = @("Repack", "Internal");
+$keywords = @("Repack", "Internal", "DIRECTOR'?S?(\.| )?CUT");
 function GetSeriesOrMovieDetails {
     param (
         $name
     )
     $name = NormalizeName -name $name;
-
-    $ignoredVersions = @($versions | Where-Object { $name -notcontains $_ })
+    $matchedKeywords = @($keywords | Where-Object { $name -match $_ });
+    $ignoredVersions = @($keywords | Where-Object { $_ -notin $matchedKeywords });
     $isSeries = $name -match $seriesRegex;
     if ($isSeries) {
         $movieName = $Matches["Name"].Trim();
@@ -86,6 +85,7 @@ function GetSeriesOrMovieDetails {
             Episode         = [Int32]::Parse( $Matches["EpisodeNumber"])
             Quality         = GetQuailty -name $Matches["Rest"]
             IgnoredVersions = $ignoredVersions
+            Keywords        = $matchedKeywords
         }
     }
 
@@ -99,6 +99,7 @@ function GetSeriesOrMovieDetails {
             Year            = $year
             Quality         = GetQuailty -name $Matches["Rest"]
             IgnoredVersions = $ignoredVersions
+            Keywords        = $matchedKeywords
         }
     }
 
@@ -119,7 +120,8 @@ function HandleMovies {
             -SavePath $info.Directory.FullName `
             -RenameTo $_.Name `
             -Year $details.Year `
-            -IgnoredVersions $details.IgnoredVersions;
+            -IgnoredVersions $details.IgnoredVersions `
+            -Keywords $details.IgnoredVersions;
     }
 }
 
@@ -144,6 +146,7 @@ function HandleSeries {
             RenameTo        = $episode.Name;
             Year            = $details.Year
             IgnoredVersions = $details.IgnoredVersions
+            Keywords        = $details.Keywords
         };
 
         $serie = $final[$details.Name];
