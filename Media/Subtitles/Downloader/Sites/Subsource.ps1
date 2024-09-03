@@ -136,7 +136,6 @@ function MatchRelease {
     )
 
     $isQualityMatched = $releaseName -match $qualityRegex;
-
     if (!$isQualityMatched) { return $false }
     $keywordMatched = $keywords.Length -gt 0 -and @($keywords | Where-Object { $releaseName -match $_ }).Length -gt 0;
     if ($keywordMatched) { return $true }
@@ -194,36 +193,29 @@ $arabicSubs = $subtitles | Where-Object {
     return $_.lang -eq "Arabic"
 };
 
-
-function HandleMovie {
-    # $sameQualitySubtitle = $arabicSubs | Where-Object { $_.releaseName -match $Quality };
+if ($type -eq "M") {
+    $sameQualitySubtitles = @($arabicSubs | Where-Object { $_.releaseName -match $Quality });
     # $sameKeywords = $sameQualitySubtitle | Where-Object { $_.releaseName -match $Quality };
     $matchedSubtitle = (
-        $arabicSubs | Where-Object {
+        $sameQualitySubtitle | Where-Object {
             $_.releaseName -match $Quality
             return MatchRelease -releaseName $_.releaseName `
                 -qualityRegex $Quality `
                 -ignoredVersions $ignoredVersions `
                 -keywords $keywords;
         } | Select-Object -First 1
-    ) ?? $arabicSubs[0];
+    ) ?? $sameQualitySubtitles[0];
     $subtitlePath = DownloadSubtitle -sub $matchedSubtitle;
     CopySubtitle -subtitlePath  $subtitlePath `
         -savePath $savePath `
         -renameTO $renameTo `
         -qualityRegex $Quality;
-}
-
-
-if ($type -eq "M") {
-    HandleMovie;
     Exit;
 }
 
 $wholeSeasonRegex = "(S0$season)([^EX0-9]|$)|" + `
     "(S0$season)(\.| \[)?(1080P|720P|480P)|" + `
     "(S0$season)E\d\d*(>|~)E\d\d*";
-
 $wholeSeasonSubtitles = @(
     $arabicSubs | Where-Object {
         return $_.releaseName -replace "\.| ", "" -match $wholeSeasonRegex `
@@ -231,49 +223,35 @@ $wholeSeasonSubtitles = @(
             -or $_releaseName -match "Complete(\.| )?Season"
     }
 );
-
+$arabicSubs = $arabicSubs | Where-Object { $_ -notin $wholeSeasonSubtitles };
 $Episodes | ForEach-Object {
     Write-Host "-----" -ForegroundColor Yellow;
+    Write-Host "Episode $($episode.Episode)" -ForegroundColor Yellow;
     $episode = $_;
     $episodeNumber = $episode.Episode;
     $episodeRegex = "(S?0*$season)?(\.| )*(E|\d+X|Episode|EP)0*$episodeNumber(\D+|$)";
     $qualityRegex = $episode.Quality
-    Write-Host "Episode $episodeNumber" -ForegroundColor Yellow;
-    $firstMatchedSubtitle = $null;
-    $qualityMatchedSubtitle = $null;
-    foreach ($arabicSub in $arabicSubs) {
-        if ($arabicSub.releaseName -match $episodeRegex) {
-            if (!$firstMatchedSubtitle) {
-                $firstMatchedSubtitle = $arabicSub;
-            }
+    $episodeSubtitles = @($arabicSubs | Where-Object { $_.releaseName -match $episodeRegex });
+    $qualitySubtitles = @($arabicSubs | Where-Object { $_.releaseName -match $qualityRegex });
+    $matchedSubtitle = $qualitySubtitles | Where-Object { 
+        MatchRelease -releaseName $arabicSub.releaseName`
+            -qualityRegex $qualityRegex `
+            -ignoredVersions $episode.IgnoredVersions `
+            -keywords $episode.Keywords; } | Select-Object -First 1;
 
-            $isMatchedRelease = MatchRelease -releaseName $arabicSub.releaseName`
+    if (!$matchedSubtitle) {
+        $matchedSubtitle = $wholeSeasonSubtitles | Where-Object { 
+            MatchRelease -releaseName $arabicSub.releaseName`
                 -qualityRegex $qualityRegex `
                 -ignoredVersions $episode.IgnoredVersions `
-                -keywords $episode.Keywords;
-            if ($isMatchedRelease) {
-                Write-Host "FOUND EXACT Quality => $( $arabicSub.releaseName )" -ForegroundColor Cyan;
-                $qualityMatchedSubtitle = $arabicSub;
-                break;
-            }
-        }
+                -keywords $episode.Keywords; } | Select-Object -First 1;
     }
 
-    if (!$qualityMatchedSubtitle -and $wholeSeasonSubtitles.Length -gt 0) {
-        $qualityMatchedSubtitle = $wholeSeasonSubtitles | Where-Object {
-            return $_.releaseName -match $qualityRegex;
-        } | Select-Object -First 1;
-
-        if (!$qualityMatchedSubtitle -and !$firstMatchedSubtitle) {
-            $qualityMatchedSubtitle = $wholeSeasonSubtitles[0];
-        }
+    if (!$matchedSubtitle) {
+        $matchedSubtitle = $
     }
 
-    if (!$qualityMatchedSubtitle) {
-        $qualityMatchedSubtitle = $firstMatchedSubtitle;
-    }
-
-    if (!$qualityMatchedSubtitle) {
+    if (!$matchedSubtitle) {
         Write-Host "CAN'T FIND Subtitle FOR $name => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
         Write-Host "$global:subtitlePageLink" -ForegroundColor Blue;
         
@@ -287,6 +265,8 @@ $Episodes | ForEach-Object {
         -renameTO $episode.RenameTo `
         -episodeRegex $episodeRegex `
         -qualityRegex "$qualityRegex";
+
+    $arabicSubs = $arabicSubs | Where-Object { $_ -notin $episodeSubtitles };
 }
 
 Write-Host "==============================" -ForegroundColor Red;

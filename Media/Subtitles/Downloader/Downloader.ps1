@@ -103,7 +103,11 @@ function GetSeriesOrMovieDetails {
         }
     }
 
-    return $null;
+
+    return @{
+        Type = "M"
+        Name = $name.Trim()
+    };
 }
 
 function HandleMovies {
