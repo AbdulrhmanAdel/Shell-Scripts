@@ -1,5 +1,5 @@
-$seriesRegex = "(?<Name>.*) *(S|Season) *(?<SeasonNumber>\d{1,2}) *(Episode|Ep|E|\d+X)(?<EpisodeNumber>\d+) *(?<Rest>.*)"; ;
-$moviesRegex = "(?<Name>.*)(?<Rest>(720|480|1080)P?.*)";
+$seriesRegex = "(?<Title>.*) *(S|Season) *(?<SeasonNumber>\d{1,2}) *(Episode|Ep|E|\d+X)(?<EpisodeNumber>\d+) *(?<Rest>.*)"; ;
+$moviesRegex = "(?<Title>.*)(?<Rest>(720|480|1080)P?.*)";
 $yearRegex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
 function GetYear {
     param (
@@ -60,9 +60,7 @@ function GetQuailty {
         }
     }
 
-    $rest = $Matches["Rest"];
-    $rest = $rest -replace "(720|480|1080)P?", " " -replace " +", "(\. | | - | )?";
-    return $rest.Trim();
+    return $null;
 }
 
 $keywords = @("Repack", "Internal", "DIRECTOR'?S?(\.| )?CUT");
@@ -71,42 +69,50 @@ function GetSeriesOrMovieDetails {
         $name
     )
     $name = NormalizeName -name $name;
-    $matchedKeywords = @($keywords | Where-Object { $name -match $_ });
+    $quality = GetQuailty -name $name;
+    $matchedKeywords = @($keywords | Where-Object { $name -match $_ }) ?? @();
     $ignoredVersions = @($keywords | Where-Object { $_ -notin $matchedKeywords });
-    $isSeries = $name -match $seriesRegex;
-    if ($isSeries) {
-        $movieName = $Matches["Name"].Trim();
+    $details = @{
+        Quality         = $quality
+        IgnoredVersions = $ignoredVersions
+        Keywords        = $matchedKeywords
+    };
+    
+    if ($name -match $seriesRegex) {
+        $movieName = $Matches["Title"].Trim();
         $year = GetYear -name $movieName;
         return @{
             Type            = "S"
-            Name            = $movieName.Trim()
+            Title           = $movieName.Trim()
             Year            = $year
             Season          = [Int32]::Parse( $Matches["SeasonNumber"])
             Episode         = [Int32]::Parse( $Matches["EpisodeNumber"])
-            Quality         = GetQuailty -name $Matches["Rest"]
+            Quality         = $quality
             IgnoredVersions = $ignoredVersions
             Keywords        = $matchedKeywords
         }
-    }
 
-    $isMovie = $name -match $moviesRegex;
-    if ($isMovie) {
-        $movieName = NormalizeName -name $Matches["Name"];
+        return $details;
+    }
+    elseif ($name -match $moviesRegex) {
+        $movieName = $Matches["Title"].Trim();
         $year = GetYear -name $movieName;
         return @{
             Type            = "M"
-            Name            = $movieName.Trim()
+            Title           = $movieName
             Year            = $year
-            Quality         = GetQuailty -name $Matches["Rest"]
+            Quality         = $quality
             IgnoredVersions = $ignoredVersions
             Keywords        = $matchedKeywords
         }
     }
 
-
     return @{
-        Type = "M"
-        Name = $name.Trim()
+        Type            = "M"
+        Title           = $name
+        Quality         = $quality
+        IgnoredVersions = $ignoredVersions
+        Keywords        = $matchedKeywords
     };
 }
 
@@ -119,7 +125,7 @@ function HandleMovies {
         & "$($PSScriptRoot)/Sites/Subsource.ps1" `
             -DownloadPath $downloadPath `
             -Type $details.Type `
-            -Name $details.Name `
+            -Title $details.Title `
             -Quality $details.Quality `
             -SavePath $info.Directory.FullName `
             -RenameTo $_.Name `
@@ -153,14 +159,14 @@ function HandleSeries {
             Keywords        = $details.Keywords
         };
 
-        $serie = $final[$details.Name];
+        $serie = $final[$details.Title];
         if ($serie) {
             $season = $serie[$details.Season] ?? @();
             $serie[$details.Season] = $season + $episodeInfo ;
             return;
         }
 
-        $final[$details.Name] = @{
+        $final[$details.Title] = @{
             $details.Season = @($episodeInfo)
         }
     }

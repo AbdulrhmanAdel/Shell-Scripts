@@ -5,7 +5,7 @@ $global:subtitlePageLink = "";
 Write-Host "Using Subsource API" -ForegroundColor Magenta;
 Write-Host "==============================" -ForegroundColor Red;
 Write-Host "Handling: " -ForegroundColor Green -NoNewline;
-Write-Host "$name " -ForegroundColor DarkBlue -NoNewline;
+Write-Host "$title " -ForegroundColor DarkBlue -NoNewline;
 Write-Host "Type: $type " -ForegroundColor Green -NoNewline;
 if ($type -eq "S") {
     Write-Host "Season: $season; " -ForegroundColor Green -NoNewline;
@@ -52,40 +52,41 @@ function Invoke-Request {
 }
 
 function GetSubtitles {
-    $searchResult = Invoke-Request -path "searchMovie" -body @{
-        query = $name
-    } -property "found";
+    $queryBody = @{
+        query = $title
+    } ;
+    $searchResult = Invoke-Request -path "searchMovie" -body $queryBody -property "found";
     if ($searchResult.Length -eq 0) {
-        Start-Process "$subsourceSiteDomain/search/$name"
+        Start-Process "$subsourceSiteDomain/search/$title"
         EXIT;
     }
     $subsourceType = $type -eq "S" ? "TVSeries": "Movie";
-    $matchShows = @($searchResult | Where-Object {
-            $isTheSameType = $_.type -eq $subsourceType -and $_.title -eq $name; ;
-                
-            return !!$Year `
-                ? $isTheSameType -and $_.releaseYear -eq $Year `
-                : $isTheSameType;
-        })
-
     $movieInfo = $null;
-    if ($matchShows.Length -gt 1 -and !$year) {
-        $matchShows | ForEach-Object {
-            Write-Host "$($_.title) -> $($_.releaseYear)"
+    $sameTypeShows = @($searchResult | Where-Object { $_.type -eq $subsourceType });
+    if ($sameTypeShows.Length -gt 1) {
+        $year ??= Read-Host "Multi matched Shows please enter correct Year";
+        $sameYearsShows = @($sameTypeShows | Where-Object {
+                $_.releaseYear -eq $Year
+            });
+
+        if ($sameTypeShows.Length -gt 1) {
+            Write-Host "There is multi shows with the same year and name"
+            $script:index = 0;
+            $sameTypeShows | ForEach-Object {
+                Write-Host "$($script:index + 1) " -ForegroundColor Green -NoNewline;
+                Write-Host "$($_.title)" -ForegroundColor Green;
+                $script:index++;
+            }
+
+            $chosedIndex = (Read-Host "Please Pick one with the number") - 1;
+            $movieInfo = $sameYearsShows[$chosedIndex];
         }
-        $year = Read-Host "Multi matched Shows please enter correct Year";
-        $movieInfo = $matchShows | Where-Object {
-            return $_.releaseYear -eq $year
-        } | Select-Object -First 1
-    }
-    elseif ($matchShows.Length -eq 1) {
-        $movieInfo = $matchShows[0]
-    }
-    else {
-        $movieInfo = $searchResult[0]
+        else {
+            $movieInfo = $sameYearsShows[0];
+        }
     }
 
-    $movieInfo = $movieInfo ?? $searchResult[0];
+    $movieInfo = $movieInfo ?? $sameTypeShows[0];
     $global:subtitlePageLink = "$subsourceSiteDomain/subtitles/$( $movieInfo.linkName )"
     $body = @{
         langs     = @("Arabic")
@@ -204,7 +205,7 @@ if ($type -eq "M") {
                 -ignoredVersions $ignoredVersions `
                 -keywords $keywords;
         } | Select-Object -First 1
-    ) ?? $sameQualitySubtitles[0];
+    ) ?? $sameQualitySubtitles[0] ?? $arabicSubs[0];
     $subtitlePath = DownloadSubtitle -sub $matchedSubtitle;
     CopySubtitle -subtitlePath  $subtitlePath `
         -savePath $savePath `
@@ -252,7 +253,7 @@ $Episodes | ForEach-Object {
     }
 
     if (!$matchedSubtitle) {
-        Write-Host "CAN'T FIND Subtitle FOR $name => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
+        Write-Host "CAN'T FIND Subtitle FOR $title => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
         Write-Host "$global:subtitlePageLink" -ForegroundColor Blue;
         
         [Console]::Beep(1000, 500);
