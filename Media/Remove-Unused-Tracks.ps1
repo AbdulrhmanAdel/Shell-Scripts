@@ -123,9 +123,11 @@ function RemoveUnusedTracks(
         $arguments += @("--forced-display-flag", "$($engSubTrackId):0");
     }
 
-    $arguments += "--subtitle-tracks"; 
-    $arguments += $subTracks -join ",";
-       
+    if ($subTracks.Length -gt 0) {
+        $arguments += "--subtitle-tracks"; 
+        $arguments += $subTracks -join ",";
+    }
+
     #endregion
     $arguments += """$inputPath""";
     $arguments += "--track-order"
