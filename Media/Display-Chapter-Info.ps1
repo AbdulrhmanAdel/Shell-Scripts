@@ -44,9 +44,4 @@
     Write-Host "==========" -ForegroundColor Green;
 }
 
-function ForceExit {
-    Read-Host "Force Close The Window";
-    ForceExit;
-}
-
-ForceExit
+& Force-Manually-Exit.ps1;
