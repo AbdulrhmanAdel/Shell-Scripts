@@ -1,16 +1,114 @@
-$outputPath = & Folder-Picker.ps1 -intialDirectory "D:\Watch";
-if (!$outputPath) {
-    return;
-}
+$outputPath = & Folder-Picker.ps1 -intialDirectory "D:\Watch" --ExitIfNotSelected;
 
 #region Functions
-$englishRegex = "(?i)en|eng|English";
-function isEnglishTrack {
+
+
+$removeSent = "-PSA|-Pahe\.in";
+$ignoredAudioLanguages = "hin?";
+# $arRegex = [Regex]::new("ara|ar|Arabic"); ;
+# $enRegex = [Regex]::new("en|eng|English");
+
+function GetAudioId {
     param (
-        $track
+        $audioTracks
     )
+    $audioTracks = $audioTracks | ForEach-Object {
+        return @{
+            Id       = [int]$_.StreamOrder;
+            Language = $_.Language
+            Title    = $_.Title
+        }
+    }
+
+    if ($audioTracks.Length -eq 1) {
+        return $audioTracks[0].Id;
+    }
     
-    return $track.Language -match $englishRegex -or $track.Title -match $englishRegex;
+    $preferedTracks = $audioTracks | Where-Object { !($_.Language -match $ignoredAudioLanguages) };
+    if ($preferedTracks.Length -eq 0) {
+        return $audioTracks[0].Id;
+    }
+
+    if ($preferedTracks.Length -eq 1) {
+        return $preferedTracks[0].Id;
+    }
+
+    $nonEnglishTrack = $preferedTracks | Where-Object { !($_.Language -match "en|eng|English") } | Select-Object -First 1;
+    if ($nonEnglishTrack) {
+        return $nonEnglishTrack.Id;
+    }
+
+    return $preferedTracks[0].Id;
+}
+
+function RemoveUnusedTracks(
+    $inputPath,
+    $outputPath
+) {
+    Write-Host "Handling File $inputPath" -ForegroundColor Green;
+    $tracks = (& mediaInfo --Output=JSON "$inputPath" | ConvertFrom-Json).media.track;
+    $videoTrack = $tracks | Where-Object { $_.'@type' -eq 'Video' }
+    $tracksOrder = @([int]$videoTrack.StreamOrder);
+    $arguments = @(
+        "-o", """$outputPath""",
+        "--video-tracks", [int]$videoTrack.StreamOrder,
+        "--no-attachments"
+    );
+
+    #region Audio
+    $audioTracks = @($tracks | Where-Object { $_.'@type' -eq 'Audio' });
+    $audioId = GetAudioId -audioTracks $audioTracks;
+    $arguments += @("--audio-tracks", $audioId);
+    $tracksOrder += $audioId;
+    #endregion
+
+    #region Subtitles
+    $subtitleTracks = @($tracks | Where-Object { $_.'@type' -eq 'Text' });
+    $subTracks = @();
+    $subtitleTracks | Where-Object {
+        $_.Language -match "ara|ar|Arabic"
+    } | ForEach-Object {
+        $subTrackId = [int]$_.StreamOrder;
+        $subTracks += $subTrackId;
+    };
+
+    $subtitleTracks | Where-Object {
+        $_.Language -match "en|eng|English"
+    } | ForEach-Object {
+        $trackId = [int]$_.StreamOrder;
+        $subTracks += $trackId;
+        $arguments += @("--default-track-flag", "$($trackId):0");
+        $arguments += @("--forced-display-flag", "$($trackId):0");
+    };
+
+    if ($subTracks.Length -gt 0) {
+        $firstSubId = $subTracks[0];
+        $arguments += @("--default-track-flag", $firstSubId);
+        $arguments += @("--forced-display-flag", $firstSubId);
+        $arguments += "--subtitle-tracks"; 
+        $arguments += $subTracks -join ",";
+        $tracksOrder += $subTracks;
+    }
+    else {
+        $arguments += "--no-subtitles";
+    }
+
+    #endregion
+    $arguments += """$inputPath""";
+    $arguments += "--track-order"
+    $arguments += ($tracksOrder | ForEach-Object { return "0:$_" }) -join ","
+
+    $p = Start-Process mkvmerge -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
+    if ($p.ExitCode -gt 0) {
+        Write-Host "FAILD Processing File. ExitCode: $($p.ExitCode)" -ForegroundColor Red;
+        Write-Host "==========================" -ForegroundColor DarkBlue;
+        return $false;
+    }
+
+    # & Remove-To-Rycle-Bin.ps1 $inputPath;
+    Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
+    Write-Host "==========================" -ForegroundColor DarkBlue;
+    return $true;
 }
 
 function GetMediaFilesFromArchive {
@@ -37,137 +135,16 @@ function GetMediaFilesFromArchive {
     return Get-ChildItem -LiteralPath $outputPath -Filter "*.mkv" -Recurse;
 }
 
-function ForceRename {
-    param (
-        $path,
-        $newName
-    )
-    
-    $RenameError = $null;
-    Rename-Item -LiteralPath $path -NewName $newName -Force -ErrorVariable RenameError | Out-Null;
-    if (!$RenameError.Count) {
-        return
-    }
-
-    Read-Host $RenameError -ForegroundColor Red;
-    ForceRename -path $path -newName $newName
-}
-
-$removeSent = "-PSA";
-$preferEnglishTrack = @("hi");
-function RemoveUnusedTracks(
-    $inputPath,
-    $outputPath
-) {
-    Write-Host "Handling File $inputPath" -ForegroundColor Green;
-
-    if (Test-Path -LiteralPath $outputPath) {
-        $outputPathInfo = Get-Item -LiteralPath $outputPath;
-        $newName = $outputPathInfo.Name -replace "$($outputPathInfo.Extension)", " - OLD - $(Get-Date  -f yyyy-MM-dd)$($outputPathInfo.Extension)";
-        Write-Output "File Already Exists: RENAMING IT TO $newName";
-        ForceRename -path $outputPath -newName $newName;
-        if ($inputPath -eq $outputPath) {
-            $inputPath = "$($outputPathInfo.DirectoryName)\$newName";
-        }
-    }
-
-    $tracks = (& mediaInfo --Output=JSON "$inputPath" | ConvertFrom-Json).media.track;
-    $videoTrack = $tracks | Where-Object { $_.'@type' -eq 'Video' }
-    $tracksOrder = @([int]$videoTrack.StreamOrder);
-    $arguments = @(
-        "-o", """$outputPath""",
-        "--video-tracks", [int]$videoTrack.StreamOrder,
-        "--no-attachments"
-    );
-
-    #region Audio
-    $audioTracks = @($tracks | Where-Object { $_.'@type' -eq 'Audio' });
-    $audioId = $null;
-    if ($audioTracks.Length -gt 1) {
-        $nonEnglishTrack = $audioTracks | Where-Object { !(isEnglishTrack -track $_) };
-        if ($nonEnglishTrack -and $preferEnglishTrack -notcontains $nonEnglishTrack.Language) {
-            $audioId = [int]$nonEnglishTrack.StreamOrder;
-        }
-        else {
-            $englishTrack = $audioTracks | Where-Object { isEnglishTrack -track $_ };
-            $audioId = [int]$englishTrack.StreamOrder
-        }
-    }
-    if (!$audioId) {
-        $audioId = [int]$audioTracks[0].StreamOrder
-    }
-    $arguments += @("--audio-tracks", $audioId);
-    $tracksOrder += $audioId;
-    #endregion
-
-    #region Subtitles
-    $subtitleTracks = @($tracks | Where-Object { $_.'@type' -eq 'Text' });
-    $subTracks = @();
-    $arSubTracks = @($subtitleTracks | Where-Object { $_.Language -match "(?i)ara|ar|Arabic" });
-    if ($arSubTracks.Length -gt 0) {
-        $arSubTrack = $arSubTracks[0];
-        $arSubTrackId = [int]$arSubTrack.StreamOrder;
-        $arguments += @("--default-track-flag", $arSubTrackId);
-        $arguments += @("--forced-display-flag", $arSubTrackId);
-        $subTracks += $arSubTrackId;
-        $tracksOrder += $arSubTrackId;
-    }
-
-    $engSubTracks = @($subtitleTracks | Where-Object { isEnglishTrack -track $_ });
-    if ($engSubTracks.Length -gt 0) {
-        $engSubTrack = $engSubTracks[0];
-        $engSubTrackId = [int]$engSubTrack.StreamOrder;
-        $subTracks += $engSubTrackId;
-        $tracksOrder += $engSubTrackId;
-        $arguments += @("--default-track-flag", "$($engSubTrackId):0");
-        $arguments += @("--forced-display-flag", "$($engSubTrackId):0");
-    }
-
-    if ($subTracks.Length -gt 0) {
-        $arguments += "--subtitle-tracks"; 
-        $arguments += $subTracks -join ",";
-    }
-
-    #endregion
-    $arguments += """$inputPath""";
-    $arguments += "--track-order"
-    $arguments += ($tracksOrder | ForEach-Object { return "0:$_" }) -join ","
-
-    $p = Start-Process mkvmerge -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
-    
-    if ($p.ExitCode -gt 0) {
-        Write-Host "FAILD Processing File. ExitCode: $($p.ExitCode)" -ForegroundColor Red;
-        Write-Host "==========================" -ForegroundColor DarkBlue;
-        return $false;
-    }
-
-    & Remove-To-Rycle-Bin.ps1 $inputPath;
-    Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
-    Write-Host "==========================" -ForegroundColor DarkBlue;
-    return $true;
-}
-
 function GetFileFromDirectory {
     param (
         $directoryPath
     )
 
-    $script:filter = ""; # Read-Host "Start with?";
+    $script:filter = "";
     if (!$script:filter) { $script:filter = ""; }
     $files = Get-ChildItem -LiteralPath $directoryPath -Filter "$script:filter*.mkv";
     $directories = Get-ChildItem -LiteralPath $directoryPath -Directory;
     return $files + $directories;
-}
-
-function RemoveDirectoryIfEmpty {
-    param (
-        $directoryPath
-    )
-
-    $items = Get-ChildItem -Path $directoryPath;
-    if ($items.Length -eq 0) {
-        Remove-Item -LiteralPath $directoryPath -Force;
-    }
 }
 
 function HandleFile {
@@ -183,15 +160,23 @@ function HandleFile {
         }
         $childern = GetFileFromDirectory -directoryPath $pathAsAfile.FullName;
         $childern | ForEach-Object { HandleFile -pathAsAfile $_ -outputPath  $outputFolderPath; };
-        RemoveDirectoryIfEmpty -directoryPath $pathAsAfile.FullName;
         return;
     }
-
+    
     $inputPath = $pathAsAfile.FullName;
-    $filePath = $inputPath;
-    $newName = $pathAsAfile.Name.Replace($removeSent, "");
+    $newName = $pathAsAfile.Name -replace $removeSent, "";
     $outputFilePath = "$outputPath\$newName";
-    return RemoveUnusedTracks -inputPath $filePath -outputPath $outputFilePath;
+    if (Test-Path -LiteralPath $outputFilePath) {
+        $outputPathInfo = Get-Item -LiteralPath $outputFilePath;
+        $newName = $outputPathInfo.Name -replace "$($outputPathInfo.Extension)", " - OLD - $(Get-Date  -f yyyy-MM-dd)$($outputPathInfo.Extension)";
+        Write-Output "File Already Exists: RENAMING IT TO $newName";
+        & Force-Rename.ps1 -path $outputFilePath -newName $newName;
+        if ($inputPath -eq $outputFilePath) {
+            $inputPath = "$($outputPathInfo.DirectoryName)\$newName";
+        }
+
+    }
+    return RemoveUnusedTracks -inputPath $inputPath -outputPath $outputFilePath;
 }
 
 #endregion

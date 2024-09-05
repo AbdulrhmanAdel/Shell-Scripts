@@ -12,4 +12,8 @@ if ($foldername.ShowDialog() -eq "OK") {
     return "$($foldername.SelectedPath)";
 }
 
+if ($ExitIfNotSelected) {
+    [Environment]::Exit(0);
+}
+
 return $null;
