@@ -53,8 +53,9 @@ function Invoke-Request {
 
 function GetSubtitles {
     $queryBody = @{
-        query = $title
-    } ;
+        query = !$Year ? $title : $title + " " + $Year
+    };
+    
     $searchResult = Invoke-Request -path "searchMovie" -body $queryBody -property "found";
     if ($searchResult.Length -eq 0) {
         Start-Process "$subsourceSiteDomain/search/$title"
@@ -65,11 +66,20 @@ function GetSubtitles {
     $sameTypeShows = @($searchResult | Where-Object { $_.type -eq $subsourceType });
     if ($sameTypeShows.Length -gt 1) {
         $year ??= Read-Host "Multi matched Shows please enter correct Year";
-        $sameYearsShows = @($sameTypeShows | Where-Object {
+        $sameYearsShows = @(
+            $sameTypeShows | Where-Object {
                 $_.releaseYear -eq $Year
-            });
+            }
+        );
 
-        if ($sameTypeShows.Length -gt 1) {
+        $exactTitleShow = $sameTypeShows | Where-Object {
+            $_.title -eq $title
+        }  | Select-Object -First 1;
+
+        if ($exactTitleShow) {
+            $movieInfo = $exactTitleShow;
+        } 
+        elseif ($sameTypeShows.Length -gt 1) {
             Write-Host "There is multi shows with the same year and name"
             $script:index = 0;
             $sameTypeShows | ForEach-Object {

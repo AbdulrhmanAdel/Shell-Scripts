@@ -1,127 +1,10 @@
-$seriesRegex = "(?<Title>.*) *(S|Season) *(?<SeasonNumber>\d{1,2}) *(Episode|Ep|E|\d+X)(?<EpisodeNumber>\d+) *(?<Rest>.*)"; ;
-$moviesRegex = "(?<Title>.*)(?<Rest>(720|480|1080)P?.*)";
-$yearRegex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
-function GetYear {
-    param (
-        $name
-    )
-
-    $result = $yearRegex.Match($name);
-
-    return $result.Success `
-        ? $result.ToString() `
-        : $null
-}
-
-# Allowed special characters in NTFS filenames
-$pattern = '!|#|\$|%|&|''|\(|\)|-|@|\^|_|`|{|}|~|\+|=|,|;|\.|\[|\]'
-function NormalizeName() {
-    param (
-        [string]$Name
-    )
-    
-    $normalizedName = $Name -replace "^\[.*?\]", "" `
-        -replace $pattern, " " `
-        -replace " +", " ";
-    return $normalizedName.Trim();
-}
-
-# https://en.wikipedia.org/wiki/Pirated_movie_release_types
-$qualitiesRegex = @(
-    "WEB(-| )?(DL|HD)",
-    "WEB(-| )?RIP",
-    "Blu(-| )?ray|BD|BR(-| )?Rip",
-    "HD(-| )?Rip",
-    "DVD(-| )?Rip",
-    "HD(-| )?TV",
-    @{
-        KEY   = "WEB"
-        Value = "WEB(-| )?(DL|RIP)"
-    },
-    @{
-        Key   = "HEVC"
-        Value = "WEB(-| )?(DL|RIP).*HEVC"
-    }
-);
-function GetQuailty {
-    param (
-        $name
-    )
-
-    foreach ($quality in $qualitiesRegex) {
-        $key = $quality;
-        $value = $quality;
-        if ($quality.Key) {
-            $key = $quality.Key;
-            $value = $quality.Value;
-        }
-        if ($name -match $key) {
-            return  $value;
-        }
-    }
-
-    return $null;
-}
-
-$keywords = @("Repack", "Internal", "DIRECTOR'?S?(\.| )?CUT");
-function GetSeriesOrMovieDetails {
-    param (
-        $name
-    )
-    $name = NormalizeName -name $name;
-    $quality = GetQuailty -name $name;
-    $matchedKeywords = @($keywords | Where-Object { $name -match $_ }) ?? @();
-    $ignoredVersions = @($keywords | Where-Object { $_ -notin $matchedKeywords });
-    $details = @{
-        Quality         = $quality
-        IgnoredVersions = $ignoredVersions
-        Keywords        = $matchedKeywords
-    };
-    
-    if ($name -match $seriesRegex) {
-        $movieName = $Matches["Title"].Trim();
-        $year = GetYear -name $movieName;
-        return @{
-            Type            = "S"
-            Title           = $movieName.Trim()
-            Year            = $year
-            Season          = [Int32]::Parse( $Matches["SeasonNumber"])
-            Episode         = [Int32]::Parse( $Matches["EpisodeNumber"])
-            Quality         = $quality
-            IgnoredVersions = $ignoredVersions
-            Keywords        = $matchedKeywords
-        }
-
-        return $details;
-    }
-    elseif ($name -match $moviesRegex) {
-        $movieName = $Matches["Title"].Trim();
-        $year = GetYear -name $movieName;
-        return @{
-            Type            = "M"
-            Title           = $movieName
-            Year            = $year
-            Quality         = $quality
-            IgnoredVersions = $ignoredVersions
-            Keywords        = $matchedKeywords
-        }
-    }
-
-    return @{
-        Type            = "M"
-        Title           = $name
-        Quality         = $quality
-        IgnoredVersions = $ignoredVersions
-        Keywords        = $matchedKeywords
-    };
-}
-
 function HandleMovies {
     param($subs)
     $movies = $subs | Where-Object { $_.Details.Type -eq "M" };
     $movies | Where-Object {
         $info = $_.Info;
         $details = $_.Details;
+        Write-Host $details;    
         & "$($PSScriptRoot)/Sites/Subsource.ps1" `
             -DownloadPath $downloadPath `
             -Type $details.Type `
@@ -210,11 +93,10 @@ $args | ForEach-Object {
 }
 
 $subs = $files | ForEach-Object {
-    $info = $_;
-    $name = $info.Name -replace $info.Extension, "";
-    $details = GetSeriesOrMovieDetails -name $name;
+    $details = & Get-Show-Details.ps1 -Path $_;
     if (!$details) { return $null; }
-   
+    $info = $details.Info;
+    $name = $info.Name -replace $info.Extension, "";
     return @{
         Name    = $name
         Info    = $info

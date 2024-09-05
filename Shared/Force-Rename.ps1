@@ -24,4 +24,3 @@ if (!$path -or !$newName) {
 }
 
 ForceRename -path $path -newName $newName;
-return $true;

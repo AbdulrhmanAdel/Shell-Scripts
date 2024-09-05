@@ -51,10 +51,84 @@
 
 # }
 
+$details = @($args | ForEach-Object {
+        return & Get-Show-Details.ps1 -Path $_ --OnlyBasicInfo;
+    } | Where-Object {
+        $null -ne $_
+    })
 
-$method = & Options-Selector.ps1 `
-    -options @("Series", "Movies") -defaultValue "Series" `
-    -title "Rename Source";
+$global:renameMap = @();
 
-if (!$method) { EXIT; }
-& "$($PSScriptRoot)/modules/Subtitle-Renamer-$method" $args;
+function SetRename {
+    param (
+        $files
+    )
+
+    if ($files.Count -eq 1) {
+        $file = $files[0];
+        $text = "CAN'T HANDLE $($file.Info.Name)" `
+            + ($file.Season ? " Season $($file.Season)" : "") `
+            + ($file.Episode ? " Episode $($file.Episode)" : "");
+        Write-Host $text -ForegroundColor Red; 
+        return;
+    }
+
+    $show = $files | Where-Object { $_.Info.Extension -in @(".mkv", ".mp4") } | Select-Object -First 1;
+    $subtitle = $files | Where-Object { $_ -ne $show } | Select-Object -First 1;
+    $text = "Renaming " `
+        + ($show.Season ? " S$($show.Season)E$($show.Episode)-" : "") + $show.Info.Name `
+        + " => " `
+        + ($subtitle.Season ? " S$($subtitle.Season)E$($subtitle.Episode)-" : "") + $show.Info.Name;
+    Write-Host $text -ForegroundColor Green;
+    $global:renameMap += @{
+        Show     = $show.Info
+        Subtitle = $subtitle.Info
+    }
+}
+
+$replaceRegex = @(
+    "-PSA", 
+    "(\(|\[)(Hi10|AniDL)(\)|\])(_| |-)*", 
+    "-Pahe\.in", 
+    "-GalaxyTV"
+) -join "|";
+
+function HandleRenameMap {
+    $global:renameMap | ForEach-Object {
+        $show = [System.IO.FileInfo]$_.Show;
+        $subtitle = [System.IO.FileInfo]$_.Subtitle;
+        $showNewName = $show.Name -replace $replaceRegex, "";
+        if ($showNewName -ne $show.Name) {
+            & Force-Rename.ps1 -Path $show.FullName -NewName $showNewName;
+        }
+    
+        $subName = $showNewName -replace $show.Extension, $subtitle.Extension; 
+        & Force-Rename.ps1 -Path $subtitle.FullName -NewName $subName;
+    }
+
+    $global:renameMap = @();
+}
+
+Write-Host "===================== START"
+Write-Host "Handling Movies" -ForegroundColor Cyan
+@($details | Where-Object { $_.type -eq "M" }) | Group-Object { return $_["Title"] } | ForEach-Object {
+    SetRename -files $_.Group;
+};
+
+HandleRenameMap
+Write-Host "===================== END"
+Write-Host ""
+
+Write-Host "===================== START"
+Write-Host "Handling Series" -ForegroundColor Blue;
+@($details | Where-Object { $_.type -eq "S" }) | Group-Object { return $_["Title"] } | ForEach-Object {
+    $seasons = $_.Group | Group-Object { return $_["Season"] };
+    $seasons.Group | Group-Object { return $_["Episode"] } | ForEach-Object {
+        SetRename -files $_.Group
+    };
+};
+
+HandleRenameMap
+Write-Host "===================== END"
+
+timeout.exe  20 /nobreak;
