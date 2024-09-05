@@ -24,7 +24,7 @@ function GetAudioId {
         return $audioTracks[0].Id;
     }
     
-    $preferedTracks = @($audioTracks | Where-Object { !($_.Language -match $ignoredAudioLanguages) });
+    $preferedTracks = @($audioTracks | Where-Object { $_.Language -notmatch $ignoredAudioLanguages });
     if ($preferedTracks.Length -eq 0) {
         return $audioTracks[0].Id;
     }
@@ -33,7 +33,7 @@ function GetAudioId {
         return $preferedTracks[0].Id;
     }
 
-    $nonEnglishTrack = $preferedTracks | Where-Object { !($_.Language -match "en|eng|English") } | Select-Object -First 1;
+    $nonEnglishTrack = $preferedTracks | Where-Object { $_.Language -notmatch "en|eng|English" } | Select-Object -First 1;
     if ($nonEnglishTrack) {
         return $nonEnglishTrack.Id;
     }
@@ -74,6 +74,7 @@ function GetSubtitleTracks {
 
     return $subTracks
 }
+
 function RemoveUnusedTracks(
     $inputPath,
     $outputPath
