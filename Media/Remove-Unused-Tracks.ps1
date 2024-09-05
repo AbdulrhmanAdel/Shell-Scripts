@@ -12,19 +12,19 @@ function GetAudioId {
     param (
         $audioTracks
     )
-    $audioTracks = $audioTracks | ForEach-Object {
-        return @{
-            Id       = [int]$_.StreamOrder;
-            Language = $_.Language
-            Title    = $_.Title
-        }
-    }
+    $audioTracks = @($audioTracks | ForEach-Object {
+            return @{
+                Id       = [int]$_.StreamOrder;
+                Language = $_.Language
+                Title    = $_.Title
+            }
+        });
 
     if ($audioTracks.Length -eq 1) {
         return $audioTracks[0].Id;
     }
     
-    $preferedTracks = $audioTracks | Where-Object { !($_.Language -match $ignoredAudioLanguages) };
+    $preferedTracks = @($audioTracks | Where-Object { !($_.Language -match $ignoredAudioLanguages) });
     if ($preferedTracks.Length -eq 0) {
         return $audioTracks[0].Id;
     }
@@ -41,6 +41,39 @@ function GetAudioId {
     return $preferedTracks[0].Id;
 }
 
+
+function GetSubtitleTracks {
+    param (
+        $subtitleTracks
+    )
+
+    if ($subtitleTracks.Length -eq 0) {
+        return $subtitleTracks;
+    }
+
+    $subTracks = @();
+    $subtitleTracks | Where-Object {
+        $_.Language -match "ara|ar|Arabic"
+    } | ForEach-Object {
+        $subTrackId = [int]$_.StreamOrder;
+        $subTracks += @{
+            Id     = $subTrackId
+            Forced = $true
+        };
+    };
+
+    $subtitleTracks | Where-Object {
+        $_.Language -match "en|eng|English"
+    } | ForEach-Object {
+        $trackId = [int]$_.StreamOrder;
+        $subTracks += @{
+            Id     = $trackId
+            Forced = $false
+        };
+    };
+
+    return $subTracks
+}
 function RemoveUnusedTracks(
     $inputPath,
     $outputPath
@@ -53,6 +86,7 @@ function RemoveUnusedTracks(
         "-o", """$outputPath""",
         "--video-tracks", [int]$videoTrack.StreamOrder,
         "--no-attachments"
+        # "--quiet"
     );
 
     #region Audio
@@ -64,36 +98,24 @@ function RemoveUnusedTracks(
 
     #region Subtitles
     $subtitleTracks = @($tracks | Where-Object { $_.'@type' -eq 'Text' });
-    $subTracks = @();
-    $subtitleTracks | Where-Object {
-        $_.Language -match "ara|ar|Arabic"
-    } | ForEach-Object {
-        $subTrackId = [int]$_.StreamOrder;
-        $subTracks += $subTrackId;
-    };
-
-    $subtitleTracks | Where-Object {
-        $_.Language -match "en|eng|English"
-    } | ForEach-Object {
-        $trackId = [int]$_.StreamOrder;
-        $subTracks += $trackId;
-        $arguments += @("--default-track-flag", "$($trackId):0");
-        $arguments += @("--forced-display-flag", "$($trackId):0");
-    };
-
+    $subTracks = GetSubtitleTracks -subtitleTracks $subtitleTracks;
     if ($subTracks.Length -gt 0) {
-        $firstSubId = $subTracks[0];
-        $arguments += @("--default-track-flag", $firstSubId);
-        $arguments += @("--forced-display-flag", $firstSubId);
+        $subTracksIds = $subTracks | ForEach-Object { return $_.Id.ToString() };
         $arguments += "--subtitle-tracks"; 
-        $arguments += $subTracks -join ",";
-        $tracksOrder += $subTracks;
+        $arguments += $subTracksIds -join ",";
+        $subTracks | ForEach-Object {
+            $subId = $_.Id;
+            $forced = $_.Forced;
+            $arguments += @("--default-track-flag", "$subId$($forced ? '' : ':0')");
+            $arguments += @("--forced-display-flag", "$subId$($forced ? '' : ':0')");
+            $tracksOrder += $subTracksIds;
+        }
     }
     else {
         $arguments += "--no-subtitles";
     }
-
     #endregion
+
     $arguments += """$inputPath""";
     $arguments += "--track-order"
     $arguments += ($tracksOrder | ForEach-Object { return "0:$_" }) -join ","
@@ -105,7 +127,7 @@ function RemoveUnusedTracks(
         return $false;
     }
 
-    # & Remove-To-Rycle-Bin.ps1 $inputPath;
+    & Remove-To-Rycle-Bin.ps1 $inputPath;
     Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
     Write-Host "==========================" -ForegroundColor DarkBlue;
     return $true;
