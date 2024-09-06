@@ -1,56 +1,3 @@
-# #region Functions
-# $replaceRegex = "(?i)-PSA|(\(|\[)(Hi10|AniDL)(\)|\])(_| |-)*";
-# $signsRegex = "_"
-# function Rename {
-#     param (
-#         [System.IO.FileInfo]$source,
-#         [System.IO.FileInfo]$target
-#     )
-    
-#     $sourceName = $source.Name -replace $replaceRegex, "" -replace $signsRegex, " ";
-#     if ($sourceName -ne $sourceName) {
-#         Rename-Item -LiteralPath $source.FullName -NewName $sourceName;
-#     }
-
-#     $targetName = $sourceName -replace $source.Extension, $target.Extension;
-#     if ($targetName -ne $target.Name) {
-#         Rename-Item -LiteralPath $target.FullName -NewName $targetName;
-#     }
-# }
-
-
-# $episodeNumberRegex = "(?i)(?<Name>.*)((S|Season)\d+)(Episode|Ep|E|[-,|,_,*,#,\.]|\[| |\dx)(?<EpisodeNumber>\d+)([-,|,_,*,#,\.]| |\]|v\d+)";
-# function GetEpisodeNumber($fileName) {
-#     $episodeNumber = $null;
-#     $matched = $fileName -match $episodeNumberRegex;
-#     if (!$matched) {
-#         $fileNameWithoutExt = $fileName -replace [System.IO.Path]::GetExtension($fileName), "";
-#         if ([int]::TryParse($fileNameWithoutExt, [ref]$episodeNumber)) {
-#             return $episodeNumber
-#         }
-#         Write-Host "Can't Extract Episode Number From $fileName";
-#         return; 
-#     }
-#     $episodeNumber = [int]($Matches["EpisodeNumber"]);
-#     if (!$episodeNumber) {
-#         Write-Host "Can't Get EpisodeNumber for $fileName, GOT $episodeNumber"
-#         timeout 15
-#         exit;
-#     }
-
-#     return $episodeNumber;
-# }
-
-# #endregion
-# $series = @{};
-# $movies = @{};
-
-# $args | ForEach-Object {
-#     $info = Get-Item -LiteralPath $_;
-#     $episodeNumber = GetEpisodeNumber -fileName $info.Name;
-
-# }
-
 $details = @($args | ForEach-Object {
         return & Get-Show-Details.ps1 -Path $_ --OnlyBasicInfo;
     } | Where-Object {
@@ -75,14 +22,9 @@ function SetRename {
 
     $show = $files | Where-Object { $_.Info.Extension -in @(".mkv", ".mp4") } | Select-Object -First 1;
     $subtitle = $files | Where-Object { $_ -ne $show } | Select-Object -First 1;
-    $text = "Renaming " `
-        + ($show.Season ? " S$($show.Season)E$($show.Episode)-" : "") + $show.Info.Name `
-        + " => " `
-        + ($subtitle.Season ? " S$($subtitle.Season)E$($subtitle.Episode)-" : "") + $show.Info.Name;
-    Write-Host $text -ForegroundColor Green;
     $global:renameMap += @{
-        Show     = $show.Info
-        Subtitle = $subtitle.Info
+        Show     = $show
+        Subtitle = $subtitle
     }
 }
 
@@ -95,15 +37,23 @@ $replaceRegex = @(
 
 function HandleRenameMap {
     $global:renameMap | ForEach-Object {
-        $show = [System.IO.FileInfo]$_.Show;
-        $subtitle = [System.IO.FileInfo]$_.Subtitle;
-        $showNewName = $show.Name -replace $replaceRegex, "";
-        if ($showNewName -ne $show.Name) {
-            & Force-Rename.ps1 -Path $show.FullName -NewName $showNewName;
+        $show = $_.Show;
+        $subtitle = $_.Subtitle;
+        Write-Host "Matched Subtitle " -NoNewline -ForegroundColor Yellow;
+        Write-Host (($show.Season ? "S$($show.Season)E$($show.Episode)-" : "") + $show.Info.Name)  -ForegroundColor Green -NoNewline;
+        Write-Host " => " -ForegroundColor Yellow -NoNewline;
+        Write-Host (($subtitle.Season ? " S$($subtitle.Season)E$($subtitle.Episode)-" : "") + $subtitle.Info.Name) -ForegroundColor Green ;
+        $showFileInfo = [System.IO.FileInfo]$show.Info;
+        $subtitleFileInfo = [System.IO.FileInfo]$subtitle.Info;
+        $showFileInfoNewName = $showFileInfo.Name -replace $replaceRegex, "";
+        if ($showFileInfoNewName -ne $showFileInfo.Name) {
+            & Force-Rename.ps1 -Path $showFileInfo.FullName -NewName $showFileInfoNewName;
         }
     
-        $subName = $showNewName -replace $show.Extension, $subtitle.Extension; 
-        & Force-Rename.ps1 -Path $subtitle.FullName -NewName $subName;
+        $subName = $showFileInfoNewName -replace $showFileInfo.Extension, $subtitleFileInfo.Extension; 
+        if ($subName -ne $subtitleFileInfo.Name) {
+            & Force-Rename.ps1 -Path $subtitleFileInfo.FullName -NewName $subName;
+        }
     }
 
     $global:renameMap = @();
