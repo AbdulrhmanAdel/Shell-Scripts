@@ -1,6 +1,6 @@
 function HandleMovies {
     param($subs)
-    $movies = $subs | Where-Object { $_.Details.Type -eq "M" };
+    $movies = $subs | Where-Object { $_.Details.Type -eq "Movie" };
     $movies | Where-Object {
         $info = $_.Info;
         $details = $_.Details;
@@ -22,7 +22,7 @@ function HandleSeries {
     param (
         $subs
     )
-    $series = $subs | Where-Object { $_.Details.Type -eq "S" };
+    $series = $subs | Where-Object { $_.Details.Type -eq "Series" };
     if ($series.Length -eq 0) {
         return;
     }
@@ -63,7 +63,7 @@ function HandleSeries {
             $episodeWithYear = $seasonEpisodes | Where-Object { !!$_.Year } | Select-Object -First  1;
             & "$($PSScriptRoot)/Sites/Subsource.ps1" `
                 -DownloadPath $downloadPath `
-                -Type "S" `
+                -Type "Series" `
                 -Name $serieName `
                 -Season $_ `
                 -Year $episodeWithYear.Year `
@@ -93,7 +93,7 @@ $args | ForEach-Object {
 }
 
 $subs = $files | ForEach-Object {
-    $details = & Get-Show-Details.ps1 -Path $_;
+    $details = & "Get-Show-Details.ps1" -Path $_;
     if (!$details) { return $null; }
     $info = $details.Info;
     $name = $info.Name -replace $info.Extension, "";

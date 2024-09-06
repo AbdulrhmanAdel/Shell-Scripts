@@ -61,7 +61,7 @@ function HandleRenameMap {
 
 Write-Host "===================== START"
 Write-Host "Handling Movies" -ForegroundColor Cyan
-@($details | Where-Object { $_.type -eq "M" }) | Group-Object { return $_["Title"] } | ForEach-Object {
+@($details | Where-Object { $_.type -eq "Movie" }) | Group-Object { return $_["Title"] } | ForEach-Object {
     SetRename -files $_.Group;
 };
 
@@ -71,7 +71,7 @@ Write-Host ""
 
 Write-Host "===================== START"
 Write-Host "Handling Series" -ForegroundColor Blue;
-@($details | Where-Object { $_.type -eq "S" }) | Group-Object { return $_["Title"] } | ForEach-Object {
+@($details | Where-Object { $_.type -eq "Series" }) | Group-Object { return $_["Title"] } | ForEach-Object {
     $seasons = $_.Group | Group-Object { return $_["Season"] };
     $seasons.Group | Group-Object { return $_["Episode"] } | ForEach-Object {
         SetRename -files $_.Group

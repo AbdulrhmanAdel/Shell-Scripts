@@ -85,7 +85,7 @@ function GetSeriesOrMovieDetails {
     }
     
     $details = @{
-        Type            = "M"
+        Type            = "Movie"
         Quality         = $quality
         IgnoredVersions = $ignoredVersions
         Keywords        = $matchedKeywords
@@ -94,7 +94,7 @@ function GetSeriesOrMovieDetails {
     $showName = $null;
     if ($name -match $seriesRegex) {
         $showName = $Matches["Title"].Trim();
-        $details.Type = "S"
+        $details.Type = "Series"
         $details.Season = [Int32]::Parse( $Matches["SeasonNumber"]);
         $details.Episode = [Int32]::Parse( $Matches["EpisodeNumber"]);
     }
