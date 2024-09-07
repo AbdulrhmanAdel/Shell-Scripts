@@ -210,6 +210,14 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
+        Extensions = @("Directory")
+        Title      = "Set Icon (Auto)"
+        Key        = "Set Icon (Auto)"
+        ScriptPath = "Icons\Web\Search-Icon.ps1"
+        Path       = $iconsPath
+        Icon       = "pwsh.exe"
+    },
+    @{
         Extensions = @("*", "Directory")
         Title      = "Display Attributes"
         Key        = "Display Attributes"

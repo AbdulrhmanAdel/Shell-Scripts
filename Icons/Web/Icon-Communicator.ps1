@@ -1,4 +1,13 @@
 # Open standard input and output streams.
+$logFilePath = "$($PSScriptRoot)/Log.txt";
+function Log {
+    param (
+        $text
+    )
+
+    Add-Content -LiteralPath $logFilePath -Value $text;
+}
+
 $stdin = [Console]::OpenStandardInput()
 $stdout = [Console]::OpenStandardOutput()
 
@@ -79,15 +88,6 @@ function GetFolders {
 }
 #endregion
 
-# Wait For Start Signal
-while ($true) {
-    $data = Read-Message
-    $action = $data.action;
-    if ($action -eq "start") {
-        break;
-    }
-}
-
 function HandleFolder {
     if ($global:folders.Length -eq 0) {
         return;
@@ -100,23 +100,24 @@ function HandleFolder {
     }
 }
 
-$global:folders = GetFolders -directoryPath "G:\Games";
-if ($global:folders.Length -eq 0) {
-    Send-Response -response @{
-        action = "no-folders"
-    }
-    EXIT;
-}
+# $global:folders = GetFolders -directoryPath "G:\Games";
+# if ($global:folders.Length -eq 0) {
+#     Send-Response -response @{
+#         action = "no-folders"
+#     }
+#     EXIT;
+# }
 
-Send-Response -response @{
-    action  = "folders"
-    folders = @($global:folders | ForEach-Object { return $_.FullName })
-}
+# Send-Response -response @{
+#     action  = "folders"
+#     folders = @($global:folders | ForEach-Object { return $_.FullName })
+# }
 
-HandleFolder;
+# HandleFolder;
 while ($true) { 
     try {
-        $json = Read-Message
+        $json = Read-Message;
+        Log -text $json;
         if ($null -eq $json) {
             break  # Exit the loop if there is an error or end of input stream.
         }
@@ -129,11 +130,11 @@ while ($true) {
                 $imgPath = DonwloadImage -imageUrl $imgLink;
                 $setFolderIconScriptPath = "D:\Programming\Projects\Personal Projects\Shell-Scripts\Icons\Set-Folder-Icon.ps1";
                 Start-Process pwsh.exe -ArgumentList @('-File', """$setFolderIconScriptPath""", '-imagePath', """$imgPath""" , '-directoryPath', """$folder""", '--noTimeout')
-                HandleFolder;
+                # HandleFolder;
                 break;
             }
             "next" {
-                HandleFolder;
+                # HandleFolder;
             }
         }
     }
