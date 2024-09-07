@@ -1,4 +1,4 @@
-$replaceText = "\[(FitGirl|Dodi).*\]";
+$replaceText = "\[(FitGirl|Dodi).*\]|-.*Edition";
 $args | Where-Object { Test-Path -LiteralPath $_ } | ForEach-Object {
     $hasIcon = Get-ChildItem -LiteralPath $_ -Filter "*.ico" -Force;
     if ($hasIcon) {
