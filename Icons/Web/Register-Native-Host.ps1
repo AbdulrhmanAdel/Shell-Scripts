@@ -1,7 +1,8 @@
 & Run-As-Admin.ps1;
 
-$extensionId = Read-Host "Please Enter ExtensionId";
-$scriptPath = "$($PSScriptRoot)\Icon-Communicator.ps1";
+# $extensionId = Read-Host "Please Enter ExtensionId";
+$extensionId = "jnnagfgkgigallbdmcldihboiekeaiig"
+$scriptPath = ".\Icon-Communicator.ps1";
 $name = "com.at_dev.icon_downloader"
 @{
     name            = $name
