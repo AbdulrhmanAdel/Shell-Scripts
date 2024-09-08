@@ -64,7 +64,7 @@ function HandleSeries {
             & "$($PSScriptRoot)/Sites/Subsource.ps1" `
                 -DownloadPath $downloadPath `
                 -Type "Series" `
-                -Name $serieName `
+                -Title $serieName `
                 -Season $_ `
                 -Year $episodeWithYear.Year `
                 -Episodes $seasonEpisodes; 
