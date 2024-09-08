@@ -218,6 +218,14 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
+        Extensions = @("Directory")
+        Title      = "Remove Icon"
+        Key        = "Remove Icon"
+        ScriptPath = "Icons\Remove-Icon.ps1"
+        Path       = $iconsPath
+        Icon       = "pwsh.exe"
+    },
+    @{
         Extensions = @("*", "Directory")
         Title      = "Display Attributes"
         Key        = "Display Attributes"
