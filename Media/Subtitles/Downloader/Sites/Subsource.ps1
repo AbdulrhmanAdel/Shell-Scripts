@@ -188,22 +188,6 @@ function CopySubtitle {
 }
 
 #endregion
-
-function MatchRelease {
-    param (
-        [string]$releaseName,
-        [string]$qualityRegex,
-        [string[]]$ignoredVersions,
-        [string[]]$keywords
-    )
-
-    $isQualityMatched = $releaseName -match $qualityRegex;
-    if (!$isQualityMatched) { return $false }
-    $keywordMatched = $keywords.Length -gt 0 -and @($keywords | Where-Object { $releaseName -match $_ }).Length -gt 0;
-    if ($keywordMatched) { return $true }
-    $isIgnoredVersion = $ignoredVersions.Length -gt 0 -and @($ignoredVersions | Where-Object { $releaseName -match $_ }).Length -gt 0;
-    return !$isIgnoredVersion;
-}
 function MatchRelease {
     param (
         [string]$releaseName,
