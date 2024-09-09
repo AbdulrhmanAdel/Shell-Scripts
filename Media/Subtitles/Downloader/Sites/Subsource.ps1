@@ -65,7 +65,7 @@ function GetSubtitles {
     }
 
     $movieInfo = $searchResult[0];
-    if ($show) {
+    if (!$show) {
         $subsourceType = $type -eq "Series" ? "TVSeries": "Movie";
         $sameTypeShows = @($searchResult | Where-Object { $_.type -eq $subsourceType });
         if ($sameTypeShows.Length -gt 1) {
@@ -259,9 +259,9 @@ $wholeSeasonSubtitles = @(
 $arabicSubs = $arabicSubs | Where-Object { $_ -notin $wholeSeasonSubtitles };
 
 $Episodes | ForEach-Object {
+    $episode = $_;
     Write-Host "-----" -ForegroundColor Yellow;
     Write-Host "Episode $($episode.Episode)" -ForegroundColor Yellow;
-    $episode = $_;
     $episodeNumber = $episode.Episode;
     $qualityRegex = $episode.Quality
     $episodeRegex = "(S?0*$season)?(\.| )*(E|\d+X|Episode|EP)0*$episodeNumber(\D+|$)"
@@ -275,7 +275,7 @@ $Episodes | ForEach-Object {
 
     if (!$matchedSubtitle) {
         $matchedSubtitle = $wholeSeasonSubtitles | Where-Object { 
-            MatchRelease -releaseName $arabicSub.releaseName`
+            MatchRelease -releaseName $_.releaseName`
                 -qualityRegex $qualityRegex `
                 -ignoredVersions $episode.IgnoredVersions `
                 -keywords $episode.Keywords; 
