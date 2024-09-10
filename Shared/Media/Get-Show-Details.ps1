@@ -23,7 +23,7 @@ function GetYear {
 }
 
 # Allowed special characters in NTFS filenames
-$pattern = '!|#|\$|%|&|''|\(|\)|-|@|\^|_|`|{|}|~|\+|=|,|;|\.|\[|\]'
+$pattern = '!|#|\$|%|&|\(|\)|-|@|\^|_|{|}|~|\+|=|,|;|\.|\[|\]'
 function NormalizeName() {
     param (
         [string]$Name
