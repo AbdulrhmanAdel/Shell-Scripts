@@ -1,13 +1,14 @@
 Write-Output $args;
 $folderPath = $args[0];
-$removeIcon = $args[1];
-
-if (!$folderPath) {
-    $folderPath = Read-Host "Please Enter Folder Path";
+if (-not (Test-Path -LiteralPath $folderPath)) {
+    Exit;
 }
 
-$desktopPathFile = "$folderPath\desktop.ini";
-
-if ($removeIcon) {
-    Remove-Item -LiteralPath $desktopPathFile -Force;
+$deskTopAndIco = Get-ChildItem -LiteralPath -Include "desktop.ini", "*.ico" -Force;
+$deskTopAndIco | ForEach-Object {
+    Remove-Item -LiteralPath $_.FullName -Force;
 }
+
+$tempFolderPath = $folderPath + "​"; 
+Move-Item -LiteralPath $folderPath -Destination $tempFolderPath;
+

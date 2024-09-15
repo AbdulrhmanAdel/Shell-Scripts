@@ -17,4 +17,4 @@ $args | Where-Object { Test-Path -LiteralPath $_ } | ForEach-Object {
     Start-Process "https://www.google.com/search?tbm=isch&q=$($name) $($isGame ? 'Game' : '') PNG Icon&path=$url";
 }
 
-timeout.exe 15 /nobreak;
+# timeout.exe  /nobreak;

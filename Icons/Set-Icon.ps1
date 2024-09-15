@@ -1,7 +1,7 @@
-$Source = @"
-    using System;
-    using System.Runtime.InteropServices;
-    
+$Signature = @"
+    [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+    public static extern int SHGetSetFolderCustomSettings(ref Shfoldercustomsettings pfcs, string pszPath, uint dwReadWrite);
+
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     public struct Shfoldercustomsettings
     {
@@ -21,28 +21,36 @@ $Source = @"
         public string pszLogo;
         public uint cchLogo;
     }
+"@
 
-"@;
-
-Add-Type -TypeDefinition $Source
-$iconPath = "D:\Game Of Thrones.ico"; 
-$fcs = New-Object Shfoldercustomsettings
+$addTypeSplat = @{
+    MemberDefinition = $Signature
+    PassThru         = $true
+    Name             = "Shell32"
+    Namespace        = 'Shell32Functions'
+}
+$Shell32 = Add-Type @addTypeSplat;
+$iconPath = $args[1]; 
+$fcs = New-Object $Shell32[1]
 $fcs.dwSize = 104;
 $fcs.dwMask = 0x00000010;
 $fcs.pszIconFile = $iconPath
 $fcs.cchIconFile = $iconPath.Length
 $fcs.iIconIndex = 0
-
-$Signature = @"
-    [DllImport("shell32.dll", CharSet = CharSet.Auto)]
-    public static extern int SHGetSetFolderCustomSettings(ref object pfcs, string pszPath, uint dwReadWrite);
-"@
-
-$addTypeSplat = @{
-    MemberDefinition = $Signature
-    PassThru = $true
-    Name = "Shell32"
-    Namespace = 'Shell32Functions'
+$result = $Shell32[0]::SHGetSetFolderCustomSettings([Ref] $fcs, $args[0], 0x00000002);
+if ($result -ne 0) {
+    Write-Host "Failed to set folder custom settings. Error Code: $result" -ForegroundColor Red;
 }
-$ShowWindowAsync = Add-Type @addTypeSplat;
-$ShowWindowAsync::SHGetSetFolderCustomSettings([Ref] $fcs, "D:\New folder (3)", 0x00000010)
+else {
+    Write-Host "Folder custom settings updated successfully."
+}
+
+
+# Ensure proper cleanup if any unmanaged memory was used
+if ($fcs.pvid -ne [IntPtr]::Zero) {
+    [System.Runtime.InteropServices.Marshal]::FreeCoTaskMem($fcs.pvid)
+}
+
+if ($fcs.pclsid -ne [IntPtr]::Zero) {
+    [System.Runtime.InteropServices.Marshal]::FreeCoTaskMem($fcs.pclsid)
+}
