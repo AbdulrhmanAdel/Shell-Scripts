@@ -47,10 +47,10 @@ else {
 
 
 # Ensure proper cleanup if any unmanaged memory was used
-if ($fcs.pvid -ne [IntPtr]::Zero) {
+if ($null -ne $fcs.pvid) {
     [System.Runtime.InteropServices.Marshal]::FreeCoTaskMem($fcs.pvid)
 }
 
-if ($fcs.pclsid -ne [IntPtr]::Zero) {
+if ($null -ne $fcs.pclsid) {
     [System.Runtime.InteropServices.Marshal]::FreeCoTaskMem($fcs.pclsid)
 }

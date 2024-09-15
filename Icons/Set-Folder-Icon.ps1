@@ -63,16 +63,9 @@ if (!$imagePath) {
 
 # Hide the Icon
 $iconFile = Get-Item -LiteralPath $iconPath -Force;
-Hide -fileInfo $iconFile;
+attrib.exe +h +s +r "$iconFile";
 
 & "$PSScriptRoot/Set-Icon.ps1" $directory.FullName "./$($iconFile.Name)";
-# Change Folder Icon
-$desktopPathFile = "$directoryPath\desktop.ini";
-attrib.exe +r +h +s "$desktopPathFile";
-if (!$directory.Attributes.HasFlag([System.IO.FileAttributes]::System)) {
-    $directory.Attributes += 'System';
-}
-
 Write-Host "DONE Image Converted Successfully" -ForegroundColor Green;
 if ($noTimeout) {
     EXIT;
