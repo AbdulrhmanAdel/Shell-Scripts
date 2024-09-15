@@ -1,12 +1,4 @@
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    $argBuilder = "";
-    foreach ($arg in $args) {
-        $argBuilder += """$arg"" ";
-    }
-    Write-Host $argBuilder;
-    Start-Process pwsh.exe -Verb RunAs "-File ""$($MyInvocation.MyCommand.Path)"" $($argBuilder)";
-    exit;
-}
+& Run-As-Admin.ps1 $args;
 
 $files = $args;
 $takeOwn = "TakeOwn";
@@ -24,10 +16,6 @@ foreach ($file in $files) {
         &$takeOwn /f "$file" /r /d y
     }
     Write-Output "TakeDown finished for $file"
-}
-
-foreach ($file in $files) {
-    Write-Output "$file";
 }
 
 timeout.exe 5;
