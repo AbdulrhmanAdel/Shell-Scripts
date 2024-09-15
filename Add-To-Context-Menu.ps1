@@ -1,4 +1,6 @@
+# Max Entries = 16
 & Run-As-Admin.ps1;
+
 Write-Host "Starting" -ForegroundColor Green;
 $Recycle = "RecycleBin";
 $baseScriptsPath = $PSScriptRoot;
@@ -6,7 +8,8 @@ function BuildScript {
     param (
         [string]$scriptPath,
         [string[]] $additionalArgs,
-        [string]$target
+        [string]$target,
+        [string]$powershellArgs
     )
 
     $finalArgs = "";
@@ -15,7 +18,7 @@ function BuildScript {
     }
 
     $target ??= "%1";
-    return "pwsh.exe -WindowStyle Maximized -file ""$baseScriptsPath\$scriptPath"" ""$target"" $finalArgs";
+    return "pwsh.exe $($powershellArgs) -file ""$baseScriptsPath\$scriptPath"" ""$target"" $finalArgs";
 }
 
 function Handle {
@@ -33,7 +36,11 @@ function Handle {
 
     $key = $element.Key;
     $target = $extension -eq $Recycle ? "$($env:SystemDrive)\`$Recycle.bin" : "%1";
-    $command = BuildScript -scriptPath $element.ScriptPath -additionalArgs $element.AdditionalArgs -target $target; 
+    $command = BuildScript -scriptPath $element.ScriptPath `
+        -additionalArgs $element.AdditionalArgs `
+        -target $target `
+        -powershellArgs $element.PowershellArgs;
+
     reg add "$base\$key" /d $element.Title /t REG_SZ /f | Out-Null;
     if ($element.Icon) {
         reg add "$base\$key" /v "Icon" /d $element.Icon /t REG_SZ /f | Out-Null;
@@ -63,31 +70,29 @@ $mediaPath = @(
     }
 );
 
-$safeDelete = @(
-    @{
-        Title = "Delete" 
-        Key   = "9999 Delete" 
-    }
-);
-
 $iconsPath = @(
     @{
         Title = "Icons" 
-        Key   = "999999 Icons" 
+        Key   = "091 Icons" 
     }
 )
+
+$iconsInfo = @{
+    Title = "Info" 
+    Key   = "09 Info" 
+};
 
 $attributesPath = @(
     @{
         Title = "Attributes"
-        Key   = "9999999 Attributes"
+        Key   = "092 Attributes"
     }
 )
 
 $infoPath = @(
     @{
         Title = "Info"
-        Key   = "99999 Info"
+        Key   = "092 Info"
     }
 )
 # $windowsPath = @(
@@ -128,14 +133,6 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
-        Extensions = @("*")
-        Title      = "Pin To Start"
-        Key        = "Pin To Start"
-        ScriptPath = "Tools\Pin-File-To-Start.ps1"
-        Path       = $toolsPath
-        Icon       = "pwsh.exe"
-    },
-    @{
         Extensions = @("*", "Directory")
         Title      = "TakeOwn"
         Key        = "TakeOwn"
@@ -151,22 +148,7 @@ $scripts = @(
         Path       = $toolsPath
         Icon       = "pwsh.exe"
     },
-    @{
-        Extensions = @("*", "Directory")
-        Title      = "Create Symblink"
-        Key        = "Create Symblink"
-        ScriptPath = "Tools\Create-Symblink.ps1"
-        Path       = $toolsPath
-        Icon       = "pwsh.exe"
-    },
-    @{
-        Extensions = @("*", "Directory")
-        Title      = "Copy To Different Drive With The Same Hierarchy"
-        Key        = "999-Copy-To-Different-Drive-With-The-Same-Hierarchy"
-        ScriptPath = "Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"
-        Path       = $toolsPath
-        Icon       = "pwsh.exe"
-    },
+    
     @{
         Extensions = @("*")
         Title      = "Get Hash"
@@ -177,30 +159,21 @@ $scripts = @(
     },
     @{
         Extensions = @("Directory")
-        Title      = "Download Video"
-        Key        = "0 Download Video"
+        Title      = "Download Youtube Video"
+        Key        = "90 Download Video"
         ScriptPath = "Youtube\Download-Video.ps1"
-        Path       = $youtubePath
+        Path       = @()
         Icon       = "pwsh.exe"
     },
     @{
         Extensions     = @("Drive", "*", "Directory", $Recycle)
         Title          = "Safe Delete"
-        Key            = "000 Safe Delete"
+        Key            = "99 Safe Delete"
         ScriptPath     = "Tools\Safe-Delete.ps1"
-        Path           = $safeDelete
+        Path           = @()
         Icon           = "pwsh.exe"
         AdditionalArgs = @("--prompt")
     },
-    # @{
-    #     Extensions     = @("Drive", "*", "Directory", $Recycle)
-    #     Title          = "Safe Delete (Prompt For Passes)"
-    #     Key            = "999 Safe Delete (Prompt For Passes)"
-    #     ScriptPath     = "Tools\Safe-Delete.ps1"
-    #     Path           = $safeDelete
-    #     Icon           = "pwsh.exe"
-    #     AdditionalArgs = @("--prompt", "--promptPasses")
-    # },
     @{
         Extensions = @("Directory")
         Title      = "Set Icon"
@@ -226,29 +199,78 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
-        Extensions = @("*", "Directory")
-        Title      = "Display Attributes"
-        Key        = "Display Attributes"
-        ScriptPath = "Attributes\Display-Attributes.ps1"
-        Path       = $attributesPath
-        Icon       = "pwsh.exe"
-    },
-    @{
-        Extensions = @("*", "Directory")
-        Title      = "Change Attributes"
-        Key        = "Change Attributes"
-        ScriptPath = "Attributes\Change-Attributes.ps1"
-        Path       = $attributesPath
-        Icon       = "pwsh.exe"
-    },
-    @{
         Extensions = @("Directory")
-        Title      = "Display Folder Content"
-        Key        = "Display Folder Content"
-        ScriptPath = "Tools\Display-Folder-Content.ps1"
-        Path       = $infoPath
+        Title      = "Open Desktop.ini"
+        Key        = "Open Desktop.ini"
+        ScriptPath = "Icons\Info\Open-Desktop.ini.ps1"
+        Path       = $iconsPath + $iconsInfo
         Icon       = "pwsh.exe"
-    }
+    },
+    @{
+        Extensions     = @("Directory")
+        Title          = "Open Ico"
+        Key            = "Open Ico"
+        ScriptPath     = "Icons\Info\Open-Ico.ps1"
+        Path           = $iconsPath + $iconsInfo
+        Icon           = "pwsh.exe"
+        PowershellArgs = "-w Hidden"
+    }#,
+    # @{
+    #     Extensions = @("*", "Directory")
+    #     Title      = "Display Attributes"
+    #     Key        = "Display Attributes"
+    #     ScriptPath = "Attributes\Display-Attributes.ps1"
+    #     Path       = $attributesPath
+    #     Icon       = "pwsh.exe"
+    # },
+    # @{
+    #     Extensions = @("*", "Directory")
+    #     Title      = "Change Attributes"
+    #     Key        = "Change Attributes"
+    #     ScriptPath = "Attributes\Change-Attributes.ps1"
+    #     Path       = $attributesPath
+    #     Icon       = "pwsh.exe"
+    # }#,
+    # @{
+    #     Extensions = @("Directory")
+    #     Title      = "Display Folder Content"
+    #     Key        = "Display Folder Content"
+    #     ScriptPath = "Tools\Display-Folder-Content.ps1"
+    #     Path       = $infoPath
+    #     Icon       = "pwsh.exe"
+    # },
+        # @{
+    #     Extensions = @("*")
+    #     Title      = "Pin To Start"
+    #     Key        = "Pin To Start"
+    #     ScriptPath = "Tools\Pin-File-To-Start.ps1"
+    #     Path       = $toolsPath
+    #     Icon       = "pwsh.exe"
+    # },
+    # @{
+    #     Extensions = @("*", "Directory")
+    #     Title      = "Create Symblink"
+    #     Key        = "Create Symblink"
+    #     ScriptPath = "Tools\Create-Symblink.ps1"
+    #     Path       = $toolsPath
+    #     Icon       = "pwsh.exe"
+    # },
+    # @{
+    #     Extensions = @("*", "Directory")
+    #     Title      = "Copy To Different Drive With The Same Hierarchy"
+    #     Key        = "999-Copy-To-Different-Drive-With-The-Same-Hierarchy"
+    #     ScriptPath = "Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"
+    #     Path       = $toolsPath
+    #     Icon       = "pwsh.exe"
+    # },    # @{
+    #     Extensions     = @("Drive", "*", "Directory", $Recycle)
+    #     Title          = "Safe Delete (Prompt For Passes)"
+    #     Key            = "999 Safe Delete (Prompt For Passes)"
+    #     ScriptPath     = "Tools\Safe-Delete.ps1"
+    #     Path           = $safeDelete
+    #     Icon           = "pwsh.exe"
+    #     AdditionalArgs = @("--prompt", "--promptPasses")
+    # },
 ) 
 #endregion
 

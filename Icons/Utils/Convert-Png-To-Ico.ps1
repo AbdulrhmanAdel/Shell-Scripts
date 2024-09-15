@@ -9,6 +9,13 @@ function ResizeImage {
     )
     $newImage = New-Object System.Drawing.Bitmap($newWidth, $newHeight);
     $graphics = [System.Drawing.Graphics]::FromImage($newImage);
+
+    # Set graphics quality settings for high-quality resizing
+    $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic;
+    $graphics.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality;
+    $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias;
+
+    # Draw the image with the new dimensions
     $graphics.DrawImage($oldImage, 0, 0, $newWidth, $newHeight);
     $graphics.Dispose();
     return $newImage;
@@ -19,7 +26,7 @@ function ConvertImageToIco  (
     [string] 
     $sourceImagePath,
     $newFilePath,
-    $sizes = @(16, 24, 32, 48, 64, 96, 128, 256)
+    $sizes = @(256, 128, 64, 48, 32, 16)
 ) {
     
     Write-Host $args -ForegroundColor Green;
@@ -29,7 +36,7 @@ function ConvertImageToIco  (
     # $sizes = 256, 128, 64, 48, 32, 16;
     # $sizes = 256, 128, 96, 64, 48, 32, 24, 16;
     # $sizes = 16, 24, 32, 48, 64, 96, 128, 256;
-    # $sizes = 256, 128, 64, 48, 40, 32, 24, 20, 16;
+    # $sizes = 256, 128, 96, 64, 48, 32, 24, 16;
 
     $sourceImage = New-Object System.Drawing.Bitmap($sourceImagePath)
     $imageStreams = [System.IO.MemoryStream[]]::new($sizes.Length);
