@@ -13,6 +13,8 @@ function DonwloadImage {
         $imageUrl
     )
     
+    Write-Host "Getting Image From " -NoNewline;
+    Write-Host $imageUrl -ForegroundColor Red;
     $tempFilePath = "$($env:TEMP)\$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss').png";
     if (Test-Path -LiteralPath $tempFilePath) {
         if (-not (Read-Host "Do you want to Use Image From Cache?")) {
@@ -71,6 +73,7 @@ if (!$folderHasIcon) {
     if (!$imagePath) {
         $imagePath = GetIamgePath
     }
+
     & "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -imagePath """$imagePath""" -saveFilePath """$iconPath""";
 }
 else {
@@ -89,8 +92,8 @@ attrib.exe +h +s +r "$iconFile";
 
 & "$PSScriptRoot/Set-Icon.ps1" $directory.FullName "./$($iconFile.Name)";
 Write-Host "DONE Image Converted Successfully" -ForegroundColor Green;
-if ($noTimeout) {
-    EXIT;
-}
+# if ($noTimeout) {
+#     EXIT;
+# }
 
 timeout.exe 10;
