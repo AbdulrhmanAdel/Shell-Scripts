@@ -73,10 +73,9 @@ if (!$folderHasIcon) {
     if (!$imagePath) {
         $imagePath = GetIamgePath
     }
-
     & "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -imagePath """$imagePath""" -saveFilePath """$iconPath""";
 }
-else {
+elseif (!$imagePath) {
     $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to refresh it (Y) Get new one (N)?";
     if (!$overwrite) {
         if (!$imagePath) {
