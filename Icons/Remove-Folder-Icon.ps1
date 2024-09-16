@@ -9,6 +9,3 @@ $deskTopAndIco | ForEach-Object {
     Remove-Item -LiteralPath $_.FullName -Force;
 }
 
-$tempFolderPath = $folderPath + "​"; 
-Move-Item -LiteralPath $folderPath -Destination $tempFolderPath;
-

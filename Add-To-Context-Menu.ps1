@@ -176,17 +176,9 @@ $scripts = @(
     },
     @{
         Extensions = @("Directory")
-        Title      = "Set Icon"
-        Key        = "Set Icon"
+        Title      = "Set Or Refresh Icon"
+        Key        = "Set Or Refresh Icon"
         ScriptPath = "Icons\Set-Folder-Icon.ps1"
-        Path       = $iconsPath
-        Icon       = "pwsh.exe"
-    },
-    @{
-        Extensions = @("Directory")
-        Title      = "Set Icon (Auto)"
-        Key        = "Set Icon (Auto)"
-        ScriptPath = "Icons\Web\Search-Icon.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
     },
@@ -239,7 +231,7 @@ $scripts = @(
     #     Path       = $infoPath
     #     Icon       = "pwsh.exe"
     # },
-        # @{
+    # @{
     #     Extensions = @("*")
     #     Title      = "Pin To Start"
     #     Key        = "Pin To Start"

@@ -1,4 +1,13 @@
 Write-Host "Set-Folder-Icon ARGS $($args)" -ForegroundColor DarkMagenta;
+
+function AutoHandleIcon {
+    $replaceText = "\[(FitGirl|Dodi).*\]|-.*Edition";
+    $name = $directory.Name -replace $replaceText, "";
+    $url = [System.Web.HttpUtility]::UrlEncode($directory.FullName);
+    $isGame = $directory.FullName.Contains("Game");
+    Start-Process "https://www.google.com/search?tbm=isch&q=$($name) $($isGame ? 'Game' : '') PNG Icon&path=$url";
+}
+
 function DonwloadImage {
     param (
         $imageUrl
@@ -19,8 +28,12 @@ function DonwloadImage {
 }
 
 function GetIamgePath {
-    $imageSourceType ??= & Options-Selector.ps1 @("FromBrowser", "FromLink", "FromPath") -title "Select Icon Source" --mustSelectOne;
+    $imageSourceType ??= & Options-Selector.ps1 @("FromBrowser (Auto)", "FromBrowser", "FromLink", "FromPath") -title "Select Icon Source" --mustSelectOne;
     switch ($imageSourceType) {
+        "FromBrowser (Auto)" {
+            AutoHandleIcon
+            return DonwloadImage -imageUrl (Read-Host "If Auto Failed, Please Enter Icon Url Manually");
+        }
         "FromBrowser" {
             Start-Process "https://www.google.com/search?tbm=isch&q=$($directory.Name) Icon";
             return DonwloadImage -imageUrl (Read-Host "Please Enter Icon Url");
@@ -33,7 +46,6 @@ function GetIamgePath {
             return Read-Host "Please Enter Icon Path.";
         }
     }
-
 }
 
 function Hide {
@@ -54,12 +66,22 @@ $directoryPath = $args[0]
 . Parse-Args.ps1 $args;
 $directory = Get-Item -LiteralPath $directoryPath -Force;
 $iconPath = "$($directory.FullName)\$($directory.Name).ico";
-
-if (!$imagePath) {
-    $imagePath = GetIamgePath
+$folderHasIcon = Test-Path -LiteralPath $iconPath;
+if (!$folderHasIcon) {
+    if (!$imagePath) {
+        $imagePath = GetIamgePath
+    }
+    & "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -imagePath """$imagePath""" -saveFilePath """$iconPath""";
 }
-
-& "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -imagePath """$imagePath""" -saveFilePath """$iconPath""";
+else {
+    $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to refresh it (Y) Get new one (N)?";
+    if (!$overwrite) {
+        if (!$imagePath) {
+            $imagePath = GetIamgePath
+        }
+        & "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -imagePath """$imagePath""" -saveFilePath """$iconPath""";    
+    }
+}
 
 # Hide the Icon
 $iconFile = Get-Item -LiteralPath $iconPath -Force;
