@@ -1,11 +1,28 @@
 Write-Host "Set-Folder-Icon ARGS $($args)" -ForegroundColor DarkMagenta;
-
-function AutoHandleIcon {
+$iconWebsites = @("Google", "Yandex", "Deviantart");
+$iconWebsite = "Deviantart";
+function OpenBrowser {
+    param(
+        [switch]
+        $AppendPath
+    )
     $replaceText = "\[(FitGirl|Dodi).*\]|-.*Edition";
     $name = $directory.Name -replace $replaceText, "";
-    $url = [System.Web.HttpUtility]::UrlEncode($directory.FullName);
     $isGame = $directory.FullName.Contains("Game");
-    Start-Process "https://www.google.com/search?tbm=isch&q=$($name) $($isGame ? 'Game' : '') PNG Icon&path=$url";
+    $query = "$($name) $($isGame ? 'Game' : '') Icon";
+    if ($AppendPath) {
+        $url = [System.Web.HttpUtility]::UrlEncode($directory.FullName);
+        $query += "&path=$url"
+    }
+
+    $link = $null;
+    switch ($iconWebsite) {
+        "Google" { $link = "https://www.google.com/search?tbm=isch&q=$query"; break; }
+        "Yandex" { $link = "https://yandex.com/images/search?$query"; break; }
+        "Deviantart" { $link = "https://www.deviantart.com/search?q=$query"; break; }
+        Default { $link = "https://www.deviantart.com/search?q=$query"; }
+    }
+    Start-Process $link;
 }
 
 function DonwloadImage {
@@ -26,43 +43,34 @@ function DonwloadImage {
 
     $tempImage = New-Item "$tempFilePath"; 
     Invoke-WebRequest -UseBasicParsing -uri $imageUrl -outfile $tempFilePath;
+    Write-Host "Image Downloaded To $($tempImage.FullName)" -ForegroundColor Red;
     return $tempImage.FullName;
 }
 
+
+$imageSourceHandlers = @{
+    "FromBrowser (Auto Set)" = {
+        OpenBrowser -AppendPath;
+        EXIT;
+    }
+    "FromBrowser"            = { 
+        OpenBrowser;
+        return DonwloadImage -imageUrl (Read-Host "Please Enter Icon Url"); 
+    }
+    "FromLink"               = { 
+        $imageUrl = Read-Host "Please Enter Icon Url";
+        return DonwloadImage -imageUrl $imageUrl; 
+    }
+    "FromPath"               = { return Read-Host "Please Enter Icon Path."; }
+};
+
 function GetIamgePath {
-    $imageSourceType ??= & Options-Selector.ps1 @("FromBrowser (Auto)", "FromBrowser", "FromLink", "FromPath") -title "Select Icon Source" --mustSelectOne;
-    switch ($imageSourceType) {
-        "FromBrowser (Auto)" {
-            AutoHandleIcon
-            return DonwloadImage -imageUrl (Read-Host "If Auto Failed, Please Enter Icon Url Manually");
-        }
-        "FromBrowser" {
-            Start-Process "https://www.google.com/search?tbm=isch&q=$($directory.Name) Icon";
-            return DonwloadImage -imageUrl (Read-Host "Please Enter Icon Url");
-        }
-        "FromLink" { 
-            $imageUrl = Read-Host "Please Enter Icon Url";
-            return DonwloadImage -imageUrl $imageUrl;
-        }
-        "FromPath" { 
-            return Read-Host "Please Enter Icon Path.";
-        }
+    $imageSource ??= & Options-Selector.ps1 $imageSourceHandlers.Keys -title "Select Icon Source" --mustSelectOne;
+    $imageSourceHandlerFn = $imageSourceHandlers[$imageSource];
+    if ($imageSourceHandlerFn) {
+        return $imageSourceHandlerFn.Invoke()[-1]
     }
 }
-
-function Hide {
-    param (
-        $fileInfo
-    )
-    
-    if (!$fileInfo.Attributes.HasFlag([System.IO.FileAttributes]::Hidden)) {
-        $fileInfo.Attributes += 'Hidden';
-    }
-    if (!$fileInfo.Attributes.HasFlag([System.IO.FileAttributes]::System)) {
-        $fileInfo.Attributes += 'System';
-    }
-}
-
 
 $directoryPath = $args[0]
 . Parse-Args.ps1 $args;
@@ -95,4 +103,4 @@ Write-Host "DONE Image Converted Successfully" -ForegroundColor Green;
 #     EXIT;
 # }
 
-timeout.exe 10;
+timeout.exe 15;

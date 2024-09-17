@@ -1,5 +1,6 @@
 # Open standard input and output streams.
 $logFilePath = "$($PSScriptRoot)/Log.txt";
+Clear-Content -LiteralPath $logFilePath;
 function Log {
     param (
         $text
@@ -65,7 +66,6 @@ function DonwloadImage {
     return $tempImage.FullName;
 }
 
-
 function IsGameFolder {
     param (
         $folderPath
@@ -74,6 +74,7 @@ function IsGameFolder {
 
     return Test-Path -Path "$folderPath/*" -Include @("setup*.exe", "install*.exe");
 }
+
 function GetFolders {
     param ($directoryPath = "G:\Games")
     return Get-ChildItem -Path $directoryPath -Directory -Recurse | Where-Object {
@@ -92,6 +93,7 @@ function HandleFolder {
     if ($global:folders.Length -eq 0) {
         return;
     }
+
     $local:folder , $global:folders = $global:folders;
     Send-Response -response @{
         action     = "process"
@@ -117,6 +119,7 @@ function HandleFolder {
 while ($true) { 
     try {
         $json = Read-Message;
+        Log -text "=======================";
         Log -text $json;
         if ($null -eq $json) {
             break  # Exit the loop if there is an error or end of input stream.
@@ -142,4 +145,6 @@ while ($true) {
         Add-Content "Icons.txt" $_.ScriptStackTrace;
         EXIT;
     }
+    Log -text "=======================";
+    Log -text "";
 }
