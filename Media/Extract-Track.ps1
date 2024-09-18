@@ -2,21 +2,23 @@
 
 $codecSettings = @{
     # Audio
-    "aac"    = @{ Type = "a"; Encoder = "aac"; Extension = ".aac" }
-    "m4a"    = @{ Type = "a"; Encoder = "aac"; Extension = ".m4a" }
-    "opus"   = @{ Type = "a"; Encoder = "libopus"; Extension = ".opus" }
-    "mp3"    = @{ Type = "a"; Encoder = "libmp3lame"; Extension = ".mp3" }
+    "aac"          = @{ Type = "a"; Encoder = "aac"; Extension = ".aac" }
+    "m4a"          = @{ Type = "a"; Encoder = "aac"; Extension = ".m4a" }
+    "opus"         = @{ Type = "a"; Encoder = "libopus"; Extension = ".opus" }
+    "mp3"          = @{ Type = "a"; Encoder = "libmp3lame"; Extension = ".mp3" }
     # Subtitles
     # ASS (Advanced SSA) subtitle (decoders: ssa ass) (encoders: ssa ass)
-    "ass"    = @{ Type = "s"; Encoder = "ass"; Extension = ".ass" }
+    "ass"          = @{ Type = "s"; Encoder = "ass"; Extension = ".ass" }
     # SubRip subtitle with embedded timing
-    "srt"    = @{ Type = "s"; Encoder = "srt"; Extension = ".srt" }
+    "srt"          = @{ Type = "s"; Encoder = "srt"; Extension = ".srt" }
     # SubRip subtitle (decoders: srt subrip) (encoders: srt subrip)
-    "subrip" = @{ Type = "s"; Encoder = "subrip"; Extension = ".srt" }
+    "subrip"       = @{ Type = "s"; Encoder = "subrip"; Extension = ".srt" }
     # DVB subtitles (decoders: dvbsub) (encoders: dvbsub)
     # "dvb_subtitle" = @{ Type = "s"; Encoder = "dvbsub"; Extension = ".sub" }
-    # DVD subtitles (decoders: dvdsub) (encoders: dvdsub)
-    # "dvd_subtitle" = @{ Type = "s"; Encoder = "dvdsub"; Extension = ".idx" }
+    # # DVD subtitles (decoders: dvdsub) (encoders: dvdsub)
+    # "dvd_subtitle" = @{ CustomHandler = {
+    #     & mkvextract 
+    # }; Extension = ".idx" }
 };
 
 
@@ -27,6 +29,12 @@ function HandleTrack {
     )
 
     $trackInfo ??= GetTrackInfo($pathInfo.FullName);
+
+    if ($trackInfo.CustomHandler) {
+        $trackInfo.CustomHandler.Invoke($fileInfo, $trackInfo);
+        return;
+    }
+
     Extract -FileInfo $fileInfo `
         -trackInfo $trackInfo;
 }
