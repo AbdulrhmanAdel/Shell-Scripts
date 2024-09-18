@@ -22,6 +22,20 @@ function GetYear {
         : $null
 }
 
+
+function GetShowVersion {
+    param (
+        $name,
+        $Year
+    )
+
+    if ($name -match "$year(?<Version>.*)") {
+        return $Matches["Version"]
+    }
+
+    return $null;
+}
+
 # Allowed special characters in NTFS filenames
 $pattern = '!|#|\$|%|&|\(|\)|-|@|\^|_|{|}|~|\+|=|,|;|\.|\[|\]'
 function NormalizeName() {
@@ -104,7 +118,17 @@ function GetSeriesOrMovieDetails {
 
     $showName ??= $name;
     $year = GetYear -name $showName;
-    $showName = $showName -replace $yearRegex, ""
+    if ($year) {
+        if (!$onlyBasicInfo) {
+            $version = GetShowVersion -name $showName -year $year;
+            if ($version) {
+                $details['Keywords'] = $details['Keywords'] + $version.Trim();
+            }
+        }
+
+        $showName = $showName -replace "$year.*", "";
+    }
+
     $details.Year = $year;
     $details.Title = $showName.Trim();
     return $details;

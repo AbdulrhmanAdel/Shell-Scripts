@@ -1,13 +1,16 @@
+. Parse-Args.ps1 $args;
+
 $audioConfig = @{
     'mp3'  = @{ Encoder = "libmp3lame"; BitRates = @('128K', '160K', '192K', '256K', '320K') }
     'm4a'  = @{ Encoder = "aac"; BitRates = @('128K', '160K', '192K', '256K') }
     'opus' = @{ Encoder = "libopus"; BitRates = @('64K', '96K', '128K') }
 }
 
-$regex = "\.($($audioConfig.Keys -join '|'))$";
-$files = @($args | Where-Object { $_ -match $regex -or (Test-Path -LiteralPath $_ -PathType Container) })
+$files = @($args)
 if ($files.Length -le 0) { Write-Host "No Files Found" -ForegroundColor Red; Start-Sleep -Seconds 10; };
-$global:outputPath = & Folder-Picker.ps1 -intialDirectory "D:\";
+if (!$global:outputPath) {
+    $global:outputPath = & Folder-Picker.ps1 -intialDirectory "D:\";
+}
 
 #region Functions
 
@@ -59,7 +62,7 @@ function Prepeare(
     }
 
     Get-ChildItem -LiteralPath "$($info.FullName)" | Where-Object {
-        $_.Name -match $regex -or $_.Extension -eq ""
+        return Is-Media.ps1 $_.FullName
     } | ForEach-Object {
         $finalOutputPath = $info.FullName;
         if ($outputPath) {
@@ -92,6 +95,6 @@ $keepMetadata = & Prompt.ps1 -title "Keep Metadata?" -defaultValue $false -messa
 
 #endregion
 
-$args | Where-Object { $_ -match $regex -or (Test-Path -LiteralPath $_ -PathType Container) } | ForEach-Object {
+$args | ForEach-Object {
     Prepeare -inputPath $_ -outputPath $global:outputPath;
 }

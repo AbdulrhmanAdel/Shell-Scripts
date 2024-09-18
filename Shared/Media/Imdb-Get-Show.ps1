@@ -13,12 +13,7 @@ function GetShow {
         $sameType = $_.qid -match $type;
         if (!$sameType) { return $false }
         if (!!$Year) {
-            $hasSameYear = $_.y -eq $Year;
-            if ($hasSameYear -and !!$Type) {
-                return 
-            }    
-        
-            return $hasSameYear;
+            return $_.y -eq $Year;
         }
 
         return $sameType;

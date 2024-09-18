@@ -1,11 +1,14 @@
 Write-Host "Set-Folder-Icon ARGS $($args)" -ForegroundColor DarkMagenta;
-$iconWebsites = @("Google", "Yandex", "Deviantart");
-$iconWebsite = "Deviantart";
+
 function OpenBrowser {
     param(
         [switch]
         $AppendPath
     )
+
+    $iconWebsite = & Options-Selector.ps1 @("Google", "Yandex", "Deviantart") `
+        -title "Select Icon Website" --mustSelectOne;
+    $iconWebsite ??= "Deviantart";
     $replaceText = "\[(FitGirl|Dodi).*\]|-.*Edition";
     $name = $directory.Name -replace $replaceText, "";
     $isGame = $directory.FullName.Contains("Game");
@@ -18,7 +21,7 @@ function OpenBrowser {
     $link = $null;
     switch ($iconWebsite) {
         "Google" { $link = "https://www.google.com/search?tbm=isch&q=$query"; break; }
-        "Yandex" { $link = "https://yandex.com/images/search?$query"; break; }
+        "Yandex" { $link = "https://yandex.com/images/search?ih=256&iw=256&isize=eq&itype=png&text=$query"; break; }
         "Deviantart" { $link = "https://www.deviantart.com/search?q=$query"; break; }
         Default { $link = "https://www.deviantart.com/search?q=$query"; }
     }
@@ -86,6 +89,7 @@ if (!$folderHasIcon) {
 elseif (!$imagePath) {
     $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to refresh it (Y) Get new one (N)?";
     if (!$overwrite) {
+        # & "$($PSScriptRoot)/Remove-Icon.ps1" $directoryPath;
         if (!$imagePath) {
             $imagePath = GetIamgePath
         }

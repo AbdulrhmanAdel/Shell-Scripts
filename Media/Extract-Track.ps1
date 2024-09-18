@@ -3,19 +3,40 @@ function ExtractTrack {
         $fileInfo,
         $trackInfo
     )
+    $format = $trackInfo.Format;
+    $handler = $formatMap[$format];
+    if ($handler) {
+        $handler.Invoke($fileInfo.FullName, $fileInfo.Directory.FullName);
+        return;
+    }
+
+    $format ??= "srt";
     $fileDirectoryName = $fileInfo.DirectoryName;
-    $fileName = $fileInfo.Name.replace($fileInfo.Extension, ".$($trackInfo["extension"])");
+    $fileName = $fileInfo.Name.replace($fileInfo.Extension, ".$format");
     $output = "$fileDirectoryName\$fileName";
-    
+
     $processArgs = @(
         """$($fileInfo.FullName)""",
         "tracks",
-        """$($trackInfo["index"]):$output"""
+        """$($trackInfo["Index"]):$output"""
     );
     Start-Process mkvextract -NoNewWindow -Wait `
         -ArgumentList $processArgs;
 }
 
+
+$formatMap = @{
+    "srt" = "srt"
+    "ass" = "ass"
+    "aac" = {
+        param (
+            [string]$InputPath,
+            [string]$OutputPath
+        )
+
+        & "$($PSScriptRoot)\Compress\Modules\Audio-Compressor.ps1" $InputPath;
+    } 
+}
 function GetTrackInfo($inputPath) {
     $json = & mediaInfo  --Output=JSON "$inputPath" | ConvertFrom-Json;
     $tracks = $json.media.track | Where-Object { $_.'@type' -eq "Text" -or $_.'@type' -eq "Audio" }
@@ -25,18 +46,14 @@ function GetTrackInfo($inputPath) {
     $streamOrder = (Read-Host "Please Enter StreamOrder") -as [int];
     $selectedTrack = $tracks | Where-Object { $_.StreamOrder -eq $streamOrder };
     $format = $selectedTrack.Format.ToLower();
-    if ($format -notin @("srt", "ass")) {
-        $format = "srt";
-    }
-    
     return @{
-        index     = $selectedTrack.StreamOrder
-        extension = $format
+        Index  = $selectedTrack.StreamOrder
+        Format = $format
     };
 }
 
 $trackInfo = $null;
-$files = $args | Where-Object { $_.EndsWith(".mkv") }
+$files = $args | Where-Object { Is-Video.ps1 $_; }
 foreach ($folderPath in $files) {
     $pathInfo = Get-Item -LiteralPath $folderPath;
     if ($pathInfo -is [System.IO.DirectoryInfo]) {
@@ -55,4 +72,4 @@ foreach ($folderPath in $files) {
 }
 
 
-timeout.exe 5;
+timeout.exe 15;
