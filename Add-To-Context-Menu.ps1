@@ -231,14 +231,14 @@ $scripts = @(
     #     Path       = $infoPath
     #     Icon       = "pwsh.exe"
     # },
-    # @{
-    #     Extensions = @("*")
-    #     Title      = "Pin To Start"
-    #     Key        = "Pin To Start"
-    #     ScriptPath = "Tools\Pin-File-To-Start.ps1"
-    #     Path       = $toolsPath
-    #     Icon       = "pwsh.exe"
-    # },
+    @{
+        Extensions = @("*")
+        Title      = "Pin To Start"
+        Key        = "Pin To Start"
+        ScriptPath = "Tools\Pin-File-To-Start.ps1"
+        Path       = $toolsPath
+        Icon       = "pwsh.exe"
+    } #,
     # @{
     #     Extensions = @("*", "Directory")
     #     Title      = "Create Symblink"
