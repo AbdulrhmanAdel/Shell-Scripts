@@ -2,17 +2,17 @@
 
 $codecSettings = @{
     # Audio
-    "aac"          = @{ Type = "a"; Encoder = "aac"; Extension = ".aac" }
-    "m4a"          = @{ Type = "a"; Encoder = "aac"; Extension = ".m4a" }
-    "opus"         = @{ Type = "a"; Encoder = "libopus"; Extension = ".opus" }
-    "mp3"          = @{ Type = "a"; Encoder = "libmp3lame"; Extension = ".mp3" }
+    "aac"    = @{ Library = "ffmpeg"; Type = "a"; Encoder = "aac"; Extension = ".aac" }
+    "m4a"    = @{ Library = "ffmpeg"; Type = "a"; Encoder = "aac"; Extension = ".m4a" }
+    "opus"   = @{ Library = "ffmpeg"; Type = "a"; Encoder = "libopus"; Extension = ".opus" }
+    "mp3"    = @{ Library = "ffmpeg"; Type = "a"; Encoder = "libmp3lame"; Extension = ".mp3" }
     # Subtitles
     # ASS (Advanced SSA) subtitle (decoders: ssa ass) (encoders: ssa ass)
-    "ass"          = @{ Type = "s"; Encoder = "ass"; Extension = ".ass" }
+    "ass"    = @{ Library = "ffmpeg"; Type = "s"; Encoder = "ass"; Extension = ".ass" }
     # SubRip subtitle with embedded timing
-    "srt"          = @{ Type = "s"; Encoder = "srt"; Extension = ".srt" }
+    "srt"    = @{ Library = "ffmpeg"; Type = "s"; Encoder = "srt"; Extension = ".srt" }
     # SubRip subtitle (decoders: srt subrip) (encoders: srt subrip)
-    "subrip"       = @{ Type = "s"; Encoder = "subrip"; Extension = ".srt" }
+    "subrip" = @{ Library = "ffmpeg"; Type = "s"; Encoder = "subrip"; Extension = ".srt" }
     # DVB subtitles (decoders: dvbsub) (encoders: dvbsub)
     # "dvb_subtitle" = @{ Type = "s"; Encoder = "dvbsub"; Extension = ".sub" }
     # # DVD subtitles (decoders: dvdsub) (encoders: dvdsub)
@@ -30,13 +30,22 @@ function HandleTrack {
 
     $trackInfo ??= GetTrackInfo($pathInfo.FullName);
 
+    if (!$trackInfo) { return; }
     if ($trackInfo.CustomHandler) {
         $trackInfo.CustomHandler.Invoke($fileInfo, $trackInfo);
         return;
     }
 
-    Extract -FileInfo $fileInfo `
-        -trackInfo $trackInfo;
+    switch ($trackInfo.Settings.Library) {
+        "ffmpeg" {  
+            Extract -FileInfo $fileInfo `
+                -trackInfo $trackInfo;
+            break; 
+        }
+        "mkvExtract" { break; }
+        Default {}
+    }
+    
 }
 
 function GetTrackInfo($inputPath) {
@@ -45,14 +54,18 @@ function GetTrackInfo($inputPath) {
         "$inputPath" | ConvertFrom-Json;
     $tracks = @($streamsInfo.streams | Where-Object { $codecSettings.ContainsKey($_.codec_name) })
     $options = $tracks | ForEach-Object {
-        $extension = ($codecSettings[$selectedTrack.codec_name]).Extension;
+        $extension = ($codecSettings[$_.codec_name]).Extension;
         $text = "$($_.tags.language) - $extension - $($_.codec_long_name)";
         return @{
             Key   = $text
             Value = $_.index
         } 
     };
-    $streamOrder = Options-Selector.ps1 -options $options --mustSelectOne
+    $streamOrder = Options-Selector.ps1 -options $options;
+    if (!$streamOrder) {
+        return $null;
+    }
+
     $selectedTrack = $tracks | Where-Object { $_.index -eq $streamOrder };
     return @{
         Index    = $streamOrder
@@ -73,7 +86,7 @@ function Extract {
     $fileName = $FileInfo.Name.replace($FileInfo.Extension, "$extension");
     $output = "$fileDirectoryName\$fileName";
     Write-Host "ffmpeg '-v' 'error' '-i' '$($FileInfo.FullName)' '-c:$($type)'  $encoder '-map' '0:$index' '$output'"
-    & ffmpeg "-v" "error" `
+    & ffmpeg "-y" "-v" "error" `
         "-i" "$($FileInfo.FullName)" `
         "-c:$($type)" "copy" `
         "-map" "0:$index" `

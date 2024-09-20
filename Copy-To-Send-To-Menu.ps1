@@ -8,7 +8,7 @@ $scriptPath = $PSScriptRoot;
 $menu = @(
     @{
         Name      = "01- Remove Unused Tracks.lnk"
-        Arguments = "-File ""$scriptPath\Media\Remove-Unused-Tracks.ps1"""
+        Arguments = "-File ""$scriptPath\Media\Remove-Unused-Tracks\Remove-Unused-Tracks.ps1"""
     },
     # @{
     #     Name      = "02- Media - Display Chapters Info.lnk"
