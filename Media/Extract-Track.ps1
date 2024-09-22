@@ -85,7 +85,6 @@ function Extract {
     $fileDirectoryName = $FileInfo.DirectoryName;
     $fileName = $FileInfo.Name.replace($FileInfo.Extension, "$extension");
     $output = "$fileDirectoryName\$fileName";
-    Write-Host "ffmpeg '-v' 'error' '-i' '$($FileInfo.FullName)' '-c:$($type)'  $encoder '-map' '0:$index' '$output'"
     & ffmpeg "-y" "-v" "error" `
         "-i" "$($FileInfo.FullName)" `
         "-c:$($type)" "copy" `

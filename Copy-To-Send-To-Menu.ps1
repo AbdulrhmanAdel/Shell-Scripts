@@ -23,6 +23,10 @@ $menu = @(
         Arguments = "-File ""$scriptPath\Media\Extract-track.ps1"""
     },
     @{
+        Name      = "02- Subtitle - Translate.lnk"
+        Arguments = "-File ""$scriptPath\Media\Subtitles\Translate\Translate.ps1"""
+    },
+    @{
         Name      = "02- Subtitle - Convertor.lnk"
         Arguments = "-File ""$scriptPath\Media\Subtitles\Convertors\Subtitle-Convertor.ps1"""
     },
