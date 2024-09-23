@@ -1,9 +1,3 @@
-param(
-    $Dialogs,
-    [string]$outputPath,
-    [string]$encoding
-)
-
 function SerializeTimeSpan ($timeSpan) {
     return '{0:00}:{1:00}:{2:00},{3:000}' -f $timeSpan.Hours, $timeSpan.Minutes, $timeSpan.Seconds, $timeSpan.Milliseconds
 }
@@ -31,7 +25,7 @@ function BuildFinalDialog {
 }
 
 $global:currenetSubIndex = 1;
-
+. Parse-Args.ps1 $args;
 $dialogs ??= $args[0];
 $outputPath ??= $args[1];
 $encoding ??= "UTF8"

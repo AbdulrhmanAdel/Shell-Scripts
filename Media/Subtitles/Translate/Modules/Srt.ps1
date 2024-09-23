@@ -1,10 +1,8 @@
 $file = $args[0];
 $info = Get-Item -LiteralPath $file;
 
-$Parser = Resolve-Path "$PSScriptRoot\..\..\Parser\Srt-Parser.ps1"
-$Assembler = Resolve-Path  "$PSScriptRoot\..\..\Parser\Srt-Assembler.ps1"
 $Translator = Resolve-Path "$PSScriptRoot\..\Helpers\Subtitles-Translator.ps1"
-$parsedResult = & $Parser -File $file;
+$parsedResult = &  Srt-Parser.ps1 -File $file;
 $content = $parsedResult | ForEach-Object {
     return $_.Content[0..($_.Content.Length - 2)]
 }
@@ -27,5 +25,5 @@ $newContent = $parsedResult | ForEach-Object {
 }
 
 $newPath = $info.Directory.FullName + "/" + $info.Name -replace "$($info.Extension)", ".ar$($info.Extension)";
-& $Assembler -Dialogs $newContent -outputPath $newPath -encoding "UTF8";
+& Srt-Assembler.ps1 -Dialogs $newContent -outputPath $newPath -encoding "UTF8";
     
