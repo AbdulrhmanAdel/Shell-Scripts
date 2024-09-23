@@ -1,10 +1,10 @@
 param(
     [string]$File,
-    [string]$Encoding
+    $Encoding
 )
 
 $file ??= $args[0];
-$encoding ??= & Get-File-Encoding.ps1 $file;
+$Encoding ??= & Get-File-Encoding.ps1 $file;
 function ParseTimeSpan {
     param (
         $time
@@ -19,7 +19,7 @@ function ParseTimeSpan {
 }
 
 #endregion
-$content = Get-Content -LiteralPath $file -Encoding $encoding;
+$content = Get-Content -LiteralPath $file -Encoding $Encoding;
 $timeRegex = "(?<StartTime>\d+:\d+:\d+,\d+) --> (?<EndTime>\d+:\d+:\d+,\d+)"
 $times = @();
 for ($i = 0; $i -lt $content.Count; $i++) {

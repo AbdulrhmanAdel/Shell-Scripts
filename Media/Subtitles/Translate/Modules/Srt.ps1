@@ -6,8 +6,7 @@ $parsedResult = &  Srt-Parser.ps1 -File $file;
 $content = $parsedResult | ForEach-Object {
     return $_.Content[0..($_.Content.Length - 2)]
 }
-    
-    
+
 $translations = & $Translator $content;
 if ($translations.Length -eq 0) {
     Write-Host "No Translation Found." -ForegroundColor Red;
