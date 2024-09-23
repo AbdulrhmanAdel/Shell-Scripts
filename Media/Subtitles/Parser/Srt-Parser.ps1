@@ -1,4 +1,8 @@
-. Parse-Args.ps1 $args;
+param(
+    [string]$File,
+    [string]$Encoding
+)
+
 $file ??= $args[0];
 $encoding ??= & Get-File-Encoding.ps1 $file;
 function ParseTimeSpan {

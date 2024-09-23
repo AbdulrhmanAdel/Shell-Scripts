@@ -8,15 +8,15 @@ $content = $parsedResult.Content | ForEach-Object {
     return $_.Content;
 }
     
-$translation = & $Translator $content;
-if (!$translation -or $translation.Length -eq 0) {
+$translations = & $Translator $content;
+if ($translations.Length -eq 0) {
+    Write-Host "No Translation Found." -ForegroundColor Red;
     return;
 }
 
-$translation = $translation[0];
 $currentIndex = 0;
 $parsedResult.Content = $parsedResult.Content | ForEach-Object {
-    $_.Content = $translation[$currentIndex];
+    $_.Content = $translations[$currentIndex];
     $currentIndex++;
     return $_;
 }

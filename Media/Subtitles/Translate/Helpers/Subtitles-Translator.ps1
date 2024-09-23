@@ -37,5 +37,12 @@ function Translate {
     return ConvertFrom-Json -InputObject ([System.Text.Encoding]::UTF8.GetString($res.Content));
 }
 
-$translated = Translate -sentences $args[0];
-return $translated;
+$translation = Translate -sentences $args[0];
+
+if (!$translation -or $translation.Length -eq 0) {
+    return @();
+}
+
+return $translation[0] |  ForEach-Object {
+    return $_ -replace "&quot;", ""
+};

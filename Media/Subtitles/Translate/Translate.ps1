@@ -3,6 +3,7 @@ $ParserAndAssembler = @{
     ".ass" = "$PSScriptRoot\Modules\Ass.ps1"
 }
 
+. Parse-Args.ps1 $args;
 $files = $args | Where-Object { & Is-Subtitle $_ };
 $files | ForEach-Object {
     Write-Host "=====================================";

@@ -20,7 +20,23 @@ $codecSettings = @{
     #     & mkvextract 
     # }; Extension = ".idx" }
 };
-
+function FfmpegExtract {
+    param (
+        [System.IO.FileInfo]$FileInfo,
+        $trackInfo
+    )
+    $index = $trackInfo.Index;
+    $extension = "." + $trackInfo.Language + $trackInfo.Settings.Extension;
+    $fileDirectoryName = $FileInfo.DirectoryName;
+    $fileName = $FileInfo.Name.replace($FileInfo.Extension, "$extension");
+    $output = "$fileDirectoryName\$fileName";
+    & ffmpeg "-y" "-v" "error" `
+        "-stats" `
+        "-i" "$($FileInfo.FullName)" `
+        "-map" "0:$index" `
+        "-c" "copy" `
+        "$output";
+}
 
 function HandleTrack {
     param (
@@ -38,9 +54,9 @@ function HandleTrack {
 
     switch ($trackInfo.Settings.Library) {
         "ffmpeg" {  
-            Extract -FileInfo $fileInfo `
+            FfmpegExtract -FileInfo $fileInfo `
                 -trackInfo $trackInfo;
-            break; 
+            break;
         }
         "mkvExtract" { break; }
         Default {}
@@ -57,8 +73,9 @@ function GetTrackInfo($inputPath) {
         $extension = ($codecSettings[$_.codec_name]).Extension;
         $text = "$($_.tags.language) - $extension - $($_.codec_long_name)";
         return @{
-            Key   = $text
-            Value = $_.index
+            Key      = $text
+            Value    = $_.index
+            Language = $_.tags.language
         } 
     };
     $streamOrder = Options-Selector.ps1 -options $options;
@@ -70,27 +87,11 @@ function GetTrackInfo($inputPath) {
     return @{
         Index    = $streamOrder
         Settings = $codecSettings[$selectedTrack.codec_name]
+        Language = $selectedTrack.tags.language
     }
 }
 
-function Extract {
-    param (
-        [System.IO.FileInfo]$FileInfo,
-        $trackInfo
-    )
-    $index = $trackInfo.Index;
-    $extension = $trackInfo.Settings.Extension;
-    $type = $trackInfo.Settings.Type;
-    $encoder = $trackInfo.Settings.Encoder;
-    $fileDirectoryName = $FileInfo.DirectoryName;
-    $fileName = $FileInfo.Name.replace($FileInfo.Extension, "$extension");
-    $output = "$fileDirectoryName\$fileName";
-    & ffmpeg "-y" "-v" "error" `
-        "-i" "$($FileInfo.FullName)" `
-        "-c:$($type)" "copy" `
-        "-map" "0:$index" `
-        "$output";
-}
+
 
 #endregion
 $files = $args | Where-Object { Is-Video.ps1 $_; }
