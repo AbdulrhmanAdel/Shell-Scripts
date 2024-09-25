@@ -41,30 +41,32 @@ function FfmpegExtract {
 function HandleTrack {
     param (
         $fileInfo,
-        $trackInfo
+        $tracksInfo
     )
 
-    $trackInfo ??= GetTrackInfo($pathInfo.FullName);
+    $tracksInfo ??= GetTracksInfo($pathInfo.FullName);
 
-    if (!$trackInfo) { return; }
-    if ($trackInfo.CustomHandler) {
-        $trackInfo.CustomHandler.Invoke($fileInfo, $trackInfo);
-        return;
-    }
-
-    switch ($trackInfo.Settings.Library) {
-        "ffmpeg" {  
-            FfmpegExtract -FileInfo $fileInfo `
-                -trackInfo $trackInfo;
-            break;
+    $tracksInfo | ForEach-Object {
+        $trackInfo = $_;
+        if (!$trackInfo) { return; }
+        if ($trackInfo.CustomHandler) {
+            $trackInfo.CustomHandler.Invoke($fileInfo, $trackInfo);
+            return;
         }
-        "mkvExtract" { break; }
-        Default {}
-    }
     
+        switch ($trackInfo.Settings.Library) {
+            "ffmpeg" {  
+                FfmpegExtract -FileInfo $fileInfo `
+                    -trackInfo $trackInfo;
+                break;
+            }
+            "mkvExtract" { break; }
+            Default {}
+        }
+    }
 }
 
-function GetTrackInfo($inputPath) {
+function GetTracksInfo($inputPath) {
     $streamsInfo = & ffprobe -v error -print_format json -show_entries `
         "stream=index,codec_name,codec_type,codec_long_name:stream_tags=language" `
         "$inputPath" | ConvertFrom-Json;
@@ -78,16 +80,15 @@ function GetTrackInfo($inputPath) {
             Language = $_.tags.language
         } 
     };
-    $streamOrder = Options-Selector.ps1 -options $options;
-    if (!$streamOrder) {
-        return $null;
-    }
-
-    $selectedTrack = $tracks | Where-Object { $_.index -eq $streamOrder };
-    return @{
-        Index    = $streamOrder
-        Settings = $codecSettings[$selectedTrack.codec_name]
-        Language = $selectedTrack.tags.language
+    $streamIndexes = Options-Selector.ps1 -options $options -Multi;
+    return $streamIndexes | ForEach-Object {
+        $streamIndex = $_;
+        $selectedTrack = $tracks | Where-Object { $_.index -eq $streamIndex };
+        return @{
+            Index    = $_
+            Settings = $codecSettings[$selectedTrack.codec_name]
+            Language = $selectedTrack.tags.language
+        }
     }
 }
 
@@ -99,9 +100,9 @@ foreach ($folderPath in $files) {
     $pathInfo = Get-Item -LiteralPath $folderPath;
     if ($pathInfo -is [System.IO.DirectoryInfo]) {
         $files = Get-ChildItem -LiteralPath $pathInfo.FullName -Filter "*.mkv";
-        $trackInfo = GetTrackInfo($files[0].FullName);
+        $tracksInfo = GetTracksInfo($files[0].FullName);
         foreach ($file in $files) {
-            HandleTrack -fileInfo $file  -trackInfo $trackInfo;
+            HandleTrack -fileInfo $file  -tracksInfo $tracksInfo;
         }
     }
     else {

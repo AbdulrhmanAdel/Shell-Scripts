@@ -1,4 +1,9 @@
-if ($args.Contains("--multi")) {
+param (
+    $options,
+    [switch]$Multi
+)
+
+if ($args.Contains("--multi") -or $Multi) {
     return & "$($PSScriptRoot)/Modules/Options-Selectors/Multi-Options-Selector.ps1" $args
 }
 

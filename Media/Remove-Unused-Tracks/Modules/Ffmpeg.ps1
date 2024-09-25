@@ -55,30 +55,30 @@ $audioStreamsIds | ForEach-Object {
 #endregion
 
 #region Subtitle
-$defaultSub = $null;
+$subs = @();
 $subtitleStreams = $streams | Where-Object { $_.codec_type -eq "subtitle" };
 $subtitleStreams | Where-Object { $_.tags.language -in $arabic } | ForEach-Object {
-    $arguments += @(
-        "-map", "0:$($_.index)"
-    );
-
-    if (!$defaultSub) {
-        $defaultSub = $_;
-        $arguments += @(
-            "-disposition:$($defaultSub.index)", "default"
-        );
-    }
+    $subs += $_;
 }
 $subtitleStreams | Where-Object { $_.tags.language -in $english } | ForEach-Object {
+    $subs += $_;
+}
+
+for ($i = 0; $i -lt $subs.Count; $i++) {
+    $sub = $subs[$i];
     $arguments += @(
-        "-map", "0:$($_.index)",
-        "-disposition:$($_.index)", "none"
-    );
+        "-map", "0:$($sub.index)"
+    )
+
+    $disposition = $i -eq 0 ? "default" : "none";
+    $arguments += @("-disposition:s:$i", $disposition);
 }
 #endregion
 
 $arguments += @("-c", "copy");
 $arguments += """$outputPath""";
+
+Write-Host "Command Args: $($arguments -join ',')" -ForegroundColor Green;
 return Start-Process ffmpeg `
     -ArgumentList $arguments `
     -NoNewWindow -PassThru -Wait;
