@@ -1,7 +1,6 @@
 #region Functions
 
 
-# $targetBitRate = [int](& Text-Input.ps1 -message "Please Enter Target BitRate in KB" -type "number")
 $targetBitRate = [int](Read-Host "Please Enter Target BitRate in KB");
 Write-Host "Target BitRate $targetBitRate";
 function Compress {

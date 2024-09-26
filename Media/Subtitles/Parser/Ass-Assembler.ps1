@@ -1,3 +1,12 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    $Dialogs,
+    [Parameter(Mandatory)]
+    [string]$outputPath,
+    [string]$Encoding = "UTF8"
+)
+
 function SerializeTimeSpan ($timeSpan) {
     return $timeSpan.ToString("hh\:mm\:ss\.ff");
 }
@@ -23,11 +32,6 @@ function ParseStyles {
         return "Style: $($_.Name),$($_.Fontname),$($_.Fontsize),$($_.PrimaryColour),$($_.SecondaryColour),$($_.OutlineColour),$($_.BackColour),$($_.Bold),$($_.Italic),$($_.Underline),$($_.StrikeOut),$($_.ScaleX),$($_.ScaleY),$($_.Spacing),$($_.Angle),$($_.BorderStyle),$($_.Outline),$($_.Shadow),$($_.Alignment),$($_.MarginL),$($_.MarginR),$($_.MarginV),$($_.Encoding)"
     }
 }
-
-. Parse-Args.ps1 $args;
-$dialogs ??= $args[0];
-$outputPath ??= $args[1];
-$encoding ??= "UTF8"
 
 @(
     "[Script Info]",

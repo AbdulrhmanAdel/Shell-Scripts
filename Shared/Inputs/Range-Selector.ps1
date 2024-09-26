@@ -1,11 +1,18 @@
+[CmdletBinding()]
+param (
+    [string]$Title = "Range Selector",
+    [string]$Message = 'Select Range',
+    [int]$TickFrequency = 10,
+    [int]$Minimum = 0,
+    [int]$Maximum = 100,
+    [int]$DefaultValue = 0
+)
+
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
-
-. Parse-Args.ps1 $args;
-
 # Create a form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = $title ?? "Range Selector"
+$form.Text = $Title;
 $form.StartPosition = "CenterScreen"
 $form.AutoSize = $true;
 $form.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowOnly;
@@ -17,29 +24,28 @@ $flowLayoutPanel.AutoScroll = $true
 $flowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding(10)  # Add padding
 $form.Controls.Add($flowLayoutPanel)
 
-
 # Create a TrackBar
-$tickFrequency = $tickFrequency ?? 10
 $trackBar = New-Object System.Windows.Forms.TrackBar
 $trackBar.Width = $width
-$trackBar.Minimum = $minimum ?? 0
-$trackBar.Maximum = $maximum ?? 100
+$trackBar.Minimum = $Minimum
+$trackBar.Maximum = $Maximum
 $value = if (!$defaultValue) { $trackBar.Minimum } 
 elseif ($defaultValue -le $trackBar.Minimum) { $trackBar.Minimum }
 elseif ($defaultValue -ge $trackBar.Maximum) { $trackBar.Maximum }
 else { $defaultValue }
 $trackBar.Value = $value;
-$trackBar.TickFrequency = $tickFrequency;
-$trackBar.SmallChange = $tickFrequency;
-$trackBar.LargeChange = $tickFrequency;
-$trackBar.Add_ValueChanged({
-        $label.Text = "Selected Range: $($trackBar.Value)"
-    })
+$trackBar.TickFrequency = $TickFrequency;
+$trackBar.SmallChange = $TickFrequency;
+$trackBar.LargeChange = $TickFrequency;
+$trackBar.Add_ValueChanged(
+    {
+        $label.Text = "$($Message): $($trackBar.Value)"
+    }
+);
 
 # Create a label
 $label = New-Object System.Windows.Forms.Label
-$labelText ??= "Selected Range"
-$label.Text = "$($labelText): $($trackBar.Value)"
+$label.Text = "$($Message): $($trackBar.Value)"
 $label.Width = $width;
 # Create a button
 $button = New-Object System.Windows.Forms.Button
@@ -60,4 +66,4 @@ $flowLayoutPanel.Controls.Add($button)
 # Show the form
 $result = $form.ShowDialog();
 $form.Dispose();
-return $result -eq [System.Windows.Forms.DialogResult]::OK ? $trackBar.Value : $defaultValue;
+return $result -eq [System.Windows.Forms.DialogResult]::OK ? $trackBar.Value : $DefaultValue;

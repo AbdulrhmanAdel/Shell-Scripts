@@ -1,6 +1,10 @@
-$title = $null;
-$message = $null;
-. Parse-Args.ps1 $args;
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [string]$Title,
+    [string]$Message = 'Are you sure you want to continue?',
+    $DefaultValue
+)
 
 # Load necessary assemblies
 Add-Type -AssemblyName System.Windows.Forms
@@ -8,7 +12,7 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 # Form Configuration
 $form = New-Object System.Windows.Forms.Form
-$form.Text = $title;
+$form.Text = $Title;
 $form.StartPosition = 'CenterScreen'
 $form.Font = New-Object System.Drawing.Font("Segoe UI", 12)
 $form.MinimizeBox = $false;
@@ -27,7 +31,7 @@ $form.Controls.Add($flowLayoutPanel)
 
 # Label Configuration
 $label = New-Object System.Windows.Forms.Label
-$label.Text = $message ?? 'Are you sure you want to continue?'
+$label.Text = $Message;
 $label.AutoSize = $true
 $label.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 10)
 $flowLayoutPanel.Controls.Add($label)

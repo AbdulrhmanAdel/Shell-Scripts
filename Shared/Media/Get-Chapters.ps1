@@ -1,7 +1,9 @@
-#region vars
-$filePath = $args[0];
-$logOtherDetails = $args.Contains("--log");
-#endregion
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [string]$FilePath,
+    [switch]$LogOtherDetails
+)
 
 #region Functions
 function ParseTimeSpan {
@@ -29,11 +31,9 @@ function Get-Chapters {
         $path
     )
 
-    $file = $path;
-    $fileInfo = Get-Item -LiteralPath $file;
-    $chapterOutput = "$($env:TEMP)\$($fileInfo.Name)($(Get-Random ))_chapters.xml";
-    & mkvextract chapters $file > $chapterOutput;
-    [xml]$xml = Get-Content -LiteralPath $chapterOutput;
+    $xmlData = & mkvextract chapters $path;
+    $xmlData[0] = '<?xml version="1.0"?>';
+    [xml]$xml = $xmlData;
     if (!$xml) {
         return @();
     }
@@ -58,7 +58,7 @@ function Get-Chapters {
                 break;
             }
             Default {
-                if ($logOtherDetails) {
+                if ($LogOtherDetails) {
                     Write-Host "$($tag.Name): $($tag.InnerText)"
                 }
                 break;

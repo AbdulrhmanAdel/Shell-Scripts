@@ -70,7 +70,7 @@ for ($i = 0; $i -lt $subs.Count; $i++) {
         "-map", "0:$($sub.index)"
     )
 
-    $disposition = $i -eq 0 ? "default" : "none";
+    $disposition = $i -eq 0 ? "default+forced" : "none";
     $arguments += @("-disposition:s:$i", $disposition);
 }
 #endregion

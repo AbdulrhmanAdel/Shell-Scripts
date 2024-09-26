@@ -1,47 +1,19 @@
+$display = Multi-Options-Selector.ps1 -Options @("Streams", "Chapters") -MustSelectOne;
 ($args | Where-Object { $_ -match ".*(.mkv)$" })  | ForEach-Object {
-    $file = $_;
-    Write-Host $file -ForegroundColor Blue;
-    $chapters = & Get-Chapters.ps1 $file;
-    if (!$chapters) {
-        Write-Host "NO CHAPTERS FOUND" -ForegroundColor Red;
-        return;
-    }
-    Write-Host ($chapters | ForEach-Object { return $_.Title }) -Separator ", " -ForegroundColor Green;
-
-    $startFromSecond = 0;
-    $delayMilliseconds = 0;
-    $foundSegmentedChapter = $false;
-    foreach ($c in $chapters) {
-        if ($c.Title -match "(?i)Ending|ED") {
-            break;
+    Write-Host "===================================" -ForegroundColor Red;
+    $fileName = [System.IO.Path]::GetFileName($_);
+    Write-Host "Info For $fileName" -ForegroundColor Green;
+    $path = $_;
+    $display | ForEach-Object {
+        if ($_ -eq "Chapters") {
+            $chapters = Get-Chapters.ps1 -FilePath $path -Log;
+            Write-Host $chapters;
         }
-        if ($c.SegmentId) {
-            $foundSegmentedChapter = $true;
-            $delayMilliseconds += $c.Duration;
-            continue;
+        else {
+            & ffprobe.exe -v error -i $path -print_format json -show_streams `
+                -show_entries "stream=index,codec_type:disposition=default:tags=language";
         }
-
-        if ($foundSegmentedChapter) {
-            break;
-        }
-        
-        $startFromSecond += $c.Duration;
     }
-    Write-Host "StartFromSecond: " -NoNewline
-    Write-Host "$($startFromSecond / 1000), " -ForegroundColor Red -NoNewline
-    Write-Host "DelayMilliseconds: " -NoNewline
-    Write-Host "$delayMilliseconds" -ForegroundColor Red
-
-    foreach ($chapter in $chapters) {
-
-        Write-Host "$($chapter.Title): $($chapter.Start) -> $($chapter.End)," -NoNewline;
-        $hasSegment = !!$chapter.SegmentId;
-        $color = $hasSegment ? [System.ConsoleColor]::Red :[System.ConsoleColor]::White;
-        Write-Host " Has Segment: $($hasSegment)" -NoNewline -ForegroundColor $color;
-        Write-Host ", With Length $($chapter.Duration)";
-    }
-
-    Write-Host "==========" -ForegroundColor Green;
+    Write-Host "===================================" -ForegroundColor Red;
 }
-
 & Force-Manually-Exit.ps1;

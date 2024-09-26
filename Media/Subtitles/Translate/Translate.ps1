@@ -12,8 +12,7 @@ $files | ForEach-Object {
     Write-Host "Handling File $fileName" -ForegroundColor Green;
     $handler = $ParserAndAssembler[$extension];
     & $handler $_;
-    Write-Host "=====================================";
-    Write-Host "";
+    Write-Host "====================================="
     Start-Sleep -Seconds 1;
 }
 

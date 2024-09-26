@@ -80,7 +80,7 @@ function GetTracksInfo($inputPath) {
             Language = $_.tags.language
         } 
     };
-    $streamIndexes = Options-Selector.ps1 -options $options -Multi;
+    $streamIndexes = Multi-Options-Selector.ps1 -options $options -MustSelectOne;
     return $streamIndexes | ForEach-Object {
         $streamIndex = $_;
         $selectedTrack = $tracks | Where-Object { $_.index -eq $streamIndex };

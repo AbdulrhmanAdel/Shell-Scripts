@@ -1,7 +1,11 @@
-. Parse-Args.ps1 $args;
-$file ??= $args[0];
-$encoding ??= & Get-File-Encoding.ps1 $file;
-$withStyles ??= $false;
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    [string]$File,
+    [switch]$WithStyles
+)
+
+$encoding = & Get-File-Encoding.ps1 $File;
 function ParseTimeSpan {
     param (
         $time
@@ -60,7 +64,7 @@ $styles = @();
 $styleRegex = "^Style: (?<Name>[^,]+),\s*(?<Fontname>[^,]+),\s*(?<Fontsize>[^,]+),\s*(?<PrimaryColour>[^,]+),\s*(?<SecondaryColour>[^,]+),\s*(?<OutlineColour>[^,]+),\s*(?<BackColour>[^,]+),\s*(?<Bold>[^,]+),\s*(?<Italic>[^,]+),\s*(?<Underline>[^,]+),\s*(?<StrikeOut>[^,]+),\s*(?<ScaleX>[^,]+),\s*(?<ScaleY>[^,]+),\s*(?<Spacing>[^,]+),\s*(?<Angle>[^,]+),\s*(?<BorderStyle>[^,]+),\s*(?<Outline>[^,]+),\s*(?<Shadow>[^,]+),\s*(?<Alignment>[^,]+),\s*(?<MarginL>[^,]+),\s*(?<MarginR>[^,]+),\s*(?<MarginV>[^,]+),\s*(?<Encoding>[^,]+)$"
 #endregion
 
-$content = Get-Content -LiteralPath $file -Encoding $encoding | ForEach-Object {
+$content = Get-Content -LiteralPath $File -Encoding $encoding | ForEach-Object {
     if ($_ -match "Dialogue: (?<Layer>\d+),(?<StartTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<EndTime>\d{1,2}:\d{2}:\d{2}\.\d{2}),(?<Style>[^,]*),(?<Name>[^,]*),(?<MarginL>\d+),(?<MarginR>\d+),(?<MarginV>\d+),(?<Effect>[^,]*),(?<Text>.+)") {
         return ParseDialogue -line $_;
     }

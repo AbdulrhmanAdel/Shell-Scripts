@@ -1,11 +1,17 @@
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [string]$Title,
+    [string]$Message,
+    [string]$DefaultValue
+)
+
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
-. Parse-Args.ps1 $args;
-
 # Create a form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = $title;
+$form.Text = $Title;
 $form.StartPosition = "CenterScreen"
 $form.AutoSize = $true;
 $form.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowOnly;
@@ -28,9 +34,7 @@ if ($message) {
     $flowLayoutPanel.Controls.Add($messageLabel);
 }
 
-
 function Add {
-    
     $text = New-Object System.Windows.Forms.TextBox;
     $text.Width = $width
     $text.Text = $defaultValue;

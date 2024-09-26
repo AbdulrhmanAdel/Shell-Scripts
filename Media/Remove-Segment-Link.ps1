@@ -14,7 +14,7 @@ $colors = @(
     [System.ConsoleColor]::Magenta
 );
 
-$keepRenamingChapters = & Prompt.ps1 "-message=Are you sure you want to keep renaming chapters?"; 
+$keepRenamingChapters = & Prompt.ps1 -message "Are you sure you want to keep renaming chapters?"; 
 #endregion
 @($args | Where-Object { $_ -match ".*\.mkv$"; }) | ForEach-Object {
     $file = $_;
@@ -31,8 +31,6 @@ $keepRenamingChapters = & Prompt.ps1 "-message=Are you sure you want to keep ren
         New-Item -ItemType Directory -Path $chaptersDirectory;
     }
     Copy-Item -LiteralPath $chapterOutput -Destination "$chaptersDirectory/$chapterFileName" -Force;
-
-
     [xml]$xml = Get-Content $chapterOutput;
     $editionEntry = $xml.GetElementsByTagName("EditionEntry").Item(0);
     $final = $editionEntry.ChildNodes | ForEach-Object {

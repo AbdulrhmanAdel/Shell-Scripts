@@ -1,6 +1,10 @@
+[CmdletBinding()]
 param(
+    [Parameter(Mandatory)]
     $Dialogs,
+    [Parameter(Mandatory)]
     [string]$outputPath,
+    [Parameter(Mandatory)]
     [string]$encoding
 )
 
