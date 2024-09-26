@@ -43,12 +43,9 @@ function HandleFiles {
 
         Write-Host "USING MODULE $extension => $handler";
         Write-Host "Start Handling $file";
-        $encoding = & Get-File-Encoding.ps1 $file;
-        Write-Host "USED ENCODING $encoding" -ForegroundColor Green;
         & $handler `
             -file "$file" `
-            -delayMilliseconds $delayMilliseconds `
-            -encoding $encoding;
+            -delayMilliseconds $delayMilliseconds;
 
         Write-Host "Finish Handling $file";
     }

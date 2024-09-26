@@ -1,3 +1,13 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    $Dialogs,
+    [Parameter(Mandatory)]
+    [string]$OutputPath,
+    [Parameter(Mandatory)]
+    [string]$Encoding
+)
+
 function SerializeTimeSpan ($timeSpan) {
     return '{0:00}:{1:00}:{2:00},{3:000}' -f $timeSpan.Hours, $timeSpan.Minutes, $timeSpan.Seconds, $timeSpan.Milliseconds
 }
@@ -25,15 +35,15 @@ function BuildFinalDialog {
 }
 
 $global:currenetSubIndex = 1;
-. Parse-Args.ps1 $args;
+
 $dialogs ??= $args[0];
-$outputPath ??= $args[1];
-$encoding ??= "UTF8"
+$OutputPath ??= $args[1];
+$Encoding ??= "UTF8"
 $dialogs | ForEach-Object {
     return BuildFinalDialog -startTime  $_.StartTime `
         -endTime $_.EndTime `
         -content $_.Content;
 } | Where-Object {
     $null -ne $_
-} | Set-Content -LiteralPath $outputPath -Encoding $encoding;
+} | Set-Content -LiteralPath $OutputPath -Encoding $Encoding;
 

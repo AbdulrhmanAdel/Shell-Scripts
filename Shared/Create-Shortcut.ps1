@@ -1,16 +1,22 @@
-. Parse-Args.ps1 $args;
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [string]$Target,
+    [Parameter(Mandatory)]
+    [string]$Source
+)
 
-if (!$target -or !$source) {
-    Write-Error -Message "Invalid soruce: $soruce -or target: $target"
+if (!$Target -or !$Source) {
+    Write-Error -Message "Invalid soruce: $soruce -or target: $Target"
     Exit;
 }
 
-if ((Test-Path -LiteralPath $target) -and $force) {
-    Remove-Item -LiteralPath $target -Force;
+if ((Test-Path -LiteralPath $Target) -and $force) {
+    Remove-Item -LiteralPath $Target -Force;
 }
 
 $shell = New-Object -comObject WScript.Shell
-$shortcut = $shell.CreateShortcut($target)
-$shortcut.TargetPath = $source;
+$shortcut = $shell.CreateShortcut($Target)
+$shortcut.TargetPath = $Source;
 $shortcut.Arguments = """$arguments"""
 $shortcut.Save();

@@ -1,12 +1,11 @@
+[CmdletBinding()]
+param (
+    [string]$IntialDirectory = [Environment]::GetFolderPath('MyDocuments')
+)
+
 Add-Type -AssemblyName System.Windows.Forms;
-
-. Parse-Args.ps1 $args;
-if (!$intialDirectory) {
-    $intialDirectory = [Environment]::GetFolderPath('MyDocuments');
-}
-
 $foldername = New-Object System.Windows.Forms.FolderBrowserDialog
-$foldername.InitialDirectory = $intialDirectory;
+$foldername.InitialDirectory = $IntialDirectory;
 $foldername.Dispose();
 if ($foldername.ShowDialog() -eq "OK") {
     return "$($foldername.SelectedPath)";

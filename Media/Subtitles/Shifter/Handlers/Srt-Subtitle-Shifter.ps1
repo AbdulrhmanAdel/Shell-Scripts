@@ -1,7 +1,12 @@
-$file = $null;
-$delayMilliseconds = $null;
-$startFromSecond = $null;
-. Parse-Args.ps1 $args;
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [string]$File,
+    [Parameter(Mandatory)]
+    [int]$DelayMilliseconds,
+    [System.Nullable[int]]$StartFromSecond
+)
+
 $delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds)
 Write-Output "Start Delaying By $delayTimeSpan $($delayTimeSpan.TotalMilliseconds), Start From $startFromSecond To File: $file";
 $content = & Srt-Parser.ps1 -File $file;
@@ -19,8 +24,8 @@ $content = $content | ForEach-Object {
         return $_;
     }
 
-} | ForEach-Object {
+} | Where-Object {
     return $null -ne $_
 }
 
-& Srt-Assembler.ps1 -File $file -Encoding $encoding;
+& Srt-Assembler.ps1 -Dialogs $content -OutputPath $file -Encoding "UTF8";

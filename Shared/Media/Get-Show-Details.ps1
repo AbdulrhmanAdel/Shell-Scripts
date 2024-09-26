@@ -1,7 +1,11 @@
-. Parse-Args.ps1 $args
+[CmdletBinding()]
+param (
+    [Parameter(Position = 0, Mandatory)]
+    [string]$Path,
+    [switch]$OnlyBasicInfo
+)
 
-$canHandle = (Test-Path -LiteralPath $path) `
-    -and $path -match "(\.mkv|\.mp4|\.srt|\.ass|)$";
+$canHandle = (Test-Path -LiteralPath $path) -and $path -match "(\.mkv|\.mp4|\.srt|\.ass|)$";
 if (!$canHandle) {
     Throw "INVALID PATH $path";
     return;

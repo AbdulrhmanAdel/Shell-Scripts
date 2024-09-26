@@ -1,4 +1,10 @@
-. Parse-Args.ps1 $args;
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [string]$name,
+    $year,
+    $type
+)
 
 function GetShow {
     param (

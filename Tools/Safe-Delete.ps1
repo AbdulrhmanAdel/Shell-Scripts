@@ -8,6 +8,12 @@
 # -z	Zero free space (good for virtual disk optimization).
 # -nobanner	Do not display the startup banner and copyright message.
 
+[CmdletBinding()]
+param (
+    [switch]$Prompt,
+    [switch]$PromptPasses
+)
+
 Write-Host $args
 . Parse-Args.ps1 $args;
 Write-Host "These Files Are going to be deleted:" -ForegroundColor Green;
@@ -15,11 +21,11 @@ $files = @($args | Where-Object { return (Test-Path -LiteralPath $_ -ErrorAction
 $files | ForEach-Object { Write-Host $_  -ForegroundColor Red; }
 
 $passes = @();
-if ($promptPasses) { 
+if ($PromptPasses) { 
     $noOfPasses = & Range-Selector.ps1 -title "Passes" -message "Select Number of passes" -minimum 1 -maximum 5  -defaultValue 1  -tickFrequency 1;
     $passes += @("-p", $noOfPasses);
 }
-if ($prompt) {
+if ($Prompt) {
     $continue = & Prompt.ps1 -message "Are you sure you want to remove these files?";
     if (!$continue) {
         Write-Host "ABORTED" -ForegroundColor Red

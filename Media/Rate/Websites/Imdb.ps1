@@ -1,4 +1,10 @@
-. Parse-Args.ps1 $args;
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [string]$name,
+    $type
+)
+
 $show = Imdb-Get-Show.ps1 -Name $name -Type $type;
 $res = Invoke-WebRequest "https://www.imdb.com/title/$($show.id)";
 $content = $res.Content 

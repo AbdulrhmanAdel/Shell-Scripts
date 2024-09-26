@@ -1,3 +1,12 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    [string]$path,
+    [Parameter(Mandatory)] 
+    [string]$newName
+)
+
+
 function ForceRename {
     param (
         $path,
@@ -14,8 +23,6 @@ function ForceRename {
     ForceRename -path $path -newName $newName
 }
 
-
-. Parse-Args.ps1 $args;
 if (!$path -or !$newName) {
     $message = "YOU MUST PROVIDE PATH AND NEW NAME, You PASSED path: $path, newName: $newName";
     Write-Host $message -ForegroundColor Red;

@@ -1,5 +1,8 @@
-$file = $args[0];
-
+[CmdletBinding()]
+param(
+    [Parameter(Position = 0, Mandatory)]
+    [string]$File
+)
 
 function Get-Encoding {
     param (

@@ -1,3 +1,12 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    $Dialogs,
+    [Parameter(Mandatory)]
+    [string]$OutputPath,
+    [string]$Encoding = "UTF8"
+)
+
 function SerializeTimeSpan ($timeSpan) {
     return $timeSpan.ToString("hh\:mm\:ss\.ff");
 }
@@ -24,11 +33,6 @@ function ParseStyles {
     }
 }
 
-. Parse-Args.ps1 $args;
-$dialogs ??= $args[0];
-$outputPath ??= $args[1];
-$encoding ??= "UTF8"
-
 @(
     "[Script Info]",
     "ScriptType: v4.00+",
@@ -45,4 +49,4 @@ $encoding ??= "UTF8"
     $dialogs.Content | ForEach-Object {
         $finalContent += ParseDialogue -dialogue $_;
     }
-) | Set-Content -LiteralPath $outputPath -Encoding $encoding;
+) | Set-Content -LiteralPath $OutputPath -Encoding $encoding;
