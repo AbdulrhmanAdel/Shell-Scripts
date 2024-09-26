@@ -1,3 +1,14 @@
+[CmdletBinding()]
+param (
+    [Parameter(Position = 0, Mandatory)]
+    [string]
+    $FolderPath,
+    [Parameter(Position = 1, Mandatory)]
+    [string]
+    $IconPath
+)
+
+
 $Signature = @"
     [DllImport("shell32.dll", CharSet = CharSet.Auto)]
     public static extern int SHGetSetFolderCustomSettings(ref Shfoldercustomsettings pfcs, string pszPath, uint dwReadWrite);
@@ -30,14 +41,13 @@ $addTypeSplat = @{
     Namespace        = 'Shell32Functions'
 }
 $Shell32 = Add-Type @addTypeSplat;
-$iconPath = $args[1]; 
 $fcs = New-Object $Shell32[1]
 $fcs.dwSize = 104;
 $fcs.dwMask = 0x00000010;
-$fcs.pszIconFile = $iconPath
-$fcs.cchIconFile = $iconPath.Length
-$fcs.iIconIndex = 0
-$result = $Shell32[0]::SHGetSetFolderCustomSettings([Ref] $fcs, $args[0], 0x00000002);
+$fcs.pszIconFile = $IconPath
+$fcs.cchIconFile = $IconPath.Length
+$fcs.iIconIndex = 0;
+$result = $Shell32[0]::SHGetSetFolderCustomSettings([Ref] $fcs, $FolderPath, 0x00000002);
 if ($result -ne 0) {
     Write-Host "Failed to set folder custom settings. Error Code: $result" -ForegroundColor Red;
 }

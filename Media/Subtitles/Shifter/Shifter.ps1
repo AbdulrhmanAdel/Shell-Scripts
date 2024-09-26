@@ -3,23 +3,17 @@ $handlers = @{
     ".srt" = "$($PSScriptRoot)/handlers/Srt-Subtitle-Shifter.ps1";
 };
 
-$global:cutFrom = $null;
-$global:cutTo = $null;
-$global:startAtWord = $null;
-
-function Get-Period() {
-    $period = Read-Host "Please type delay period in seconds?";
-    $period = $period -as [double]
-    if ($period -isnot [System.Double]) {
-        return Get-Period;
+function Get-DelayInMilliseconds() {
+    $period = Input.ps1 -Type "Number" -Title "Please type delay period in seconds?" -Required;
+    if ($period -eq 0) {
+        return Get-DelayInMilliseconds;
     }
     
     return $period;
 }
 
-$delayMilliseconds = (Get-Period) * 1000;
+$delayMilliseconds = (Get-DelayInMilliseconds) * 1000;
 Write-Host "The Delay Will Be $delayMilliseconds Milliseconds"
-
 
 # Function to adjust time
 function HandleFiles {
@@ -41,6 +35,8 @@ function HandleFiles {
             continue;
         }
 
+
+        Write-Host "=========================" -ForegroundColor Green;
         Write-Host "USING MODULE $extension => $handler";
         Write-Host "Start Handling $file";
         & $handler `
@@ -48,25 +44,11 @@ function HandleFiles {
             -delayMilliseconds $delayMilliseconds;
 
         Write-Host "Finish Handling $file";
+        Write-Host "=========================" -ForegroundColor Green;
     }
 }
 
-
-$mode = ($args | Where-Object { $null -ne $_ -and $_.StartsWith("mode=") }) -replace "mode=", ""
-switch ($mode) {
-    "StartAtWord" {
-        $global:startAtWord = "-startAtWord=$(Read-Host 'Please enter startAtWord')";
-        break;
-    }
-
-    "Range" {  
-        $global:cutFrom = "cutFrom=$(Read-Host 'Please enter cutFrom')";
-        $global:cutTo = "cutTo=$(Read-Host 'Please enter cutTo')";
-        break;
-    }
-}
-
-$files = $args | Where-Object { $_.EndsWith(".ass") -or $_.EndsWith(".srt") }
+$files = $args | Where-Object { Is-Subtitle.ps1 $_ };
 HandleFiles -files $files;
 Write-Host "Subtitles adjusted."
 timeout.exe  20 /nobreak;

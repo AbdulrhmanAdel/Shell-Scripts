@@ -20,6 +20,7 @@ $content = $content | ForEach-Object {
     
     $newStartTime = $startTime.Add($delayTimeSpan);
     if ($newStartTime.TotalMilliseconds -gt 0) {
+        $_.StartTime = $newStartTime;
         $_.EndTime = $_.EndTime.Add($delayTimeSpan);
         return $_;
     }

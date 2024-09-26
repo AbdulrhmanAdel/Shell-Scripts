@@ -1,4 +1,4 @@
-& Run-As-Admin.ps1;
+& Run-AsAdmin.ps1;
 
 # $extensionId = Read-Host "Please Enter ExtensionId";
 $extensionId = "jnnagfgkgigallbdmcldihboiekeaiig"
@@ -16,5 +16,5 @@ $name = "com.at_dev.icon_downloader"
 $key = "HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\$name";
 $value = "$($PSScriptRoot)\Icon-Communicator.Json";
 reg add $key /ve /d $value /f;
-& Force-Manually-Exit.ps1;
+& Force-ManuallyExit.ps1;
 

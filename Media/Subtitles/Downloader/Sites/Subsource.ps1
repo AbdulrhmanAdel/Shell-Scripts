@@ -52,7 +52,7 @@ function Invoke-Request {
 }
 
 function GetSubtitles {
-    $show = & "Imdb-Get-Show.ps1" -Name $title -Type $type -Year $Year;
+    $show = & "Imdb-GetShow.ps1" -Name $title -Type $type -Year $Year;
     $searchQuery = (!!$show ? $show.id : $null) ?? (!$Year ? $title : $title + " " + $Year);
     $queryBody = @{
         query = $searchQuery

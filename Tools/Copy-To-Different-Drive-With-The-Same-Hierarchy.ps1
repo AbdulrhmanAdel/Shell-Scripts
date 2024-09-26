@@ -25,7 +25,7 @@ function CopyWithShellGUI {
 }
 
 #endregion
-# $driveLetter = & Options-Selector.ps1 @(Get-Partition -DiskNumber 0 | Where-Object { !!$_.DriveLetter } | ForEach-Object { return $_.DriveLetter })
+# $driveLetter = & Single-Options-Selector.ps1 -Options @(Get-Partition -DiskNumber 0 | Where-Object { !!$_.DriveLetter } | ForEach-Object { return $_.DriveLetter })
 $driveLetter = Read-Host "Enter Drive Letter";
 if (!$driveLetter) {
     EXIT;

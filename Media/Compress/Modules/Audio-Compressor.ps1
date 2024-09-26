@@ -87,10 +87,10 @@ function Prepeare(
 #region Options
 
 $addSpecsToOutputFileName = & Prompt.ps1 -title "Add Specs to Output File Name?" -defaultValue $false -message "Add Specs to Output File Name?";
-$targetExtension = & Options-Selector.ps1 $audioConfig.Keys -defaultValue "m4a";
+$targetExtension = & Single-Options-Selector.ps1 -Options $audioConfig.Keys -defaultValue "m4a";
 $config = $audioConfig[$targetExtension];
-$targetBitRate = & Options-Selector.ps1 $config.BitRates -defaultValue $config.BitRates[0];
-$sampleRate = & Options-Selector.ps1 @("24000", "32000", "48000") -defaultValue "48000";
+$targetBitRate = & Single-Options-Selector.ps1 -Options $config.BitRates -defaultValue $config.BitRates[0];
+$sampleRate = & Single-Options-Selector.ps1 -Options @("24000", "32000", "48000") -defaultValue "48000";
 $keepMetadata = & Prompt.ps1 -title "Keep Metadata?" -defaultValue $false -message "Keep Metadata?";
 
 #endregion

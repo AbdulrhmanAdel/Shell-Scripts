@@ -16,7 +16,7 @@ function RemoveUnusedTracks(
         return $false;
     }
 
-    & Remove-To-Rycle-Bin.ps1 $inputPath;
+    & Remove-ToRycleBin.ps1 $inputPath;
     Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
     Write-Host "==========================" -ForegroundColor DarkBlue;
     return $true;
@@ -30,7 +30,7 @@ function GetMediaFilesFromArchive {
     # $folderName = $archiveFileInfo.Name -replace $archiveFileInfo.Extension, '';
     $outputPath = "$temp/RUT-$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss')";
     if (Test-Path -LiteralPath $outputPath) {
-        & Remove-To-Rycle-Bin.ps1 $outputPath;
+        & Remove-ToRycleBin.ps1 $outputPath;
     }
 
     $archiveProcess = Start-Process "C:\Program Files\7-Zip\7z.exe" -ArgumentList @(
@@ -118,12 +118,12 @@ $args | Where-Object {
     }
         
     if ($results -notcontains $false) {
-        & Remove-To-Rycle-Bin.ps1 $_;
+        & Remove-ToRycleBin.ps1 $_;
 
         if ($isArchive) {
             $hasParts = $_ -match "(?<Name>.*)part/d+";
             if ($hasParts) {
-                & Remove-To-Rycle-Bin.ps1 $_;
+                & Remove-ToRycleBin.ps1 $_;
             }
         }
     }

@@ -132,7 +132,7 @@ while ($true) {
                 $imgLink = $json.imgLink;
                 $imgPath = DonwloadImage -imageUrl $imgLink;
                 $setFolderIconScriptPath = "D:\Programming\Projects\Personal Projects\Shell-Scripts\Icons\Set-Folder-Icon.ps1";
-                Start-Process pwsh.exe -ArgumentList @('-File', """$setFolderIconScriptPath""", '-imagePath', """$imgPath""" , '-directoryPath', """$folder""", '--noTimeout')
+                Start-Process pwsh.exe -ArgumentList @('-File', """$setFolderIconScriptPath""", '-ImagePath', """$imgPath""" , '-DirectoryPath', """$folder""", '-SkipTimeout')
                 # HandleFolder;
                 break;
             }

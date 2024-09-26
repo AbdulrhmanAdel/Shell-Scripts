@@ -1,4 +1,4 @@
-& Run-As-Admin.ps1 $args;
+& Run-AsAdmin.ps1 $args;
 
 $files = $args;
 $takeOwn = "TakeOwn";

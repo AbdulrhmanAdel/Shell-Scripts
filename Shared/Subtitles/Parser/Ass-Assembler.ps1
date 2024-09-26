@@ -33,7 +33,7 @@ function ParseStyles {
     }
 }
 
-@(
+$content = @(
     "[Script Info]",
     "ScriptType: v4.00+",
     "Collisions: Normal",
@@ -43,10 +43,12 @@ function ParseStyles {
     "",
     "[V4+ Styles]",
     "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-    (ParseStyles -styles $dialogs.Styles),
+    @(ParseStyles -styles $dialogs.Styles),
     "",
     "[Events]",
-    $dialogs.Content | ForEach-Object {
-        $finalContent += ParseDialogue -dialogue $_;
-    }
+    @(
+        $dialogs.Content | ForEach-Object {
+            return ParseDialogue -dialogue $_;
+        }
+    )
 ) | Set-Content -LiteralPath $OutputPath -Encoding $encoding;

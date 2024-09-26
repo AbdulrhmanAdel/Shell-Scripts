@@ -49,7 +49,7 @@ $files | ForEach-Object {
     $isDrive = $_ -match '^(?<Drive>[a-z]:)"$';
     if ($isDrive) {
         $drive = $Matches.Drive;
-        $deleteType = & Options-Selector.ps1 @("Format Disk", "Clean Free Space");
+        $deleteType = & Single-Options-Selector.ps1 -Options @("Format Disk", "Clean Free Space");
         if (!$deleteType) {
             return;
         }

@@ -92,7 +92,7 @@ $args | ForEach-Object {
 }
 
 $subs = $files | ForEach-Object {
-    $details = & "Get-Show-Details.ps1" -Path $_.FullName;
+    $details = & "Get-ShowDetails.ps1" -Path $_.FullName;
     if (!$details) { return $null; }
     $info = $details.Info;
     $name = $info.Name -replace $info.Extension, "";

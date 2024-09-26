@@ -59,7 +59,7 @@ $flags = @(
 );
 
 $selected = @($flags | Where-Object { return $file.Attributes.HasFlag([System.IO.FileAttributes]$_); });
-$newAttributes = & Options-Selector.ps1 -options $flags --multi -selectedOptions $selected;
+$newAttributes = & Multi-Options-Selector.ps1 -Options $flags -SelectedOptions $selected ;
 $newAttributes | ForEach-Object { AddFlagIfNotExits $_; };
 
 $flags | ForEach-Object {

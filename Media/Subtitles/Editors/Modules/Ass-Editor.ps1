@@ -89,7 +89,7 @@ function Edit {
         [string]$path
     )
 
-    $encoding = & Get-File-Encoding.ps1 $path;
+    $encoding = & Get-FileEncoding.ps1 $path;
     Write-Host "USED ENCODING $encoding" -ForegroundColor Green;
     Write-Host "Editing $($path)" -ForegroundColor Green;
     $content = Get-Content -LiteralPath $path -Encoding $encoding;

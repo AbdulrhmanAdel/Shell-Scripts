@@ -16,4 +16,4 @@ $display = Multi-Options-Selector.ps1 -Options @("Streams", "Chapters") -MustSel
     }
     Write-Host "===================================" -ForegroundColor Red;
 }
-& Force-Manually-Exit.ps1;
+& Force-ManuallyExit.ps1;

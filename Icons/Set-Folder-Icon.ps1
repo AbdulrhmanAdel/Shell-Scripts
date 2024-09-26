@@ -1,4 +1,13 @@
-Write-Host "Set-Folder-Icon ARGS $($args)" -ForegroundColor DarkMagenta;
+[CmdletBinding()]
+param (
+    [Parameter(Position = 0, Mandatory)]
+    [string]
+    $DirectoryPath,
+    $ImagePath,
+    [switch]$SkipTimeOut
+)
+
+Write-Host "Set-Folder-Icon ARGS DirectoryPath: $DirectoryPath, ImagePath: $ImagePath, SkipTimeOut: $SkipTimeOut" -ForegroundColor DarkMagenta;
 
 function OpenBrowser {
     param(
@@ -6,8 +15,9 @@ function OpenBrowser {
         $AppendPath
     )
 
-    $iconWebsite = & Options-Selector.ps1 @("Google", "Yandex", "Deviantart") `
-        -title "Select Icon Website" --mustSelectOne;
+    $iconWebsite = & Single-Options-Selector.ps1 `
+        -Options @("Google", "Yandex", "Deviantart") `
+        -Title "Select Icon Website" -MustSelectOne;
     $iconWebsite ??= "Deviantart";
     $replaceText = "\[(FitGirl|Dodi).*\]";
     $name = $directory.Name -replace $replaceText, "";
@@ -50,7 +60,6 @@ function DonwloadImage {
     return $tempImage.FullName;
 }
 
-
 $imageSourceHandlers = @{
     "FromBrowser (Auto Set)" = {
         OpenBrowser -AppendPath;
@@ -68,43 +77,42 @@ $imageSourceHandlers = @{
 };
 
 function GetIamgePath {
-    $imageSource ??= & Options-Selector.ps1 $imageSourceHandlers.Keys -title "Select Icon Source" --mustSelectOne;
+    $imageSource ??= & Single-Options-Selector.ps1 `
+        -Options $imageSourceHandlers.Keys `
+        -Title "Select Icon Source" `
+        -MustSelectOne;
+
     $imageSourceHandlerFn = $imageSourceHandlers[$imageSource];
     if ($imageSourceHandlerFn) {
         return $imageSourceHandlerFn.Invoke()[-1]
     }
 }
 
-$directoryPath = $args[0]
-. Parse-Args.ps1 $args;
-$directory = Get-Item -LiteralPath $directoryPath -Force;
-$iconPath = "$($directory.FullName)\$($directory.Name).ico";
+$directory = Get-Item -LiteralPath $DirectoryPath -Force;
+$iconPath = "$DirectoryPath\$($directory.Name).ico";
 $folderHasIcon = Test-Path -LiteralPath $iconPath;
-if (!$folderHasIcon) {
-    if (!$imagePath) {
-        $imagePath = GetIamgePath
-    }
-    & "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -imagePath """$imagePath""" -saveFilePath """$iconPath""";
-}
-elseif (!$imagePath) {
+if ($folderHasIcon -and !$ImagePath) {
     $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to overwrite it?";
-    if ($overwrite) {
-        # & "$($PSScriptRoot)/Remove-Icon.ps1" $directoryPath;
-        if (!$imagePath) {
-            $imagePath = GetIamgePath
-        }
-        & "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -imagePath """$imagePath""" -saveFilePath """$iconPath""";    
+    if (!$overwrite) {
+        & "$PSScriptRoot/Refresh-Icon.ps1" -FolderPath $DirectoryPath;
+        return;
     }
 }
 
+if (!$ImagePath) {
+    $ImagePath = GetIamgePath
+}
+
+& "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -ImagePath "$ImagePath" -SavePath "$iconPath";
 # Hide the Icon
 $iconFile = Get-Item -LiteralPath $iconPath -Force;
 attrib.exe +h +s +r "$iconFile";
 
 & "$PSScriptRoot/Set-Icon.ps1" $directory.FullName "./$($iconFile.Name)";
 Write-Host "DONE Image Converted Successfully" -ForegroundColor Green;
-# if ($noTimeout) {
-#     EXIT;
-# }
+
+if ($SkipTimeOut) {
+    EXIT;
+}
 
 timeout.exe 15;

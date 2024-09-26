@@ -3,16 +3,15 @@ param (
     [Parameter(Mandatory)]
     [System.Object[]]    
     $Options,
-    [System.Object]
-    $DefaultValue,
     [switch]$MustSelectOne = $false,
-    [string]$title = "Select an Option"
+    [string]$Title = "Select an Option",
+    [System.Object]$DefaultValue
 )
 
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles();
 $form = New-Object System.Windows.Forms.Form
-$form.Text = $title;
+$form.Text = $Title;
 $form.StartPosition = 'CenterScreen'
 $form.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 $form.Width = 500;

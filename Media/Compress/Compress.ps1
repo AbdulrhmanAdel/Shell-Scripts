@@ -19,7 +19,7 @@ function Run {
     Write-Host "FINISH ENCODING" -ForegroundColor Magenta;
 }
 
-$source = & Options-Selector.ps1 -options @("All", "Videos", "Images", "Course", "Audio");
+$source = & Single-Options-Selector.ps1 -options @("All", "Videos", "Images", "Course", "Audio");
 $modulesPath = "$($PSScriptRoot)\Modules";
 if ($source -eq "Course" ) {
     $scriptPath = "$modulesPath/Course/Course-Compressor.ps1";

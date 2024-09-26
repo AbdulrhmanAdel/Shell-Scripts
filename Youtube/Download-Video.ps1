@@ -14,14 +14,14 @@ if (!$destinitionPath) {
     $destinitionPath = Read-Host "Please enter destinition path?";
 }
 
-$format = & Options-Selector.ps1 -options @(
+$format = & Single-Options-Selector.ps1 -Options @(
     "mp3",
     "m4a",
     "opus",
     "480p",
     "720p",
     "Cancel"
-) -title "Please enter format you want?" --mustSelectOne;
+) -Title "Please enter format you want?" -MustSelectOne;
 
 if ($format -eq "Cancel") {
     EXIT;

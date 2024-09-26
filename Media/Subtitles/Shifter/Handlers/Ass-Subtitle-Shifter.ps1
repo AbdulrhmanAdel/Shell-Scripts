@@ -19,12 +19,10 @@ $assContent.Content = $assContent.Content | ForEach-Object {
     
     $newStartTime = $startTime.Add($delayTimeSpan);
     if ($newStartTime.TotalMilliseconds -gt 0) {
+        $_.StartTime = $newStartTime;
         $_.EndTime = $_.EndTime.Add($delayTimeSpan);
         return $_;
     }
 
-} | Where-Object {
-    return $null -ne $_
-}
-
+};
 & Ass-Assembler.ps1 -Dialogs $assContent -Encoding "UTF8" -OutputPath $File;

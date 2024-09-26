@@ -1,5 +1,5 @@
 $details = @($args | ForEach-Object {
-        return & Get-Show-Details.ps1 -Path $_ --OnlyBasicInfo;
+        return & Get-ShowDetails.ps1 -Path $_ --OnlyBasicInfo;
     } | Where-Object {
         $null -ne $_
     })

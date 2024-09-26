@@ -1,3 +1,13 @@
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [string]
+    $ImagePath,
+    [Parameter(Mandatory)]
+    [string]
+    $SavePath
+)
+
 Add-Type -AssemblyName System.Drawing;
 Write-Host "Convert-Png-To-Ico ARGS $($args)" -ForegroundColor Yellow;
 
@@ -95,9 +105,8 @@ function ConvertImageToIco  (
     $sourceImage.Dispose();
 }
 
-. Parse-Args.ps1 $args;
 ConvertImageToIco `
-    -sourceImagePath $imagePath `
-    -newFilePath $saveFilePath;
+    -sourceImagePath $ImagePath `
+    -newFilePath $SavePath;
 
-return $saveFilePath;
+return $SavePath;

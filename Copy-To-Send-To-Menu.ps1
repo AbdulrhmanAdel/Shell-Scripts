@@ -1,4 +1,4 @@
-& Run-As-Admin.ps1;
+& Run-AsAdmin.ps1;
 # Install-Package SharpShell;
 
 Write-Host "Copying To Send To Menu" -ForegroundColor Green;

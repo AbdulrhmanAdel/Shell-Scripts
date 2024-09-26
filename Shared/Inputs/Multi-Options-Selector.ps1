@@ -3,7 +3,8 @@
 param (
     $options,
     [switch]$Multi,
-    [switch]$MustSelectOne
+    [switch]$MustSelectOne,
+    $SelectedOptions
 )
 
 Add-Type -AssemblyName System.Windows.Forms

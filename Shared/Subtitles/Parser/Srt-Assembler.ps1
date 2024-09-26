@@ -35,10 +35,6 @@ function BuildFinalDialog {
 }
 
 $global:currenetSubIndex = 1;
-
-$dialogs ??= $args[0];
-$OutputPath ??= $args[1];
-$Encoding ??= "UTF8"
 $dialogs | ForEach-Object {
     return BuildFinalDialog -startTime  $_.StartTime `
         -endTime $_.EndTime `

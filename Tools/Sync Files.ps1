@@ -32,7 +32,7 @@ $personalProjectConfig = "$syncProgramPath\Configs\Personal Projects.ffs_gui";
 $programmingProgramsConfig = "$syncProgramPath\Configs\Programming Programs.ffs_gui";
 
 function Sync {
-    $type = [SyncTarget]::$(& Options-Selector.ps1 ([SyncTarget].GetEnumNames()));
+    $type = [SyncTarget]::$(& Single-Options-Selector.ps1 -Options ([SyncTarget].GetEnumNames()));
     if ($null -eq $type -or $type -eq [SyncTarget]::Cancel) {
         EXIT;
     }

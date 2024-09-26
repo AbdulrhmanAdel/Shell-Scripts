@@ -4,7 +4,7 @@ param(
     [string]$File
 )
 
-$encoding = & Get-File-Encoding.ps1 $File;
+$encoding = & Get-FileEncoding.ps1 $File;
 function ParseTimeSpan {
     param (
         $time

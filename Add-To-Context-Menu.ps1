@@ -1,5 +1,5 @@
 # Max Entries = 16
-& Run-As-Admin.ps1;
+& Run-AsAdmin.ps1;
 
 Write-Host "Starting" -ForegroundColor Green;
 $Recycle = "RecycleBin";
