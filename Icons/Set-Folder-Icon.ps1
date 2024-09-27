@@ -16,7 +16,7 @@ function OpenBrowser {
     )
 
     $iconWebsite = & Single-Options-Selector.ps1 `
-        -Options @("Google", "Yandex", "Deviantart") `
+        -Options @("Google", "Yandex", "Deviantart", "Bing") `
         -Title "Select Icon Website" -MustSelectOne;
     $iconWebsite ??= "Deviantart";
     $replaceText = "\[(FitGirl|Dodi).*\]";
@@ -33,6 +33,7 @@ function OpenBrowser {
         "Google" { $link = "https://www.google.com/search?tbm=isch&q=$query"; break; }
         "Yandex" { $link = "https://yandex.com/images/search?ih=256&iw=256&isize=eq&itype=png&text=$query"; break; }
         "Deviantart" { $link = "https://www.deviantart.com/search/deviations?q=$query&order=most-recent"; break; }
+        "Bing" { $link = "https://www.bing.com/images/search?q=$query"; break; }
         Default { $link = "https://www.deviantart.com/search?q=$query"; }
     }
     Start-Process $link;
@@ -89,7 +90,7 @@ function GetIamgePath {
 }
 
 $directory = Get-Item -LiteralPath $DirectoryPath -Force;
-$iconPath = "$DirectoryPath\$($directory.Name).ico";
+$iconPath = "$($directory.FullName)\$($directory.Name.Trim()).ico";
 $folderHasIcon = Test-Path -LiteralPath $iconPath;
 if ($folderHasIcon -and !$ImagePath) {
     $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to overwrite it?";

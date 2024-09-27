@@ -1,8 +1,6 @@
-& Run-AsAdmin.ps1 $args;
-
-$files = $args;
+& Run-AsAdmin.ps1 -Arguments $args;
 $takeOwn = "TakeOwn";
-foreach ($file in $files) {
+foreach ($file in $args) {
     $fileInfo = Get-Item -LiteralPath $file;
     if ($fileInfo -is [System.IO.FileInfo]) {
         &$takeOwn /f "$file"

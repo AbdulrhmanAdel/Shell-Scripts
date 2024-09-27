@@ -6,5 +6,10 @@ param (
 )
 
 $folderName = [System.IO.Path]::GetFileName($FolderPath);
-$newFolderName = "$folderName "
+$space = ' ';
+
+$newFolderName = "$folderName$space"
+if ($folderName -match $space) {
+    $newFolderName = "$folderName" -replace $space, ''
+}
 Rename-Item -LiteralPath $FolderPath -NewName $newFolderName;

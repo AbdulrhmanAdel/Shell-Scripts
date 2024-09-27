@@ -1,8 +1,6 @@
-$outputPath = & Folder-Picker.ps1 -intialDirectory "D:\Watch" --ExitIfNotSelected;
+$outputPath = & Folder-Picker.ps1 -IntialDirectory "D:\Watch" -ExitIfNotSelected;
 
 #region Functions
-
-
 $removeSent = "-PSA|-Pahe\.in|\[AniDL\] ";
 function RemoveUnusedTracks(
     $inputPath,

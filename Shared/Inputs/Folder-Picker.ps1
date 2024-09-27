@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param (
-    [string]$IntialDirectory = [Environment]::GetFolderPath('MyDocuments')
+    [string]$IntialDirectory = [Environment]::GetFolderPath('MyDocuments'),
+    [switch]$ExitIfNotSelected
 )
 
 Add-Type -AssemblyName System.Windows.Forms;

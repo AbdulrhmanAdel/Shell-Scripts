@@ -1,11 +1,16 @@
+[CmdletBinding()]
+param (
+    [Parameter(Position = 0)]
+    $Arguments = @()
+)
+
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     $callStack = Get-PSCallStack
     $path = $callStack[1].ScriptName
-    $arguments = @(
+    $processArguments = @(
         "-File", """$path"""
     )
 
-    $arguments += $args;
-    Start-Process pwsh.exe -Verb RunAs -ArgumentList $arguments;
+    Start-Process pwsh.exe -Verb RunAs -File "$path" -ArgumentList $Arguments;
     [Environment]::Exit(0);
 }
