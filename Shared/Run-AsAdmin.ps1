@@ -9,8 +9,8 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     $path = $callStack[1].ScriptName
     $processArguments = @(
         "-File", """$path"""
-    )
+    ) + $Arguments;
 
-    Start-Process pwsh.exe -Verb RunAs -File "$path" -ArgumentList $Arguments;
+    Start-Process pwsh.exe -Verb RunAs -ArgumentList $processArguments;
     [Environment]::Exit(0);
 }

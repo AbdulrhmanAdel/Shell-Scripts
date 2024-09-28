@@ -16,7 +16,7 @@ function OpenBrowser {
     )
 
     $iconWebsite = & Single-Options-Selector.ps1 `
-        -Options @("Google", "Yandex", "Deviantart", "Bing") `
+        -Options @("Google", "Yandex", "Deviantart", "Bing", "DuckDuckGo") `
         -Title "Select Icon Website" -MustSelectOne;
     $iconWebsite ??= "Deviantart";
     $replaceText = "\[(FitGirl|Dodi).*\]";
@@ -34,6 +34,7 @@ function OpenBrowser {
         "Yandex" { $link = "https://yandex.com/images/search?ih=256&iw=256&isize=eq&itype=png&text=$query"; break; }
         "Deviantart" { $link = "https://www.deviantart.com/search/deviations?q=$query&order=most-recent"; break; }
         "Bing" { $link = "https://www.bing.com/images/search?q=$query"; break; }
+        "DuckDuckGo" { $link = "https://duckduckgo.com/?t=h_&iax=images&ia=images&iaf=type:transparent,layout:Square&q=$query"; break; }
         Default { $link = "https://www.deviantart.com/search?q=$query"; }
     }
     Start-Process $link;

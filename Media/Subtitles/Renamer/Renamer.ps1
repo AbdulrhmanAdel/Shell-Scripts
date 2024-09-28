@@ -1,9 +1,3 @@
-$details = @($args | ForEach-Object {
-        return & Get-ShowDetails.ps1 -Path $_ --OnlyBasicInfo;
-    } | Where-Object {
-        $null -ne $_
-    })
-
 $global:renameMap = @();
 
 function SetRename {
@@ -58,6 +52,12 @@ function HandleRenameMap {
 
     $global:renameMap = @();
 }
+
+$details = @($args | ForEach-Object {
+    return & Get-ShowDetails.ps1 -Path $_ -OnlyBasicInfo;
+} | Where-Object {
+    $null -ne $_
+})
 
 Write-Host "===================== START"
 Write-Host "Handling Movies" -ForegroundColor Cyan
