@@ -24,13 +24,11 @@ function CopyWithShellGUI {
     $objFolder.CopyHere($source, 88) # 88 => 16, 64, 8
 }
 
-#endregion
-# $driveLetter = & Single-Options-Selector.ps1 -Options @(Get-Partition -DiskNumber 0 | Where-Object { !!$_.DriveLetter } | ForEach-Object { return $_.DriveLetter })
-$driveLetter = Read-Host "Enter Drive Letter";
-if (!$driveLetter) {
-    EXIT;
-}
 
+$drives = Get-PSDrive -PSProvider FileSystem  | Foreach-Object { return $_.Name };
+#endregion
+
+$driveLetter = & Single-Options-Selector.ps1 -Options $drives -MustSelectOne;
 $files | ForEach-Object {
     $dest = (Split-Path $_).ToCharArray();
     $dest[0] = $driveLetter;

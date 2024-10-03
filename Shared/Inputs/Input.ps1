@@ -2,9 +2,9 @@
 param (
     [string]$Title = "Please Enter Value",
     [string]$Message = "Please Enter Value",
-    [string]$DefaultValue,
     [string]$Type = "Text",
-    [switch]$Required = $false
+    [switch]$Required = $false,
+    $DefaultValue
 )
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -56,7 +56,7 @@ while ($Required -and $result -ne [System.Windows.Forms.DialogResult]::OK) {
 }
 
 $form.Dispose();
-if (!!$text.Text) {
+if (!$text.Text) {
     return $DefaultValue;
 }
 

@@ -62,6 +62,12 @@ function CreateMenu {
 
 
 #region Vars 
+# $baseScriptsPath = @(
+#     @{
+#         Title = "Scripts"
+#         Key   = "0 Scripts"
+#     }
+# )
 
 $mediaPath = @(
     @{
@@ -247,14 +253,15 @@ $scripts = @(
     #     Path       = $toolsPath
     #     Icon       = "pwsh.exe"
     # },
+    @{
+        Extensions = @("*", "Directory")
+        Title      = "Copy To Different Drive With The Same Hierarchy"
+        Key        = "999-Copy-ToDrive.ps1"
+        ScriptPath = "Tools\Copy-ToDrive.ps1"
+        Path       = $toolsPath
+        Icon       = "pwsh.exe"
+    } #, 
     # @{
-    #     Extensions = @("*", "Directory")
-    #     Title      = "Copy To Different Drive With The Same Hierarchy"
-    #     Key        = "999-Copy-To-Different-Drive-With-The-Same-Hierarchy"
-    #     ScriptPath = "Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"
-    #     Path       = $toolsPath
-    #     Icon       = "pwsh.exe"
-    # },    # @{
     #     Extensions     = @("Drive", "*", "Directory", $Recycle)
     #     Title          = "Safe Delete (Prompt For Passes)"
     #     Key            = "999 Safe Delete (Prompt For Passes)"

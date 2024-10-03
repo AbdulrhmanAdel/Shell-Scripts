@@ -1,4 +1,4 @@
-& Run-AsAdmin.ps1 -Arguments $args;
+& Run-AsAdmin.ps1 -Arguments ($args | ForEach-Object {return """$_"""});
 $takeOwn = "TakeOwn";
 foreach ($file in $args) {
     $fileInfo = Get-Item -LiteralPath $file;

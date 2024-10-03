@@ -1,24 +1,26 @@
+enum ExtractLibraryType{
+    Ffmpeg
+    MkvExtract
+}
+
 #region Functions
 
 $codecSettings = @{
     # Audio
-    "aac"    = @{ Library = "ffmpeg"; Type = "a"; Encoder = "aac"; Extension = ".aac" }
-    "m4a"    = @{ Library = "ffmpeg"; Type = "a"; Encoder = "aac"; Extension = ".m4a" }
-    "opus"   = @{ Library = "ffmpeg"; Type = "a"; Encoder = "libopus"; Extension = ".opus" }
-    "mp3"    = @{ Library = "ffmpeg"; Type = "a"; Encoder = "libmp3lame"; Extension = ".mp3" }
+    "aac"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "aac"; Extension = ".aac" }
+    "m4a"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "aac"; Extension = ".m4a" }
+    "opus"         = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "libopus"; Extension = ".opus" }
+    "mp3"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "libmp3lame"; Extension = ".mp3" }
     # Subtitles
     # ASS (Advanced SSA) subtitle (decoders: ssa ass) (encoders: ssa ass)
-    "ass"    = @{ Library = "ffmpeg"; Type = "s"; Encoder = "ass"; Extension = ".ass" }
+    "ass"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "ass"; Extension = ".ass" }
     # SubRip subtitle with embedded timing
-    "srt"    = @{ Library = "ffmpeg"; Type = "s"; Encoder = "srt"; Extension = ".srt" }
+    "srt"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "srt"; Extension = ".srt" }
     # SubRip subtitle (decoders: srt subrip) (encoders: srt subrip)
-    "subrip" = @{ Library = "ffmpeg"; Type = "s"; Encoder = "subrip"; Extension = ".srt" }
+    "subrip"       = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "subrip"; Extension = ".srt" }
     # DVB subtitles (decoders: dvbsub) (encoders: dvbsub)
-    # "dvb_subtitle" = @{ Type = "s"; Encoder = "dvbsub"; Extension = ".sub" }
-    # # DVD subtitles (decoders: dvdsub) (encoders: dvdsub)
-    # "dvd_subtitle" = @{ CustomHandler = {
-    #     & mkvextract 
-    # }; Extension = ".idx" }
+    "dvd_subtitle" = @{  Library = [ExtractLibraryType]::MkvExtract; Type = "s"; Extension = ".sub" }
+    "dvb_subtitle" = @{  Library = [ExtractLibraryType]::MkvExtract; Type = "s"; Extension = ".sub" }
 };
 function FfmpegExtract {
     param (
@@ -45,22 +47,29 @@ function HandleTrack {
     )
 
     $tracksInfo ??= GetTracksInfo($pathInfo.FullName);
-
     $tracksInfo | ForEach-Object {
         $trackInfo = $_;
         if (!$trackInfo) { return; }
+        $extension = "." + $trackInfo.Language + $trackInfo.Settings.Extension;
+        $fileDirectoryName = $FileInfo.DirectoryName;
+        $fileName = $FileInfo.Name.replace($FileInfo.Extension, "$extension");
+        $output = "$fileDirectoryName\$fileName";
+
         if ($trackInfo.CustomHandler) {
             $trackInfo.CustomHandler.Invoke($fileInfo, $trackInfo);
             return;
         }
     
         switch ($trackInfo.Settings.Library) {
-            "ffmpeg" {  
+            ([ExtractLibraryType]::Ffmpeg) {  
                 FfmpegExtract -FileInfo $fileInfo `
                     -trackInfo $trackInfo;
                 break;
             }
-            "mkvExtract" { break; }
+            ([ExtractLibraryType]::MkvExtract) { 
+                & mkvextract.exe "$($fileInfo.FullName)" tracks "$($trackInfo.Index):$output"
+                break; 
+            }
             Default {}
         }
     }
