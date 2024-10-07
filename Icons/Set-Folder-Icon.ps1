@@ -29,6 +29,8 @@ function OpenBrowser {
     }
 
     $link = $null;
+    $pickFirstImage = Prompt.ps1 -Message "Auto Pick First Image?";
+    $query += $pickFirstImage ? "&pickFirstImage" : ""
     switch ($iconWebsite) {
         "Google" { $link = "https://www.google.com/search?tbm=isch&q=$query"; break; }
         "Yandex" { $link = "https://yandex.com/images/search?ih=256&iw=256&isize=eq&itype=png&text=$query"; break; }

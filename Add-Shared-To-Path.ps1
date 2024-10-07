@@ -12,4 +12,6 @@ $pathes = $currentPath -split ";" | Where-Object {
 
 $pathes += $directories + $parentDirectory;
 # Set the new path
-[System.Environment]::SetEnvironmentVariable("Path", $pathes -join ";", "User")
+[System.Environment]::SetEnvironmentVariable("Path", $pathes -join ";", "User");
+
+timeout 15;

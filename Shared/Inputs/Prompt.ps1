@@ -1,8 +1,8 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory)]
+    [string]$Message,
     [string]$Title,
-    [string]$Message = 'Are you sure you want to continue?',
     $DefaultValue
 )
 
