@@ -77,7 +77,7 @@ $imageSourceHandlers = @{
         $imageUrl = Read-Host "Please Enter Icon Url";
         return DonwloadImage -imageUrl $imageUrl; 
     }
-    "FromPath"               = { return Read-Host "Please Enter Icon Path."; }
+    "FromPath"               = { return File-Picker.ps1 -Required -Filter "Images |*.ico;*.png;*.jpg" }
 };
 
 function GetIamgePath {
@@ -107,7 +107,14 @@ if (!$ImagePath) {
     $ImagePath = GetIamgePath
 }
 
-& "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -ImagePath "$ImagePath" -SavePath "$iconPath";
+
+if ($ImagePath.EndsWith(".ico")) {
+    Copy-Item -LiteralPath $ImagePath -Destination $iconPath -Force;
+}
+else {
+    & "$($PSScriptRoot)/Utils/Convert-Png-To-Ico.ps1" -ImagePath "$ImagePath" -SavePath "$iconPath";
+}
+
 # Hide the Icon
 $iconFile = Get-Item -LiteralPath $iconPath -Force;
 attrib.exe +h +s +r "$iconFile";
