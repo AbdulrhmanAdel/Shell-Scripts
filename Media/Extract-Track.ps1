@@ -19,8 +19,8 @@ $codecSettings = @{
     # SubRip subtitle (decoders: srt subrip) (encoders: srt subrip)
     "subrip"       = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "subrip"; Extension = ".srt" }
     # DVB subtitles (decoders: dvbsub) (encoders: dvbsub)
-    "dvd_subtitle" = @{  Library = [ExtractLibraryType]::MkvExtract; Type = "s"; Extension = ".sub" }
-    "dvb_subtitle" = @{  Library = [ExtractLibraryType]::MkvExtract; Type = "s"; Extension = ".sub" }
+    # "dvd_subtitle" = @{  Library = [ExtractLibraryType]::MkvExtract; Type = "s"; Extension = ".sub" }
+    # "dvb_subtitle" = @{  Library = [ExtractLibraryType]::MkvExtract; Type = "s"; Extension = ".sub" }
 };
 function FfmpegExtract {
     param (

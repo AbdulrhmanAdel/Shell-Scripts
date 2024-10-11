@@ -6,9 +6,9 @@ $directories = Get-ChildItem -Path $parentDirectory -Directory -Recurse | Where-
 
 # Current system path
 $currentPath = [System.Environment]::GetEnvironmentVariable("Path", "User");
-$pathes = $currentPath -split ";" | Where-Object {
+$pathes = @($currentPath -split ";" | Where-Object {
     return !$_.StartsWith($parentDirectory)
-};
+});
 
 $pathes += $directories + $parentDirectory;
 # Set the new path
