@@ -31,13 +31,13 @@ function GetMediaFilesFromArchive {
         & Remove-ToRycleBin.ps1 $outputPath;
     }
 
-    $archiveProcess = Start-Process "C:\Program Files\7-Zip\7z.exe" -ArgumentList @(
+    $archiveProcess = Start-Process 7z.exe -ArgumentList @(
         "x", 
         $archiveFileInfo.FullName,
         "-o$outputPath"
     ) -NoNewWindow -PassThru -Wait;
     
-    if ($archiveProcess.ExitCode -gt 0) {
+    if (!$archiveProcess -or $archiveProcess.ExitCode -gt 0) {
         return @();
     }
 
@@ -115,7 +115,7 @@ $args | Where-Object {
         return $false;
     }
         
-    if ($results -notcontains $false) {
+    if ($results.Length -and $results -notcontains $false) {
         & Remove-ToRycleBin.ps1 $_;
 
         if ($isArchive) {

@@ -78,7 +78,6 @@ for ($i = 0; $i -lt $subs.Count; $i++) {
 $arguments += @("-c", "copy");
 $arguments += """$outputPath""";
 
-Write-Host "Command Args: $($arguments -join ',')" -ForegroundColor Green;
 return Start-Process ffmpeg `
     -ArgumentList $arguments `
     -NoNewWindow -PassThru -Wait;

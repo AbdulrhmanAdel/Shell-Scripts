@@ -61,12 +61,16 @@ function RunCmd {
 function RunProgram {
     param (
         $Path,
-        [switch]$NoWait
+        [switch]$NoWait,
+        [switch]$NoAdmin
     )
 
     Write-Host "===========================" -BackgroundColor Red;
     Write-Host "Running $Path" -BackgroundColor Green;
-    if ($NoWait) {
+    if ($NoAdmin) {
+        Start-Process $Path -Wait;
+    }
+    elseif ($NoWait) {
         Start-Process $Path -Verb RunAs;
     }
     else {
@@ -90,10 +94,11 @@ RunReg -Path "$programmingPath\1- Regisy Programs\VsCode.reg";
 RunReg -Path "$programmingPath\1- Regisy Programs\WebStorm.reg";
 RunReg -Path "$programmingPath\1- Regisy Programs\Rider.reg";
 RunReg -Path "$programmingPath\1- Regisy Programs\Terminal.reg";
+RunReg -Path "$programmingPath\1- Regisy Programs\Add-IDEsToUserEnvPath.ps1";
 RunPowershell -Path "$programmingPath\1- Programs Data\Link.ps1";
 
 RunProgram -Path "$programmingPath\Git\Git-2.46.2-64-bit.exe";
-RunProgram -Path "$programmingPath\Node\node-v22.0.0-x64.msi";
+RunProgram -Path "$programmingPath\Node\node-v22.9.0-x64.msi";
 # #endregion
 
 # # region Programs
@@ -104,9 +109,8 @@ Invoke-Item -LiteralPath "D:\Programs\OS\Windows\Win11_24H2_English_x64.iso";
 RunPowershell -Path "$tweaksPath\Enable-DotNet3.5Framework.ps1";
 RunCmd -Path "$programsPath\C++ Runtimes\install_all.bat"
 RunProgram -Path "$programsPath\Games\DirectX\DXSETUP.exe";
-RunReg -Path "$tweaksPath\Show-Turbo Boost.reg"
+RunReg -Path "$tweaksPath\Show-TurboBoost.reg"
 RunReg -Path "$tweaksPath\Fix powershell files whitespace issue.reg"
-RunPowershell -Path "$tweaksPath\Toggle-HiddenFiles.ps1"
 RunPowershell -Path "$tweaksPath\StartMenu\Restore.ps1"
 RunPowershell -Path "$tweaksPath\Hib\Disable-Hib.ps1"
 RunCmd -Path "$tweaksPath\Date And Time\Change-DateFormat.bat"
@@ -127,10 +131,23 @@ RunProgram -Path "$programsPath\Net\Downloaders\IDM\IDMan.exe" -NoWait;
 RunPowershell -Path "$programsPath\Net\Torrent\qBittorrent\Data\Link-QBitTorrentDataFolder.ps1"
 RunReg -Path "$programsPath\Net\Torrent\qBittorrent\Data\Register-QBitTorrentMagnet.reg"
 RunReg -Path "$programsPath\Net\Torrent\qBittorrent\Data\Assign-QBittorrentToOpenTorrentFiles.reg"
-RunProgram -Path "$programsPath\Net\Torrent\qBittorrent\Data\Assign-QBittorrentToOpenTorrentFiles.reg" -NoWait;
+RunProgram -Path "$programsPath\Net\Torrent\qBittorrent\qbittorrent.exe" -NoWait;
 
 RunProgram -Path "$programsPath\Hardware\HWiNFO64\HWiNFO64.exe" -NoWait;
 RunProgram -Path "$programsPath\Hardware\RivaTuner Statistics Server\RTSS.exe" -NoWait;
 
 #endregion
+
+$pathEnvironmentVariable = [Environment]::GetEnvironmentVariable('path', [EnvironmentVariableTarget]::User);
+$pathes = @($pathEnvironmentVariable -split ";");
+$pathes += @(
+    "$programsPath\Windows\General Tools"
+    "$programsPath\Media\Tools\Ffmpeg\bin"
+    "$programsPath\Media\Tools\HandBrake"
+    "$programsPath\Media\Tools\MediaInfo"
+    "$programsPath\Media\Tools\mkvtoolnix"
+    "$programsPath\Media\Tools\yt"
+);
+[Environment]::SetEnvironmentVariable('Path', $pathes -join ";", [EnvironmentVariableTarget]::User);
+
 
