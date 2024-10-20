@@ -11,17 +11,6 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 
 # region Helpers
 
-function CreateShortcut {
-    param (
-        $Target,
-        $Source
-    )
-    
-    & "D:\Programming\Projects\Personal Projects\Shell-Scripts\Shared\Create-Shortcut.ps1" `
-        -Target $Target `
-        -Source $Source
-}
-
 function RunPowershell {
     param (
         $Path
@@ -57,7 +46,6 @@ function RunCmd {
     Write-Host "===========================" -BackgroundColor Red;
 }
 
-
 function RunProgram {
     param (
         $Path,
@@ -81,6 +69,7 @@ function RunProgram {
 
 }
 #endregion
+
 # region Setup Personal Projects
 $personalProjectPath = $PSScriptRoot;
 RunPowershell -Path "$personalProjectPath\Add-Shared-To-Path.ps1"
@@ -138,7 +127,7 @@ RunProgram -Path "$programsPath\Hardware\RivaTuner Statistics Server\RTSS.exe" -
 
 #endregion
 
-$pathEnvironmentVariable = [Environment]::GetEnvironmentVariable('path', [EnvironmentVariableTarget]::User);
+$pathEnvironmentVariable = [Environment]::GetEnvironmentVariable('path', [EnvironmentVariableTarget]::User) ?? "";
 $pathes = @($pathEnvironmentVariable -split ";");
 $pathes += @(
     "$programsPath\Windows\General Tools"
