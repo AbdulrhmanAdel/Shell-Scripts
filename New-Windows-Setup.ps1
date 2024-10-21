@@ -98,7 +98,7 @@ Invoke-Item -LiteralPath "D:\Programs\OS\Windows\Win11_24H2_English_x64.iso";
 RunPowershell -Path "$tweaksPath\Enable-DotNet3.5Framework.ps1";
 RunCmd -Path "$programsPath\C++ Runtimes\install_all.bat"
 RunProgram -Path "$programsPath\Games\DirectX\DXSETUP.exe";
-RunReg -Path "$tweaksPath\Show-TurboBoost.reg"
+RunReg -Path "$tweaksPath\Power Plan\Show-TurboBoost.reg"
 RunReg -Path "$tweaksPath\Fix powershell files whitespace issue.reg"
 RunPowershell -Path "$tweaksPath\StartMenu\Restore.ps1"
 RunPowershell -Path "$tweaksPath\Hib\Disable-Hib.ps1"

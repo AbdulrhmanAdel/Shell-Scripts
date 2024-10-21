@@ -1,4 +1,4 @@
-$outputPath = & Folder-Picker.ps1 -IntialDirectory "D:\Watch" -ExitIfNotSelected;
+$outputPath = & Folder-Picker.ps1 -IntialDirectory "E:\Watch" -ExitIfNotSelected;
 
 #region Functions
 $removeSent = "-PSA|-Pahe\.in|\[AniDL\] ";

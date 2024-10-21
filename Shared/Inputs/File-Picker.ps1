@@ -3,13 +3,14 @@ param (
     [string]$IntialDirectory = [Environment]::GetFolderPath('MyDocuments'),
     [switch]$ExitIfNotSelected,
     [switch]$Required,
+    [switch]$ShowHiddenFiles,
     $Filter
 )
 
 Add-Type -AssemblyName System.Windows.Forms;
 $openFileDialog = New-Object System.Windows.Forms.OpenFileDialog;
 $openFileDialog.InitialDirectory = $IntialDirectory;
-$openFileDialog.ShowHiddenFiles = $true;
+$openFileDialog.ShowHiddenFiles = $ShowHiddenFiles
 if ($Filter) {
     $openFileDialog.Filter = $Filter;
 }

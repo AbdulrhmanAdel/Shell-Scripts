@@ -77,7 +77,12 @@ $imageSourceHandlers = @{
         $imageUrl = Read-Host "Please Enter Icon Url";
         return DonwloadImage -imageUrl $imageUrl; 
     }
-    "FromPath"               = { return File-Picker.ps1 -Required -Filter "Images |*.ico;*.png;*.jpg" }
+    "FromPath"               = { 
+        return File-Picker.ps1 `
+            -Required `
+            -ShowHiddenFiles `
+            -Filter "Images |*.ico;*.png;*.jpg" 
+    }
 };
 
 function GetIamgePath {
