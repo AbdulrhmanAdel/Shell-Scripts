@@ -2,7 +2,8 @@
 #region function
 
 
-$outputPath = & Folder-Picker.ps1;
+$intialDir = Split-Path $args[0];
+$outputPath = & Folder-Picker.ps1 -IntialDirectory $intialDir;
 function Compress {
     param (
         $file
@@ -23,11 +24,15 @@ function Compress {
     Write-Host "Compressing $file" -ForegroundColor Green;
 }
 
+# $usePredifindConfig = & Prompt.ps1 -Message "Use Predifined Config";
 #endregion
 
-$selector = "Options-Selector.ps1";
-$width, $height = (& $selector -options @("480x640", "720x1280", "1080x1920") -title "Select Video Resoluation" -defaultValue "720x1280") -split "x" | ForEach-Object { return [int]$_ };
-$selectedVideoEncoder = & $selector -options @(
+$width, $height = (& Single-Options-Selector.ps1 `
+        -Options @("480x640", "720x1280", "1080x1920") `
+        -Title "Select Video Resoluation" `
+        -DefaultValue "720x1280") -split "x" | ForEach-Object { return [int]$_ };
+
+$selectedVideoEncoder = & Single-Options-Selector.ps1 -Options @(
     "svt_av1",
     "svt_av1_10bit",
     "x264",
@@ -44,15 +49,16 @@ $selectedVideoEncoder = & $selector -options @(
     # "VP9",
     # "VP9_10bit",
     # "theora"
-) -title "Select Encoder Target" -defaultValue "x265";
+) -Title "Select Encoder Target" -DefaultValue "x265";
 
 $encoderPresetOptions = @( "ultrafast", "superfast", "veryfast", "faster", "fast", "medium")
-$encoderPreset = & $selector -options $encoderPresetOptions -defaultValue "veryfast" -title "Select Encoding Speed Preset" ;
-
-
+$encoderPreset = & Single-Options-Selector.ps1 `
+    -Options $encoderPresetOptions `
+    -Title "Select Encoding Speed Preset" `
+    -DefaultValue "veryfast";
 
 #region Audio
-$selectedAudioEncoder = & $selector -options @(
+$selectedAudioEncoder = & Single-Options-Selector.ps1 -Options @(
     "none",
     "av_aac",
     "opus",
@@ -73,7 +79,7 @@ $selectedAudioEncoder = & $selector -options @(
     "flac24",
     "copy:flac",
     "copy:opus"
-) -title "Select Audio Encoder Target" -defaultValue "av_aac";
+) -Title "Select Audio Encoder Target" -DefaultValue "av_aac";
 #endregion
 
 $sharedArgs = @(
@@ -87,7 +93,7 @@ $sharedArgs = @(
     "--aencoder", $selectedAudioEncoder
 );
 
-$qualtiyMethod = & $selector -options @("Quality", "BitRate") -defaultValue "Quality" -title "Quality Or BitRate" ;
+$qualtiyMethod = & Single-Options-Selector.ps1 -options @("Quality", "BitRate") -defaultValue "Quality" -title "Quality Or BitRate" ;
 switch ($qualtiyMethod) {
     "Quality" { 
         $quality = & Range-Selector.ps1 -title "Quality" -message "Select Quality (Lower Is Better)" -minimum 0 -maximum 51  -defaultValue 22  -tickFrequency 1;
@@ -100,7 +106,7 @@ switch ($qualtiyMethod) {
     Default {}
 }
 
-$frame = & $selector -options @(30, 60, 120, "As Source") -title "Select Frame Rate" -defaultValue "As Source";
+$frame = & Single-Options-Selector.ps1 -options @(30, 60, 120, "As Source") -title "Select Frame Rate" -defaultValue "As Source";
 if ($frame -ne "As Source") {
     $sharedArgs += @("--rate", $frame, "--pfr");
 }

@@ -166,7 +166,7 @@ $scripts = @(
     @{
         Extensions = @("Directory")
         Title      = "Download Youtube Video"
-        Key        = "90 Download Video"
+        Key        = "90 Download Youtube Video"
         ScriptPath = "Youtube\Download-Video.ps1"
         Path       = @()
         Icon       = "pwsh.exe"
