@@ -10,21 +10,21 @@
 
 [CmdletBinding()]
 param (
+    [Parameter(Mandatory = $true)]
+    [string[]]$Files,
     [switch]$Prompt,
     [switch]$PromptPasses
 )
 
-Write-Host $args
-. Parse-Args.ps1 $args;
+Write-Host $Files
 Write-Host "These Files Are going to be deleted:" -ForegroundColor Green;
-$files = @($args | Where-Object { return (Test-Path -LiteralPath $_ -ErrorAction Ignore) -or $_ -match '^(?<Drive>[a-z]:)"$'; });
-$files | ForEach-Object { Write-Host $_  -ForegroundColor Red; }
-
+$Files | ForEach-Object { Write-Host $_  -ForegroundColor Red; }
 $passes = @();
 if ($PromptPasses) { 
     $noOfPasses = & Range-Selector.ps1 -title "Passes" -message "Select Number of passes" -minimum 1 -maximum 5  -defaultValue 1  -tickFrequency 1;
     $passes += @("-p", $noOfPasses);
 }
+
 if ($Prompt) {
     $continue = & Prompt.ps1 -message "Are you sure you want to remove these files?";
     if (!$continue) {
@@ -43,7 +43,7 @@ function Delete {
     Start-Process sdelete -ArgumentList $procesArgs -Wait -NoNewWindow;
 }
 
-$files | ForEach-Object {
+$Files | ForEach-Object {
     Write-Host $isDrive $_;
 
     $isDrive = $_ -match '^(?<Drive>[a-z]:)"$';
@@ -70,7 +70,6 @@ $files | ForEach-Object {
     }
     
     Delete -procesArgs @("-r", "-s", """$($_)""");
-
 }    
 
 
