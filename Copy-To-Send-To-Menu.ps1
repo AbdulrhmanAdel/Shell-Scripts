@@ -10,6 +10,10 @@ $menu = @(
         Name      = "01- Remove Unused Tracks.lnk"
         Arguments = "-File ""$scriptPath\Media\Remove-Unused-Tracks\Remove-Unused-Tracks.ps1"""
     },
+    @{
+        Name      = "9999- Copy.lnk"
+        Arguments = "-File ""$scriptPath\Tools\Copy-ToDrive.ps1"" -CustomDestiniation -Files"
+    },
     # @{
     #     Name      = "02- Media - Display Chapters Info.lnk"
     #     Arguments = "-File ""$scriptPath\Media\Display-Chapter-Info.ps1"""

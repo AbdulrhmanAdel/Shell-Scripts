@@ -7,18 +7,19 @@ $baseScriptsPath = $PSScriptRoot;
 function BuildScript {
     param (
         [string]$scriptPath,
-        [string[]] $additionalArgs,
+        [string]$PathParamName,
+        [string[]]$additionalArgs,
         [string]$target,
         [string]$powershellArgs
     )
 
     $finalArgs = "";
     if ($additionalArgs) {
-        $finalArgs = ($additionalArgs | ForEach-Object { return """$_""" }) -join " "
+        $finalArgs = ($additionalArgs | ForEach-Object { return "$_" }) -join " "
     }
 
     $target ??= "%1";
-    return "pwsh.exe $($powershellArgs) -file ""$baseScriptsPath\$scriptPath"" ""$target"" $finalArgs";
+    return "pwsh.exe $($powershellArgs) -file ""$baseScriptsPath\$scriptPath"" $PathParamName ""$target"" $finalArgs";
 }
 
 function Handle {
@@ -37,6 +38,7 @@ function Handle {
     $key = $element.Key;
     $target = $extension -eq $Recycle ? "$($env:SystemDrive)\`$Recycle.bin" : "%1";
     $command = BuildScript -scriptPath $element.ScriptPath `
+        -PathParamName $element.PathParamName `
         -additionalArgs $element.AdditionalArgs `
         -target $target `
         -powershellArgs $element.PowershellArgs;
@@ -254,12 +256,23 @@ $scripts = @(
     #     Icon       = "pwsh.exe"
     # },
     @{
-        Extensions = @("*", "Directory")
-        Title      = "Copy To Different Drive With The Same Hierarchy"
-        Key        = "999-Copy-ToDrive.ps1"
-        ScriptPath = "Tools\Copy-ToDrive.ps1"
-        Path       = $toolsPath
-        Icon       = "pwsh.exe"
+        Extensions    = @("*", "Directory")
+        Title         = "Copy"
+        Key           = "999 Copy.ps1"
+        ScriptPath    = "Tools\Copy-ToDrive.ps1"
+        Path          = $toolsPath
+        Icon          = "pwsh.exe"
+        PathParamName = "-Files"
+        AdditionalArgs = @("-CustomDestiniation")
+    }, 
+    @{
+        Extensions    = @("*", "Directory")
+        Title         = "Copy To Different Drive With The Same Hierarchy"
+        Key           = "999-Copy-ToDrive.ps1"
+        ScriptPath    = "Tools\Copy-ToDrive.ps1"
+        Path          = $toolsPath
+        Icon          = "pwsh.exe"
+        PathParamName = "-Files"
     } #, 
     # @{
     #     Extensions     = @("Drive", "*", "Directory", $Recycle)

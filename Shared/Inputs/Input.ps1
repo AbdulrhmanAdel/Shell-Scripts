@@ -34,7 +34,7 @@ $text.Text = $DefaultValue
 if ($Type -eq "Number") {
     $text.Add_KeyPress({
             param($s, $e)
-            $e.Handled = ![char]::IsDigit($e.KeyChar) -and ![char]::IsControl($e.KeyChar)
+            $e.Handled = $e.KeyChar -ne '-' -and ![char]::IsDigit($e.KeyChar) -and ![char]::IsControl($e.KeyChar)
         })
 }
 $form.Controls.Add($text)
