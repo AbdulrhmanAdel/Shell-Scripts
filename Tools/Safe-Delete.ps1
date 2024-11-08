@@ -10,10 +10,10 @@
 
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory = $true)]
-    [string[]]$Files,
     [switch]$Prompt,
-    [switch]$PromptPasses
+    [switch]$PromptPasses,
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Files
 )
 
 Write-Host $Files

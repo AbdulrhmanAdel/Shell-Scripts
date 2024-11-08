@@ -69,7 +69,7 @@ $menu = @(
     },
     @{
         Name       = "999- Safe Delete.lnk"
-        Arguments  = "-File ""$scriptPath\Tools\Safe-Delete.ps1"" -Files"
+        Arguments  = "-File ""$scriptPath\Tools\Safe-Delete.ps1"""
         SuffixArgs = @();
     }
 )
