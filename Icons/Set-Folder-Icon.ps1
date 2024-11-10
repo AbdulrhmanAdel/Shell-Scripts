@@ -7,14 +7,7 @@ param (
     [switch]$SkipTimeOut
 )
 
-Write-Host "Set-Folder-Icon ARGS DirectoryPath: $DirectoryPath, ImagePath: $ImagePath, SkipTimeOut: $SkipTimeOut" -ForegroundColor DarkMagenta;
-
 function OpenBrowser {
-    param(
-        [switch]
-        $AppendPath
-    )
-
     $iconWebsite = & Single-Options-Selector.ps1 `
         -Options @("Google", "Yandex", "Deviantart", "Bing", "DuckDuckGo") `
         -Title "Select Icon Website" -MustSelectOne;
@@ -23,14 +16,19 @@ function OpenBrowser {
     $name = $directory.Name -replace $replaceText, "";
     $isGame = $directory.FullName.Contains("Game");
     $query = "$($name) $($isGame ? 'Game' : '') Icon";
-    if ($AppendPath) {
-        $url = [System.Web.HttpUtility]::UrlEncode($directory.FullName);
-        $query += "&path=$url"
+    $link = $null;
+    $Options = @{
+        path           = [System.Web.HttpUtility]::UrlEncode($directory.FullName)
+        pickFirstImage = Prompt.ps1 -Message "Auto Pick First Image?"
     }
 
-    $link = $null;
-    $pickFirstImage = Prompt.ps1 -Message "Auto Pick First Image?";
-    $query += $pickFirstImage ? "&pickFirstImage" : ""
+    $Options.Keys.ForEach({
+            $Value = $Options[$_];
+            if ($Value) {
+                $query += "&" + $_ + "=" + $Value
+            }
+        });
+
     switch ($iconWebsite) {
         "Google" { $link = "https://www.google.com/search?tbm=isch&q=$query"; break; }
         "Yandex" { $link = "https://yandex.com/images/search?ih=256&iw=256&isize=eq&itype=png&text=$query"; break; }
@@ -39,6 +37,7 @@ function OpenBrowser {
         "DuckDuckGo" { $link = "https://duckduckgo.com/?t=h_&iax=images&ia=images&iaf=type:transparent,layout:Square&q=$query"; break; }
         Default { $link = "https://www.deviantart.com/search?q=$query"; }
     }
+
     Start-Process $link;
 }
 
@@ -65,19 +64,15 @@ function DonwloadImage {
 }
 
 $imageSourceHandlers = @{
-    "FromBrowser (Auto Set)" = {
-        OpenBrowser -AppendPath;
+    "FromBrowser" = {
+        OpenBrowser;
         EXIT;
     }
-    "FromBrowser"            = { 
-        OpenBrowser;
-        return DonwloadImage -imageUrl (Read-Host "Please Enter Icon Url"); 
-    }
-    "FromLink"               = { 
+    "FromLink"    = { 
         $imageUrl = Read-Host "Please Enter Icon Url";
         return DonwloadImage -imageUrl $imageUrl; 
     }
-    "FromPath"               = { 
+    "FromPath"    = { 
         return File-Picker.ps1 `
             -Required `
             -ShowHiddenFiles `

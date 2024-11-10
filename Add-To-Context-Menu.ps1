@@ -85,11 +85,6 @@ $iconsPath = @(
     }
 )
 
-$iconsInfo = @{
-    Title = "Info" 
-    Key   = "09 Info" 
-};
-
 $attributesPath = @(
     @{
         Title = "Attributes"
@@ -185,7 +180,7 @@ $scripts = @(
     @{
         Extensions = @("Directory")
         Title      = "Set Or Refresh Icon"
-        Key        = "Set Or Refresh Icon"
+        Key        = "0 Set Or Refresh Icon"
         ScriptPath = "Icons\Set-Folder-Icon.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
@@ -193,27 +188,18 @@ $scripts = @(
     @{
         Extensions = @("Directory")
         Title      = "Remove Icon"
-        Key        = "Remove Icon"
+        Key        = "8 Remove Icon"
         ScriptPath = "Icons\Remove-Icon.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
     },
     @{
         Extensions = @("Directory")
-        Title      = "Open Desktop.ini"
-        Key        = "Open Desktop.ini"
-        ScriptPath = "Icons\Info\Open-Desktop.ini.ps1"
-        Path       = $iconsPath + $iconsInfo
+        Title      = "Open Folder Icon Info.ini"
+        Key        = "9 Open Folder Icon Info.ini"
+        ScriptPath = "Icons\Open-FolderIconInfo.ps1"
+        Path       = $iconsPath
         Icon       = "pwsh.exe"
-    },
-    @{
-        Extensions     = @("Directory")
-        Title          = "Open Ico"
-        Key            = "Open Ico"
-        ScriptPath     = "Icons\Info\Open-Ico.ps1"
-        Path           = $iconsPath + $iconsInfo
-        Icon           = "pwsh.exe"
-        PowershellArgs = "-w Hidden"
     }#,
     # @{
     #     Extensions = @("*", "Directory")
