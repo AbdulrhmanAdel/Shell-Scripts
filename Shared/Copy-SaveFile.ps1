@@ -44,4 +44,8 @@ New-Item `
     -Target $fileInfo.FullName `
     -ItemType SymbolicLink;
 
+if (Prompt.ps1 -Message "Open Linked Folder") {
+    explorer.exe $parent; 
+}
+
 timeout.exe 15;

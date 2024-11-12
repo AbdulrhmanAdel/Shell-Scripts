@@ -4,7 +4,8 @@ param (
     [switch]$ExitIfNotSelected,
     [switch]$Required,
     [switch]$ShowHiddenFiles,
-    $Filter
+    $Filter,
+    [int]$Retry
 )
 
 Add-Type -AssemblyName System.Windows.Forms;
@@ -16,7 +17,8 @@ if ($Filter) {
 }
 
 $openFileDialog.Dispose();
-if ($openFileDialog.ShowDialog() -eq "OK") {
+$dialogOption = New-Object System.Windows.Forms.Form -Property @{TopMost = $true; TopLevel = $true }
+if ($openFileDialog.ShowDialog($dialogOption) -eq "OK") {
     return "$($openFileDialog.FileName)";
 }
 
@@ -24,5 +26,8 @@ if ($ExitIfNotSelected) {
     [Environment]::Exit(0);
 }
 
-while ($Required -and $openFileDialog.ShowDialog() -ne 'OK') {}
+$WithRetry = $Retry -gt 0;
+while (($Required -or ($WithRetry -and $Retry -gt 0)) -and $openFileDialog.ShowDialog($dialogOption) -ne 'OK') {
+    $Retry--;
+}
 return $null;

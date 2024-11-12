@@ -76,6 +76,7 @@ $imageSourceHandlers = @{
         return File-Picker.ps1 `
             -Required `
             -ShowHiddenFiles `
+            -Retry 3 `
             -Filter "Images |*.ico;*.png;*.jpg" 
     }
 };
