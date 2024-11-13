@@ -74,6 +74,7 @@ $imageSourceHandlers = @{
     }
     "FromPath"    = { 
         return File-Picker.ps1 `
+            -IntialDirectory $directory.Parent.FullName `
             -Required `
             -ShowHiddenFiles `
             -Retry 3 `
@@ -99,7 +100,7 @@ $folderHasIcon = Test-Path -LiteralPath $iconPath;
 if ($folderHasIcon -and !$ImagePath) {
     $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to overwrite it?";
     if (!$overwrite) {
-        & "$PSScriptRoot/Refresh-Icon.ps1" -FolderPath $DirectoryPath;
+        # & "$PSScriptRoot/Refresh-Icon.ps1" -FolderPath $DirectoryPath;
         return;
     }
 }

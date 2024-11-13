@@ -38,8 +38,9 @@ $addTypeSplat = @{
     MemberDefinition = $Signature
     PassThru         = $true
     Name             = "Shell32"
-    Namespace        = 'Shell32Functions'
+    Namespace        = 'SetIconShell32Functions'
 }
+
 $Shell32 = Add-Type @addTypeSplat;
 $fcs = New-Object $Shell32[1]
 $fcs.dwSize = 104;
@@ -53,6 +54,7 @@ if ($result -ne 0) {
 }
 else {
     Write-Host "Folder custom settings updated successfully."
+    & "$PSScriptRoot/Refresh-Icon.ps1" -FolderPath $FolderPath;
 }
 
 
