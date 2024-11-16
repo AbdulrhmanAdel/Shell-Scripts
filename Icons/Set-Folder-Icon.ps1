@@ -70,14 +70,17 @@ $imageSourceHandlers = @{
     }
     "FromLink"    = { 
         $imageUrl = Read-Host "Please Enter Icon Url";
-        return DonwloadImage -imageUrl $imageUrl; 
+        if ($imageUrl) {
+            return DonwloadImage -imageUrl $imageUrl; 
+        }
+
+        return $null;
     }
     "FromPath"    = { 
         return File-Picker.ps1 `
             -IntialDirectory $directory.Parent.FullName `
-            -Required `
             -ShowHiddenFiles `
-            -Retry 3 `
+            -Retry 1 `
             -Filter "Images |*.ico;*.png;*.jpg" 
     }
 };
@@ -89,24 +92,25 @@ function GetIamgePath {
         -MustSelectOne;
 
     $imageSourceHandlerFn = $imageSourceHandlers[$imageSource];
-    if ($imageSourceHandlerFn) {
-        return $imageSourceHandlerFn.Invoke()[-1]
-    }
-}
+    return $imageSourceHandlerFn.Invoke()[-1];
+} 
 
 $directory = Get-Item -LiteralPath $DirectoryPath -Force;
 $iconPath = "$($directory.FullName)\$($directory.Name.Trim()).ico";
 $folderHasIcon = Test-Path -LiteralPath $iconPath;
 if ($folderHasIcon -and !$ImagePath) {
-    $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to overwrite it?";
-    if (!$overwrite) {
-        # & "$PSScriptRoot/Refresh-Icon.ps1" -FolderPath $DirectoryPath;
-        return;
-    }
+    Write-Host "Folder Already Has Icon. Overriding IT" -ForegroundColor Red 'bold';
+    # $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to overwrite it?";
+    # if (!$overwrite) {
+    #     # & "$PSScriptRoot/Refresh-Icon.ps1" -FolderPath $DirectoryPath;
+    #     return;
+    # }
 }
 
 if (!$ImagePath) {
-    $ImagePath = GetIamgePath
+    while (!$ImagePath) {
+        GetIamgePath
+    }
 }
 
 

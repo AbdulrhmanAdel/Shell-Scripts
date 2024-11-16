@@ -4,7 +4,7 @@ $handlers = @{
 };
 
 function Get-DelayInMilliseconds() {
-    $period = Input.ps1 -Type "Number" -Title "Please type delay period in seconds?" -Required;
+    $period = Input.ps1 -Type "Number" -Message "Please type delay period in seconds?" -Required;
     if ($period -eq 0) {
         return Get-DelayInMilliseconds;
     }
