@@ -8,10 +8,14 @@ param (
 )
 
 function OpenBrowser {
-    $iconWebsite = & Single-Options-Selector.ps1 `
+    param (
+        [string]$Website,
+        [switch]$PickFirstImage
+    )
+    $Website ??= & Single-Options-Selector.ps1 `
         -Options @("Google", "Yandex", "Deviantart", "Bing", "DuckDuckGo") `
         -Title "Select Icon Website" -MustSelectOne;
-    $iconWebsite ??= "Deviantart";
+
     $replaceText = "\[(FitGirl|Dodi).*\]";
     $name = $directory.Name -replace $replaceText, "";
     $isGame = $directory.FullName.Contains("Game");
@@ -19,7 +23,7 @@ function OpenBrowser {
     $link = $null;
     $Options = @{
         path           = [System.Web.HttpUtility]::UrlEncode($directory.FullName)
-        pickFirstImage = Prompt.ps1 -Message "Auto Pick First Image?"
+        pickFirstImage = $PickFirstImage
     }
 
     $Options.Keys.ForEach({
@@ -29,7 +33,7 @@ function OpenBrowser {
             }
         });
 
-    switch ($iconWebsite) {
+    switch ($Website) {
         "Google" { $link = "https://www.google.com/search?tbm=isch&q=$query"; break; }
         "Yandex" { $link = "https://yandex.com/images/search?ih=256&iw=256&isize=eq&itype=png&text=$query"; break; }
         "Deviantart" { $link = "https://www.deviantart.com/search/deviations?q=$query&order=most-recent"; break; }
@@ -69,6 +73,9 @@ $imageSourceHandlers = @{
         EXIT;
     }
     "FromLink"    = { 
+        if (Prompt.ps1 -Message "Open Browser?") {
+            OpenBrowser -Website "Yandex";
+        }
         $imageUrl = Read-Host "Please Enter Icon Url";
         if ($imageUrl) {
             return DonwloadImage -imageUrl $imageUrl; 
@@ -99,7 +106,7 @@ $directory = Get-Item -LiteralPath $DirectoryPath -Force;
 $iconPath = "$($directory.FullName)\$($directory.Name.Trim()).ico";
 $folderHasIcon = Test-Path -LiteralPath $iconPath;
 if ($folderHasIcon -and !$ImagePath) {
-    Write-Host "Folder Already Has Icon. Overriding IT" -ForegroundColor Red 'bold';
+    Write-Host "Folder Already Has Icon. Overriding IT" -ForegroundColor Red;
     # $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to overwrite it?";
     # if (!$overwrite) {
     #     # & "$PSScriptRoot/Refresh-Icon.ps1" -FolderPath $DirectoryPath;
@@ -109,7 +116,7 @@ if ($folderHasIcon -and !$ImagePath) {
 
 if (!$ImagePath) {
     while (!$ImagePath) {
-        GetIamgePath
+        $ImagePath = GetIamgePath
     }
 }
 

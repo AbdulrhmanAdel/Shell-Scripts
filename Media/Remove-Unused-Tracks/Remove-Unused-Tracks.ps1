@@ -116,13 +116,20 @@ $args | Where-Object {
     }
         
     if ($results.Length -and $results -notcontains $false) {
-        & Remove-ToRycleBin.ps1 $_;
-
         if ($isArchive) {
-            $hasParts = $_ -match "(?<Name>.*)part/d+";
+            $extension = $pathAsAfile.Extension;
+            $regex = "(?<Name>.*)part\d+\$extension$"
+            $hasParts = $pathAsAfile.Name -match $regex;
             if ($hasParts) {
-                & Remove-ToRycleBin.ps1 $_;
+                Get-ChildItem -LiteralPath $pathAsAfile.Directory.FullName | Where-Object {
+                    $_.Name.StartsWith($Matches["Name"]);
+                } | ForEach-Object {
+                    & Remove-ToRycleBin.ps1 $_.FullName;
+                }
             }
+        }
+        else {
+            & Remove-ToRycleBin.ps1 $_;
         }
     }
 }
