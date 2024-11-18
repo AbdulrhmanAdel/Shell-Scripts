@@ -52,7 +52,7 @@ function Invoke-Request {
 }
 
 function GetSubtitles {
-    $show = & "Imdb-GetShow.ps1" -Name $title -Type $type -Year $Year;
+    $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
     # $show = $null;
     $searchQuery = (!!$show ? $show.id : $null) ?? (!$Year ? $title : $title + " " + $Year);
     $queryBody = @{
@@ -121,7 +121,7 @@ function DownloadSubtitle {
         $sub
     )
     Write-Host "Downloading Subtitle From => "  -NoNewLine;
-    Write-Host "$subsourceSiteDomain/$( $sub.fullLink )" -ForegroundColor Blue;
+    Write-Host "$subsourceSiteDomain$($sub.fullLink)" -ForegroundColor Blue;
     Write-Host "Release Name " -NoNewLine;
     Write-Host "$($sub.releaseName)" -ForegroundColor Blue;
     if ($downloadSubtitleCache[$sub.subId]) {
