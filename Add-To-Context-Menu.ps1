@@ -194,6 +194,14 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
+        Extensions = @(".png")
+        Title      = "Convert To Icon"
+        Key        = "0 Convert To Icon"
+        ScriptPath = "Icons\Utils\Convert-Png-To-Ico.ps1"
+        Path       = $iconsPath
+        Icon       = "pwsh.exe"
+    },
+    @{
         Extensions = @("Directory")
         Title      = "Open Folder Icon Info.ini"
         Key        = "9 Open Folder Icon Info.ini"

@@ -1,9 +1,8 @@
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory)]
+    [Parameter(Mandatory, Position = 1)]
     [string]
     $ImagePath,
-    [Parameter(Mandatory)]
     [string]
     $SavePath
 )
@@ -103,6 +102,12 @@ function ConvertImageToIco  (
     }
 
     $sourceImage.Dispose();
+}
+
+if (!$SavePath) {
+    $ImageInfo = Get-Item -LiteralPath $ImagePath;
+    $SavePath = $ImageInfo.DirectoryName + "\" `
+        + $ImageInfo.Name -replace $ImageInfo.Extension, ".ico";
 }
 
 ConvertImageToIco `
