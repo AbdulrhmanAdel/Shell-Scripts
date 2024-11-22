@@ -12,9 +12,12 @@ function OpenBrowser {
         [string]$Website,
         [switch]$PickFirstImage
     )
-    $Website ??= & Single-Options-Selector.ps1 `
-        -Options @("Google", "Yandex", "Deviantart", "Bing", "DuckDuckGo") `
-        -Title "Select Icon Website" -MustSelectOne;
+
+    if (!$Website -or $Website -eq "") {
+        $Website = & Single-Options-Selector.ps1 `
+            -Options @("Google", "Yandex", "Deviantart", "Bing", "DuckDuckGo") `
+            -Title "Select Icon Website" -MustSelectOne;
+    }
 
     $replaceText = "\[(FitGirl|Dodi).*\]";
     $name = $directory.Name -replace $replaceText, "";
