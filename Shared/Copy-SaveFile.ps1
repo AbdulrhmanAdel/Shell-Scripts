@@ -5,8 +5,12 @@ param (
     $SaveCheckPath,
     [Parameter(Mandatory)]
     [string]
-    $Destiniation
+    $Destination
 )
+
+if (-not (Test-Path -LiteralPath $Destination)) {
+    New-Item -Path $Destination -ItemType Directory -ErrorAction Ignore | Out-Null
+}
 
 $files = Get-ChildItem -LiteralPath $SaveCheckPath -Exclude "*.ps1", "*.lnk";
 $fileInfo = $null;
@@ -30,22 +34,18 @@ if (!$fileInfo) {
 }
 
 Write-Host "Copying Save $($fileInfo.Name)" -ForegroundColor Cyan
-$des = "$Destiniation\$($fileInfo.Name)";
-if (Test-Path -LiteralPath $des) {
-    Remove-Item -LiteralPath $des -Force -Recurse;
-}
-else {
-    $parent = Split-Path $des;
-    New-Item -Path $parent -ItemType Directory -ErrorAction Ignore | Out-Null
+$targetPath = "$Destination\$($fileInfo.Name)";
+if (Test-Path -LiteralPath $targetPath) {
+    Remove-Item -LiteralPath $targetPath -Force -Recurse;
 }
 
 New-Item `
-    -Path $des `
+    -Path $targetPath `
     -Target $fileInfo.FullName `
     -ItemType SymbolicLink;
 
 if (Prompt.ps1 -Message "Open Linked Folder") {
-    explorer.exe $parent; 
+    explorer.exe $Destination; 
 }
 
 timeout.exe 15;
