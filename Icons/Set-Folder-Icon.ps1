@@ -85,7 +85,7 @@ $imageSourceHandlers = @{
     }
     "FromPath"    = { 
         return File-Picker.ps1 `
-            -IntialDirectory $directory.Parent.FullName `
+            -InitialDirectory $directory.Parent.FullName `
             -ShowHiddenFiles `
             -Retry 1 `
             -Filter "Images |*.ico;*.png;*.jpg" 

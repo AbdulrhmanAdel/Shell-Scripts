@@ -1,4 +1,4 @@
-$outputPath = & Folder-Picker.ps1 -IntialDirectory "E:\Watch" -ExitIfNotSelected;
+$outputPath = & Folder-Picker.ps1 -InitialDirectory "E:\Watch" -ExitIfNotSelected;
 
 #region Functions
 $removeSent = "-PSA|-Pahe\.in|\[AniDL\] ";
@@ -9,12 +9,12 @@ function RemoveUnusedTracks(
     Write-Host "Handling File $inputPath" -ForegroundColor Green;
     $process = & "$PSScriptRoot/Modules/Ffmpeg.ps1" $inputPath $outputPath;
     if ($process.ExitCode -gt 0) {
-        Write-Host "FAILD Processing File. ExitCode: $($p.ExitCode)" -ForegroundColor Red;
+        Write-Host "FAILED Processing File. ExitCode: $($p.ExitCode)" -ForegroundColor Red;
         Write-Host "==========================" -ForegroundColor DarkBlue;
         return $false;
     }
 
-    & Remove-ToRycleBin.ps1 $inputPath;
+    & Remove-ToRecycleBin.ps1 $inputPath;
     Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
     Write-Host "==========================" -ForegroundColor DarkBlue;
     return $true;
@@ -28,7 +28,7 @@ function GetMediaFilesFromArchive {
     # $folderName = $archiveFileInfo.Name -replace $archiveFileInfo.Extension, '';
     $outputPath = "$temp/RUT-$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss')";
     if (Test-Path -LiteralPath $outputPath) {
-        & Remove-ToRycleBin.ps1 $outputPath;
+        & Remove-ToRecycleBin.ps1 $outputPath;
     }
 
     $archiveProcess = Start-Process 7z.exe -ArgumentList @(
@@ -58,22 +58,22 @@ function GetFileFromDirectory {
 
 function HandleFile {
     param (
-        $pathAsAfile,
+        $pathAsAFile,
         $outputPath
     )
 
-    if ($pathAsAfile -is [System.IO.DirectoryInfo]) {
-        $outputFolderPath = "$outputPath/$($pathAsAfile.Name)";
+    if ($pathAsAFile -is [System.IO.DirectoryInfo]) {
+        $outputFolderPath = "$outputPath/$($pathAsAFile.Name)";
         if (!(Test-Path -LiteralPath $outputFolderPath)) {
             New-Item -ItemType Directory -Path $outputFolderPath;
         }
-        $childern = GetFileFromDirectory -directoryPath $pathAsAfile.FullName;
-        $childern | ForEach-Object { HandleFile -pathAsAfile $_ -outputPath  $outputFolderPath; };
+        $children = GetFileFromDirectory -directoryPath $pathAsAFile.FullName;
+        $children | ForEach-Object { HandleFile -pathAsAFile $_ -outputPath  $outputFolderPath; };
         return;
     }
 
-    $inputPath = $pathAsAfile.FullName;
-    $newName = $pathAsAfile.Name -replace $removeSent, "";
+    $inputPath = $pathAsAFile.FullName;
+    $newName = $pathAsAFile.Name -replace $removeSent, "";
     $outputFilePath = "$outputPath\$newName";
     if (Test-Path -LiteralPath $outputFilePath) {
         $outputPathInfo = Get-Item -LiteralPath $outputFilePath;
@@ -94,43 +94,45 @@ $archiveExtensions = @('.rar', '.zip', '.7z');
 $args | Where-Object { 
     return Test-Path -LiteralPath $_
 } | ForEach-Object {
-    $pathAsAfile = Get-Item -LiteralPath $_;
-    if ($pathAsAfile -is [System.IO.DirectoryInfo] -or $pathAsAfile.Extension -eq ".mkv") {
-        HandleFile -pathAsAfile $pathAsAfile -outputPath $outputPath;
+    $pathAsAFile = Get-Item -LiteralPath $_;
+    if ($pathAsAFile -is [System.IO.DirectoryInfo] -or $pathAsAFile.Extension -eq ".mkv") {
+        HandleFile -pathAsAFile $pathAsAFile -outputPath $outputPath;
         return;
     }
 
-    $isArchive = $pathAsAfile.Extension -in $archiveExtensions
+    $isArchive = $pathAsAFile.Extension -in $archiveExtensions
     if (!$isArchive) {
         return;
     }
 
-    $mediaFromArchive = GetMediaFilesFromArchive -archiveFileInfo $pathAsAfile;
+    $mediaFromArchive = GetMediaFilesFromArchive -archiveFileInfo $pathAsAFile;
     $results = $mediaFromArchive | ForEach-Object {
-        $removeTracksResult = HandleFile -pathAsAfile $_ -outputPath $outputPath;
-        if ($removeTracksResult ) {
+        $removeTracksResult = HandleFile -pathAsAFile $_ -outputPath $outputPath;
+        if ($removeTracksResult) {
             return $true;
         }
 
         return $false;
     }
-        
-    if ($results.Length -and $results -notcontains $false) {
-        if ($isArchive) {
-            $extension = $pathAsAfile.Extension;
-            $regex = "(?<Name>.*)part\d+\$extension$"
-            $hasParts = $pathAsAfile.Name -match $regex;
-            if ($hasParts) {
-                Get-ChildItem -LiteralPath $pathAsAfile.Directory.FullName | Where-Object {
-                    $_.Name.StartsWith($Matches["Name"]);
-                } | ForEach-Object {
-                    & Remove-ToRycleBin.ps1 $_.FullName;
-                }
-            }
-        }
-        else {
-            & Remove-ToRycleBin.ps1 $_;
-        }
+
+    if (!$results -or $results.Length -eq 0 -or $results -contains $false) {
+        return;
     }
+
+    $extension = $pathAsAFile.Extension;
+    $regex = "(?<Name>.*)part\d+\$extension$"
+    $hasParts = $pathAsAFile.Name -match $regex;
+    if ($hasParts) {
+        Get-ChildItem -LiteralPath $pathAsAFile.Directory.FullName | Where-Object {
+            $_.Name.StartsWith($Matches["Name"]);
+        } | ForEach-Object {
+            & Remove-ToRecycleBin.ps1 $_.FullName;
+        }
+
+        return;
+    }
+
+    & Remove-ToRecycleBin.ps1 $_;
 }
+
 timeout.exe 5;

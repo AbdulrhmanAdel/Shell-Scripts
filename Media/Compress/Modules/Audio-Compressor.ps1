@@ -9,7 +9,7 @@ $audioConfig = @{
 $files = @($args)
 if ($files.Length -le 0) { Write-Host "No Files Found" -ForegroundColor Red; Start-Sleep -Seconds 10; };
 if (!$global:outputPath) {
-    $global:outputPath = & Folder-Picker.ps1 -intialDirectory "D:\";
+    $global:outputPath = & Folder-Picker.ps1 -InitialDirectory "D:\";
 }
 
 #region Functions

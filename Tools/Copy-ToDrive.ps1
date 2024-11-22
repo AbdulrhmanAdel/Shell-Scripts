@@ -55,7 +55,7 @@ function CreateSameHirectyWithDifferentDrive {
 
 #endregion
 $outputPath = $CustomDestiniation `
-    ? (Folder-Picker.ps1 -IntialDirectory "D:\" -Required) `
+    ? (Folder-Picker.ps1 -InitialDirectory "D:\" -Required) `
     : (CreateSameHirectyWithDifferentDrive);
 
 if ($TeraCopy) {

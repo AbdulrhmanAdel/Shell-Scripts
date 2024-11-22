@@ -3,7 +3,7 @@
 
 
 $intialDir = Split-Path $args[0];
-$outputPath = & Folder-Picker.ps1 -IntialDirectory $intialDir;
+$outputPath = & Folder-Picker.ps1 -InitialDirectory $intialDir;
 function Compress {
     param (
         $file

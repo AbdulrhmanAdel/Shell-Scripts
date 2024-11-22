@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param (
-    [string]$IntialDirectory = [Environment]::GetFolderPath('MyDocuments'),
+    [string]$InitialDirectory = [Environment]::GetFolderPath('MyDocuments'),
     [switch]$ExitIfNotSelected,
     [switch]$Required,
     [switch]$ShowHiddenFiles,
@@ -9,7 +9,7 @@ param (
 
 Add-Type -AssemblyName System.Windows.Forms;
 $foldername = New-Object System.Windows.Forms.FolderBrowserDialog;
-$foldername.InitialDirectory = $IntialDirectory;
+$foldername.InitialDirectory = $InitialDirectory;
 $foldername.Dispose();
 $foldername.ShowHiddenFiles = $ShowHiddenFiles;
 $dialogOption = New-Object System.Windows.Forms.Form -Property @{TopMost = $true; TopLevel = $true }
