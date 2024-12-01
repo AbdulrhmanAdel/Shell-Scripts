@@ -1,25 +1,16 @@
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    $callStack = Get-PSCallStack
-    $Path = $callStack[1].ScriptName
-    $processArguments = @(
-        "-File", """$Path"""
-    );
-
-    Start-Process powershell.exe -Verb RunAs -ArgumentList $processArguments;
-    [Environment]::Exit(0);
-}
-
+$env:Path += "$personalProjectPath\Shared";
+Run-AsAdmin.ps1;
 # region Helpers
 
 function RunPowershell {
     param (
         $Path
     )
-    Write-Host "===========================" -BackgroundColor Red;
-    Write-Host "Running $Path" -BackgroundColor Green;
+    Write-Host "===========================" ;
+    Write-Host "Running $Path" ;
     & "$Path";
-    Write-Host "Done" -BackgroundColor Green;
-    Write-Host "===========================" -BackgroundColor Red;
+    Write-Host "Done" ;
+    Write-Host "===========================" ;
 }
 
 function RunReg {
@@ -27,11 +18,11 @@ function RunReg {
         $Path
     )
 
-    Write-Host "===========================" -BackgroundColor Red;
-    Write-Host "Running $Path" -BackgroundColor Green;
+    Write-Host "===========================" ;
+    Write-Host "Running $Path" ;
     reg import "$Path";
-    Write-Host "Done" -BackgroundColor Green;
-    Write-Host "===========================" -BackgroundColor Red;
+    Write-Host "Done" ;
+    Write-Host "===========================" ;
 }
 
 function RunCmd {
@@ -39,22 +30,37 @@ function RunCmd {
         $Path
     )
     
-    Write-Host "===========================" -BackgroundColor Red;
-    Write-Host "Running $Path" -BackgroundColor Green;
+    Write-Host "===========================" ;
+    Write-Host "Running $Path" ;
     & "$Path";
-    Write-Host "Done" -BackgroundColor Green;
-    Write-Host "===========================" -BackgroundColor Red;
+    Write-Host "Done" ;
+    Write-Host "===========================" ;
 }
 
+
+$installedPrograms = Get-CimInstance -ClassName Win32_Product;
 function RunProgram {
     param (
         $Path,
         [switch]$NoWait,
         [switch]$NoAdmin
     )
+    
+    if (!$NoWait) {
+        $InstallSource = Split-Path -LiteralPath $Path;
+        $PackageName = Split-Path $Path -Leaf;
+        $isInstalled = $installedPrograms | Where-Object { 
+            $InstallSource -match $_.InstallSource -or `
+                $PackageName -match $_.PackageName
+        }
+        if ($isInstalled) {
+            Write-Host "Program $Path Already Installed" -ForegroundColor Red;
+            return;
+        }
+    }
 
-    Write-Host "===========================" -BackgroundColor Red;
-    Write-Host "Running $Path" -BackgroundColor Green;
+    Write-Host "===========================" ;
+    Write-Host "Running $Path" ;
     if ($NoAdmin) {
         Start-Process $Path -Wait;
     }
@@ -64,9 +70,8 @@ function RunProgram {
     else {
         Start-Process $Path -Verb RunAs -Wait;
     }
-    Write-Host "Done" -BackgroundColor Green;
-    Write-Host "===========================" -BackgroundColor Red;
-
+    Write-Host "Done" ;
+    Write-Host "===========================" ;
 }
 #endregion
 
@@ -124,7 +129,7 @@ RunProgram -Path "$programsPath\Net\Torrent\qBittorrent\qbittorrent.exe" -NoWait
 
 RunProgram -Path "$programsPath\Hardware\HWiNFO64\HWiNFO64.exe" -NoWait;
 RunProgram -Path "$programsPath\Hardware\RivaTuner Statistics Server\RTSS.exe" -NoWait;
-
+RunProgram -Path "$programsPath\Tools\MEGAsync\MEGAsync.exe" -NoWait;
 #endregion
 
 $pathEnvironmentVariable = [Environment]::GetEnvironmentVariable('path', [EnvironmentVariableTarget]::User) ?? "";
