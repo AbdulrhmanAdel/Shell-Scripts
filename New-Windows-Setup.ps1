@@ -4,11 +4,17 @@ Run-AsAdmin.ps1;
 
 function RunPowershell {
     param (
-        $Path
+        $Path,
+        $AdditionalArgs
     )
     Write-Host "===========================" ;
-    Write-Host "Running $Path" ;
-    & "$Path";
+    Write-Host "Running $Path";
+
+    $ProcessArgs = @("-File", $Path);
+    if ($AdditionalArgs) {
+        $ProcessArgs += $AdditionalArgs;
+    }
+    Start-Process pwsh -ArgumentList $ProcessArgs -Wait -NoNewWindow;
     Write-Host "Done" ;
     Write-Host "===========================" ;
 }
@@ -128,6 +134,7 @@ RunReg -Path "$programsPath\Net\Torrent\qBittorrent\Data\Assign-QBittorrentToOpe
 RunProgram -Path "$programsPath\Net\Torrent\qBittorrent\qbittorrent.exe" -NoWait;
 
 RunProgram -Path "$programsPath\Hardware\HWiNFO64\HWiNFO64.exe" -NoWait;
+RunPowershell -Path "$programsPath\Hardware\HWiNFO64\HWiNFO64.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
 RunProgram -Path "$programsPath\Hardware\RivaTuner Statistics Server\RTSS.exe" -NoWait;
 RunProgram -Path "$programsPath\Tools\MEGAsync\MEGAsync.exe" -NoWait;
 #endregion
