@@ -117,7 +117,7 @@ RunCmd -Path "$tweaksPath\Date And Time\Change-DateFormat.bat"
 
 RunProgram -Path "$programsPath\Microsoft\PowerShell-7.4.4-win-x64.msi";
 RunProgram -Path "$programsPath\Microsoft\PowerToysUserSetup-0.85.0-x64.exe";
-RunProgram -Path "$programsPath\Media\K-Lite\K-Lite_Codec_Pack_1855_Mega.exe";
+RunProgram -Path "$programsPath\Media\K-Lite\K-Lite_Codec_Pack.exe";
 RunProgram -Path "$programsPath\Compress\7-Zip\7zFM.exe";
 
 # IDM
