@@ -4,6 +4,7 @@ param (
     [switch]$ExitIfNotSelected,
     [switch]$Required,
     [switch]$ShowHiddenFiles,
+    [switch]$ShowOnTop,
     $Filter,
     [int]$Retry
 )
@@ -17,7 +18,11 @@ if ($Filter) {
 }
 
 $openFileDialog.Dispose();
-$dialogOption = New-Object System.Windows.Forms.Form -Property @{TopMost = $true; TopLevel = $true }
+$dialogOption = New-Object System.Windows.Forms.Form;
+if ($ShowOnTop) {
+    $dialogOption.TopMost = $true;
+    $dialogOption.TopLevel = $true;
+}
 if ($openFileDialog.ShowDialog($dialogOption) -eq "OK") {
     return "$($openFileDialog.FileName)";
 }

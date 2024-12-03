@@ -91,6 +91,7 @@ $imageSourceHandlers = @{
             -InitialDirectory $directory.Parent.FullName `
             -ShowHiddenFiles `
             -Retry 1 `
+            -ShowOnTop `
             -Filter "Images |*.ico;*.png;*.jpg" 
     }
 };

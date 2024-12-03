@@ -47,7 +47,7 @@ function Send-Response {
 }
 
 
-function DonwloadImage {
+function DownloadImage {
     param (
         $imageUrl
     )
@@ -128,13 +128,13 @@ while ($true) {
         $action = $json.action;
         switch ($action) {
             "icon" {
-                $folder = $json.folderPath ?? (Folder-Picker.ps1 -Retry 1);
+                $folder = $json.folderPath ?? (Folder-Picker.ps1 -Retry 1 -ShowOnTop);
                 if (!$folder) {
                     Log -text "No Folder Selected.";
                     break;
                 }
                 $imgLink = $json.imgLink;
-                $imgPath = DonwloadImage -imageUrl $imgLink;
+                $imgPath = DownloadImage -imageUrl $imgLink;
                 $setFolderIconScriptPath = "D:\Programming\Projects\Personal Projects\Shell-Scripts\Icons\Set-Folder-Icon.ps1";
                 Start-Process pwsh.exe -ArgumentList @('-File', """$setFolderIconScriptPath""", '-DirectoryPath', """$folder""", '-ImagePath', """$imgPath""" , '-SkipTimeout')
                 # HandleFolder;

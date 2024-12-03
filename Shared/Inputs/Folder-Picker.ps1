@@ -4,6 +4,7 @@ param (
     [switch]$ExitIfNotSelected,
     [switch]$Required,
     [switch]$ShowHiddenFiles,
+    [switch]$ShowOnTop,
     [int]$Retry
 )
 
@@ -12,7 +13,12 @@ $foldername = New-Object System.Windows.Forms.FolderBrowserDialog;
 $foldername.InitialDirectory = $InitialDirectory;
 $foldername.Dispose();
 $foldername.ShowHiddenFiles = $ShowHiddenFiles;
-$dialogOption = New-Object System.Windows.Forms.Form -Property @{TopMost = $true; TopLevel = $true }
+$dialogOption = New-Object System.Windows.Forms.Form;
+if ($ShowOnTop) {
+    $dialogOption.TopMost = $true;
+    $dialogOption.TopLevel = $true;
+}
+
 if ($foldername.ShowDialog($dialogOption) -eq "OK") {
     return "$($foldername.SelectedPath)";
 }
