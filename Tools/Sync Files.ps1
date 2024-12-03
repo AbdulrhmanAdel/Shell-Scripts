@@ -1,7 +1,17 @@
 Write-Host "GETTING DRIVE LETTER..." -ForegroundColor Green
+$driveLetter = $null;
 $disk = Get-Disk -FriendlyName "WD My Passport 2626" -ErrorAction Ignore
-$part = Get-Partition -DiskNumber $disk.DiskNumber -ErrorAction Ignore;
-$driveLetter = $part.DriveLetter;
+if ($disk) {
+    $part = Get-Partition -DiskNumber $disk.DiskNumber -ErrorAction Ignore;
+    $driveLetter = $part.DriveLetter;
+}
+else {
+    $drives = Get-PSDrive -PSProvider FileSystem | `
+        Where-Object { $_.Name -ne $folderDrive } | `
+        Foreach-Object { return $_.Name };
+    $driveLetter = & Single-Options-Selector.ps1 -Options $drives -MustSelectOne;
+}
+
 if (!$driveLetter) {
     Write-Host "CAN'T RETRIEVED DRIVE LETTER" -ForegroundColor Red
     timeout 5;
