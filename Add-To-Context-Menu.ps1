@@ -315,4 +315,4 @@ $scripts | ForEach-Object {
 };
 
 Write-Host "Done" -ForegroundColor Green;
-timeout.exe 10;
+timeout.exe 5;

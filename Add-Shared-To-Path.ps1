@@ -14,4 +14,4 @@ $pathes += $directories + $parentDirectory;
 # Set the new path
 [System.Environment]::SetEnvironmentVariable("Path", $pathes -join ";", "User");
 
-timeout 15;
+timeout 5;

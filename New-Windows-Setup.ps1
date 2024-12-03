@@ -1,4 +1,3 @@
-$env:Path += "$personalProjectPath\Shared";
 Run-AsAdmin.ps1;
 # region Helpers
 
@@ -10,7 +9,7 @@ function RunPowershell {
     Write-Host "===========================" ;
     Write-Host "Running $Path";
 
-    $ProcessArgs = @("-File", $Path);
+    $ProcessArgs = @("-File", """$Path""");
     if ($AdditionalArgs) {
         $ProcessArgs += $AdditionalArgs;
     }
@@ -53,11 +52,11 @@ function RunProgram {
     )
     
     if (!$NoWait) {
-        $InstallSource = Split-Path -LiteralPath $Path;
+        $InstallSource = (Split-Path -LiteralPath $Path) + "\";
         $PackageName = Split-Path $Path -Leaf;
         $isInstalled = $installedPrograms | Where-Object { 
-            $InstallSource -match $_.InstallSource -or `
-                $PackageName -match $_.PackageName
+            $InstallSource -eq $_.InstallSource -or `
+                $PackageName -eq $_.PackageName
         }
         if ($isInstalled) {
             Write-Host "Program $Path Already Installed" -ForegroundColor Red;
@@ -111,7 +110,7 @@ RunCmd -Path "$programsPath\C++ Runtimes\install_all.bat"
 RunProgram -Path "$programsPath\Games\DirectX\DXSETUP.exe";
 RunReg -Path "$tweaksPath\Power Plan\Show-TurboBoost.reg"
 RunReg -Path "$tweaksPath\Fix powershell files whitespace issue.reg"
-RunPowershell -Path "$tweaksPath\StartMenu\Restore.ps1"
+RunPowershell -Path "$tweaksPath\StartMenu\Sync-StartMenu.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
 RunPowershell -Path "$tweaksPath\Hib\Disable-Hib.ps1"
 RunCmd -Path "$tweaksPath\Date And Time\Change-DateFormat.bat"
 
