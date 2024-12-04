@@ -12,10 +12,14 @@
 param (
     [switch]$Prompt,
     [switch]$PromptPasses,
+    [switch]$RunAsAdmin,
     [Parameter(ValueFromRemainingArguments = $true)]
     $Files
 )
 
+if ($RunAsAdmin) {
+    Run-AsAdmin.ps1;
+}
 Write-Host $Files
 Write-Host "These Files Are going to be deleted:" -ForegroundColor Green;
 $Files | ForEach-Object { Write-Host $_  -ForegroundColor Red; }
