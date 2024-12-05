@@ -37,9 +37,9 @@ $formInput = $null;
 switch ($Type) {
     "Number" {
         $formInput = New-Object System.Windows.Forms.NumericUpDown;
-        $Min -and ($formInput.Minimum = $Min) | Out-Null;
-        $Max -and ($formInput.Maximum = $Max) | Out-Null;
-        !$NoDecimal -and ($formInput.DecimalPlaces = 5) | Out-Null;
+        $formInput.Minimum = $Min ? $Min : [int]::MinValue
+        $formInput.Maximum = $Max ? $Max : [int]::MaxValue;
+        !$NoDecimal -and ($formInput.DecimalPlaces = 3) | Out-Null;
         $DefaultValue -and ($formInput.Value = [double]$DefaultValue) | Out-Null;
         break;
     }
