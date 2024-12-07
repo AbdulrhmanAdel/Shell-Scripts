@@ -67,13 +67,13 @@ function RunProgram {
     Write-Host "===========================" ;
     Write-Host "Running $Path" ;
     if ($NoAdmin) {
-        Start-Process $Path -Wait;
+        Start-Process -File $Path -Wait;
     }
     elseif ($NoWait) {
-        Start-Process $Path -Verb RunAs;
+        Start-Process -File $Path -Verb RunAs;
     }
     else {
-        Start-Process $Path -Verb RunAs -Wait;
+        Start-Process -File $Path -Verb RunAs -Wait;
     }
     Write-Host "Done" ;
     Write-Host "===========================" ;
@@ -107,7 +107,6 @@ $tweakspath = "$programsPath\Windows\Tweaks"
 Invoke-Item -LiteralPath "D:\Programs\OS\Windows\Win11_24H2_English_x64.iso";
 RunPowershell -Path "$tweaksPath\Enable-DotNet3.5Framework.ps1";
 RunCmd -Path "$programsPath\C++ Runtimes\install_all.bat"
-RunProgram -Path "$programsPath\Games\DirectX\DXSETUP.exe";
 RunReg -Path "$tweaksPath\Power Plan\Show-TurboBoost.reg"
 RunReg -Path "$tweaksPath\Fix powershell files whitespace issue.reg"
 RunPowershell -Path "$tweaksPath\StartMenu\Sync-StartMenu.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
@@ -117,6 +116,7 @@ RunCmd -Path "$tweaksPath\Date And Time\Change-DateFormat.bat"
 RunProgram -Path "$programsPath\Microsoft\PowerShell-7.4.4-win-x64.msi";
 RunProgram -Path "$programsPath\Microsoft\PowerToysUserSetup-0.85.0-x64.exe";
 RunProgram -Path "$programsPath\Media\K-Lite\K-Lite_Codec_Pack.exe";
+RunPowershell -Path "$programsPath\Media\K-Lite\K-Lite.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
 RunProgram -Path "$programsPath\Compress\7-Zip\7zFM.exe";
 
 # IDM
@@ -132,11 +132,20 @@ RunReg -Path "$programsPath\Net\Torrent\qBittorrent\Data\Register-QBitTorrentMag
 RunReg -Path "$programsPath\Net\Torrent\qBittorrent\Data\Assign-QBittorrentToOpenTorrentFiles.reg"
 RunProgram -Path "$programsPath\Net\Torrent\qBittorrent\qbittorrent.exe" -NoWait;
 
+#region hardware Monitor
 RunProgram -Path "$programsPath\Hardware\HWiNFO64\HWiNFO64.exe" -NoWait;
 RunPowershell -Path "$programsPath\Hardware\HWiNFO64\HWiNFO64.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
 RunProgram -Path "$programsPath\Hardware\RivaTuner Statistics Server\RTSS.exe" -NoWait;
-RunProgram -Path "$programsPath\Tools\MEGAsync\MEGAsync.exe" -NoWait;
 #endregion
+RunProgram -Path "$programsPath\Tools\MEGAsync\MEGAsync.exe" -NoWait;
+
+#region Games
+$gamesPath = "$programsPath\Games";
+RunProgram -Path "$gamesPath\DirectX\DXSETUP.exe";
+RunProgram -Path "$gamesPath\Epic Games\Epic Online Services\EpicOnlineServices.exe"
+RunProgram -Path "$gamesPath\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe"
+#endregion
+
 
 $pathEnvironmentVariable = [Environment]::GetEnvironmentVariable('path', [EnvironmentVariableTarget]::User) ?? "";
 $pathes = @($pathEnvironmentVariable -split ";");
@@ -146,7 +155,9 @@ $pathes += @(
     "$programsPath\Media\Tools\HandBrake"
     "$programsPath\Media\Tools\MediaInfo"
     "$programsPath\Media\Tools\mkvtoolnix"
-    "$programsPath\Media\Tools\yt"
+    "$programsPath\Media\Tools\yt",
+    "$programsPath\Tools\ImageMagick",
+    "$programsPath\Compress\7-Zip"
 );
 [Environment]::SetEnvironmentVariable('Path', $pathes -join ";", [EnvironmentVariableTarget]::User);
 

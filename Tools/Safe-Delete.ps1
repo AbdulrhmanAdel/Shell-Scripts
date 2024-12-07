@@ -16,10 +16,10 @@ param (
     [Parameter(ValueFromRemainingArguments = $true)]
     $Files
 )
-
-if ($RunAsAdmin) {
-    Run-AsAdmin.ps1;
-}
+# Run-AsAdmin.ps1;
+# if ($RunAsAdmin -or (Prompt.ps1 -Message "Run As Admin?")) {
+    
+# }
 Write-Host $Files
 Write-Host "These Files Are going to be deleted:" -ForegroundColor Green;
 $Files | ForEach-Object { Write-Host $_  -ForegroundColor Red; }
@@ -59,6 +59,7 @@ $Files | ForEach-Object {
         }
 
         if ($deleteType -eq "Format Disk") {
+            Delete -procesArgs @("-z", $drive);
             Get-ChildItem -LiteralPath "$drive/" | ForEach-Object {
                 Delete -procesArgs @("-r", "-s", """$($_)""");
             };
