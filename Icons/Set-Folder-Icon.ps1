@@ -70,7 +70,7 @@ function DonwloadImage {
     return $tempImage.FullName;
 }
 
-$imageSourceHandlers = @{
+$imageSourceHandlers = [ordered]@{
     "FromBrowser" = {
         OpenBrowser;
         EXIT;
