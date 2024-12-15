@@ -175,7 +175,9 @@ function CopySubtitle {
             $finalName = $renameTo;
         }
         if ($files.Length -gt 1) {
-            $finalName += ".$fileIndex"
+            if ($fileIndex -gt 0) {
+                $finalName += ".$fileIndex"
+            }
             $fileIndex++;
         }
 
