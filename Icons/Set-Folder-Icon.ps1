@@ -4,7 +4,8 @@ param (
     [string]
     $DirectoryPath,
     $ImagePath,
-    [switch]$SkipTimeOut
+    [switch]$SkipTimeOut,
+    [string]$ImageSource
 )
 
 function OpenBrowser {
@@ -48,7 +49,7 @@ function OpenBrowser {
     Start-Process $link;
 }
 
-function DonwloadImage {
+function DownloadImage {
     param (
         $imageUrl
     )
@@ -70,7 +71,7 @@ function DonwloadImage {
     return $tempImage.FullName;
 }
 
-$imageSourceHandlers = [ordered]@{
+$ImageSourceHandlers = [ordered]@{
     "FromBrowser" = {
         OpenBrowser;
         EXIT;
@@ -81,7 +82,7 @@ $imageSourceHandlers = [ordered]@{
         }
         $imageUrl = Read-Host "Please Enter Icon Url";
         if ($imageUrl) {
-            return DonwloadImage -imageUrl $imageUrl; 
+            return DownloadImage -imageUrl $imageUrl; 
         }
 
         return $null;
@@ -96,14 +97,14 @@ $imageSourceHandlers = [ordered]@{
     }
 };
 
-function GetIamgePath {
-    $imageSource ??= & Single-Options-Selector.ps1 `
-        -Options $imageSourceHandlers.Keys `
+function GetImagePath {
+    $ImageSource ??= & Single-Options-Selector.ps1 `
+        -Options $ImageSourceHandlers.Keys `
         -Title "Select Icon Source" `
         -MustSelectOne;
 
-    $imageSourceHandlerFn = $imageSourceHandlers[$imageSource];
-    return $imageSourceHandlerFn.Invoke()[-1];
+    $ImageSourceHandlerFn = $ImageSourceHandlers[$ImageSource];
+    return $ImageSourceHandlerFn.Invoke()[-1];
 } 
 
 $directory = Get-Item -LiteralPath $DirectoryPath -Force;
@@ -120,7 +121,7 @@ if ($folderHasIcon -and !$ImagePath) {
 
 if (!$ImagePath) {
     while (!$ImagePath) {
-        $ImagePath = GetIamgePath
+        $ImagePath = GetImagePath
     }
 }
 

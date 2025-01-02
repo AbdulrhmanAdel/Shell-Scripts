@@ -205,9 +205,12 @@ function MatchRelease {
     }
 
     # Check if any keyword matches
-    $keywordMatched = $keywords | Where-Object { $releaseName -match $_ }
-    if ($keywordMatched) {
-        return $true
+    if ($keywords.Length -gt 0) {
+
+        $keywordMatched = $keywords | Where-Object { $releaseName -match $_ }
+        if ($keywordMatched) {
+            return $true
+        }
     }
 
     # Check if version is ignored

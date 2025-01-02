@@ -14,7 +14,7 @@ function HandleMovies {
             -RenameTo $_.Name `
             -Year $details.Year `
             -IgnoredVersions $details.IgnoredVersions `
-            -Keywords $details.IgnoredVersions;
+            -Keywords $details.Keywords;
     }
 }
 
