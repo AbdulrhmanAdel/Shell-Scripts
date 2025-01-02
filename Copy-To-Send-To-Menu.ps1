@@ -39,6 +39,7 @@ $menu = @(
         Arguments = "-File ""$scriptPath\Media\Subtitles\Editors\Subtitle-Editor.ps1"""
     },
     @{
+        
         Name      = "02- Subtitle - Renamer.lnk"
         Arguments = "-File ""$scriptPath\Media\Subtitles\Renamer\Renamer.ps1"""
     },
@@ -51,7 +52,7 @@ $menu = @(
         Arguments = "-File ""$scriptPath\Media\Subtitles\Shifter\Shifter.ps1"""
     },
     @{
-        Name       = "03- Download Subtitle.lnk"
+        Name       = "03- Subtitle - Downloader.lnk"
         Arguments  = "-File ""$scriptPath\Media\Subtitles\Downloader\Downloader.ps1"""
         SuffixArgs = @();
     },

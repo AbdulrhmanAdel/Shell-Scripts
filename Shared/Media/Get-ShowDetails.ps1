@@ -11,7 +11,7 @@ if (!$canHandle) {
     return;
 }
 
-$seriesRegex = "(?<Title>.*) *(S|Season) *(?<SeasonNumber>\d{1,2}) *(Episode|Ep|E|\d+X)(?<EpisodeNumber>\d+) *(?<Rest>.*)"; ;
+$seriesRegex = "(?<Title>.*) *(S|Season) *(?<SeasonNumber>\d{1,2}) *( |Episode|Ep|E|-|\d+X) *(?<EpisodeNumber>\d+) *(?<Rest>.*)";
 $moviesRegex = "(?<Title>.*)(?<Rest>(720|480|1080)P?.*)";
 $yearRegex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
 function GetYear {
@@ -25,7 +25,6 @@ function GetYear {
         ? $result.ToString() `
         : $null
 }
-
 
 function GetShowVersion {
     param (
