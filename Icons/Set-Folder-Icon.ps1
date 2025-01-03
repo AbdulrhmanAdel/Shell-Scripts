@@ -40,7 +40,7 @@ function OpenBrowser {
     switch ($Website) {
         "Google" { $link = "https://www.google.com/search?tbm=isch&q=$query"; break; }
         "Yandex" { $link = "https://yandex.com/images/search?ih=256&iw=256&isize=eq&itype=png&text=$query"; break; }
-        "Deviantart" { $link = "https://www.deviantart.com/search/deviations?q=$query&order=most-recent"; break; }
+        "Deviantart" { $link = "https://www.deviantart.com/search/deviations?q=$query&order=watch"; break; }
         "Bing" { $link = "https://www.bing.com/images/search?q=$query"; break; }
         "DuckDuckGo" { $link = "https://duckduckgo.com/?t=h_&iax=images&ia=images&iaf=type:transparent,layout:Square&q=$query"; break; }
         Default { $link = "https://www.deviantart.com/search?q=$query"; }

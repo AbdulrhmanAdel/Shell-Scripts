@@ -6,7 +6,7 @@ $assFiles = @($files | Where-Object { $_.EndsWith(".ass") });
 $srtFiles = @($files | Where-Object { $_.EndsWith(".srt") });
 
 if ($assFiles.Length -gt 0) {
-    & "$($PSScriptRoot)/Modules/Ass-Editor.ps1" -files $assFiles -encoding $encoding;
+    & "$($PSScriptRoot)/Modules/Ass-Editor.ps1" -Files $assFiles;
 }
 
 if ($srtFiles.Length -gt 0) {
