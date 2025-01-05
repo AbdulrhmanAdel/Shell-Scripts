@@ -1,5 +1,4 @@
-# $display = Multi-Options-Selector.ps1 -Options @("Streams", "Chapters") -MustSelectOne;
-($args | Where-Object { $_ -match ".*(.mkv)$" })  | ForEach-Object {
+$args | Where-Object { $_ -match ".*(.mkv)$" }  | ForEach-Object {
     Write-Host "===================================" -ForegroundColor Red;
     $fileName = [System.IO.Path]::GetFileName($_);
     Write-Host "Info For $fileName" -ForegroundColor Green;
@@ -7,11 +6,17 @@
 
     Write-Host "Chapters" -ForegroundColor Green;
     $chapters = Get-Chapters.ps1 -FilePath $path;
-    Write-Host $chapters;
+    $chapters | ForEach-Object {
+        Write-Host "======================" -ForegroundColor Cyan;
+        Write-Host "Title: $($_.Title)";
+        Write-Host "Start: $($_.Start)";
+        Write-Host "End: $($_.End)";
+        Write-Host "Duration: $($_.Duration)";
+        Write-Host "SegmentId: $($_.SegmentId ?? 'N/A')";
+        Write-Host "Hidden: $(!!$_.Hidden)";
+    }
     Write-Host "";
     Write-Host "Streams" -ForegroundColor Gray;
-    & ffprobe.exe -v error -i $path -print_format json -show_streams `
-        -show_entries "stream=index,codec_type:disposition=default:tags=language";
     Write-Host "===================================" -ForegroundColor Red;
 }
 & Force-ManuallyExit.ps1;
