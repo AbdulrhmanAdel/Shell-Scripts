@@ -1,4 +1,18 @@
-. Parse-Args.ps1 $args;
+[CmdletBinding()]
+param (
+    [string]$DownloadPath,
+    [string]$Type,
+    [string]$Title,
+    [string]$Quality,
+    [string]$SavePath,
+    [string]$RenameTo,
+    [int]$Year,
+    [string[]]$IgnoredVersions,
+    [string[]]$Keywords,
+    [int]$Season,
+    [System.Object[]]$Episodes
+)
+
 $subsourceSiteDomain = "https://subsource.net";
 $baseUrl = "https://api.subsource.net/api";
 $global:subtitlePageLink = "";
@@ -19,20 +33,19 @@ else {
 #region Functions
 function Invoke-Request {
     param (
-        $path,
-        $body,
+        $Path,
+        $Body,
         $property
     )
     try {
-        $url = "$baseUrl/$path";
         $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
         $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
-        $session.Cookies.Add((New-Object System.Net.Cookie("connect.sid", "s%3AJjQvrc15KYCTzhj3clCJLqSJfZJSulSN.89cjTrabd1I%2F4Ir%2Bh7GkTY8tvgm%2FNotqwNOU3IITq7w", "/", "api.subsource.net")))
-        $session.Cookies.Add((New-Object System.Net.Cookie("cf_clearance", "ivfeWZCYBe2u6yrtSRaLJIExqrUjeVimUtvC.XiKUsw-1736529721-1.2.1.1-vMPWP9QH6DDm9pLsFY_sFoU0zxQow7RG2cJYJoq3XPcdzJi9kJzN4jYNmexXN2Z8joUm6B0mS70AXzrEVsVWwhxyb3cA8kgdIcpZ6NSTvvsSGGFB.rT0sJrFGIwUS9p8ZoPDKHzLda6k1CQCq498kyON_fb27vcOjR_vrdfm1NSowqh9QCIavAHB8TUq41xGn9yhSMzDPrQrBv4GlawXZo6AtxF2aNcmOojyeQzsuG.z.A3nfKffiqHEQNn1Oe13D9ZV_18aPHx_bH05Dc_dY.l1AZw21l0VTf7UscjMIl6lzF2OYkmbTebUQDgbV9Sg.Y6ClfdPsqSMEFkrU0Lk.vBHKlc79kfDF1aubhc_JOjaXDIkStnXPv057WU.P7ObJXJ1lWIoJ44ibGCexPsxwQ", "/", ".subsource.net")))
-        $result = Invoke-WebRequest -Uri  $url `
-            -Method "POST" `
-            -WebSession $session `
-            -Headers @{
+        $Body = ($Body | ConvertTo-Json -Depth 100)
+        $headers = @{
+            "authority"          = "api.subsource.net"
+            "method"             = "POST"
+            "path"               = "/api/$Path"
+            "scheme"             = "https"
             "accept"             = "application/json, text/plain, */*"
             "accept-encoding"    = "gzip, deflate, br, zstd"
             "accept-language"    = "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"
@@ -46,10 +59,14 @@ function Invoke-Request {
             "sec-fetch-dest"     = "empty"
             "sec-fetch-mode"     = "cors"
             "sec-fetch-site"     = "same-site"
-        } `
+        };
+        $result = Invoke-WebRequest -Uri "$baseUrl/$Path" `
+            -Method "POST" `
+            -WebSession $session `
+            -Headers $headers `
             -ContentType "application/json" `
-            -Body $body
-        
+            -Body $Body;
+
         $content = $result.Content | ConvertFrom-Json;
         if ($property) {
             return $content.$property;
@@ -58,8 +75,8 @@ function Invoke-Request {
     }
     catch {
         $reponse = $_.Exception.Response;
-        $_.Exception.Response.Content | Out-String;
         if ($reponse.StatusCode -ne 429) {
+            Write-Host "$($reponse.StatusCode) - $($_.Exception.Message)" -ForegroundColor Red;
             return;
         }
         $remainging = $null;
@@ -77,8 +94,7 @@ function Invoke-Request {
 }
 
 function GetSubtitles {
-    $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
-    # $show = $null;
+    # $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
     $searchQuery = (!!$show ? $show.id : $null) ?? (!$Year ? $title : $title + " " + $Year);
     $queryBody = @{
         query = $searchQuery

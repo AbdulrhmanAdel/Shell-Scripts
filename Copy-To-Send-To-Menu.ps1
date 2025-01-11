@@ -57,6 +57,10 @@ $menu = @(
         SuffixArgs = @();
     },
     @{
+        Name      = "450- Display - Not Arabic Subtitled Media.lnk"
+        Arguments = "-File ""$scriptPath\Media\Display-NonArabicSubtitled.ps1"""
+    },
+    @{
         Name      = "500- Copy Paths To Clipboard.lnk"
         Arguments = "-File ""$scriptPath\Tools\Copy-Paths-To-Clipboard.ps1"""
     },

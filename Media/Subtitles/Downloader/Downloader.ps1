@@ -80,7 +80,7 @@ $args | ForEach-Object {
     }
 
     if ($info -is [System.IO.FileInfo]) {
-        if ($info.Extension -in @(".mkv", ".mp4")) {
+        if ($info.Extension -in @(".mkv", ".mp4") -and !(Has-SoftSubbedArabic.ps1 -Path $_)) {
             $files += $info;
         }
         return;
