@@ -5,7 +5,7 @@ param (
     $DirectoryPath,
     $ImagePath,
     [switch]$SkipTimeOut,
-    [string]$ImageSource
+    $ImageSource = $null
 )
 
 function OpenBrowser {
@@ -104,7 +104,21 @@ function GetImagePath {
         -MustSelectOne;
 
     $ImageSourceHandlerFn = $ImageSourceHandlers[$ImageSource];
-    return $ImageSourceHandlerFn.Invoke()[-1];
+    $Path = $ImageSourceHandlerFn.Invoke()[-1];
+
+    if ($Path.EndsWith(".ico")) {
+        return $Path;
+    }
+
+    $Width, $Hight = (& magick.exe identify -format "%w %h" "$Path").Split(" ");
+    if ($Width -ne $Hight) {
+        $PathInfo = Get-Item -LiteralPath $Path;
+        $NewImagePath = "$($PathInfo.Directory.FullName)\$($PathInfo.BaseName)-resized$($PathInfo.Extension)";
+        & magick convert "$Path" -resize 512x512 -gravity center -background none -extent 512x512 "$NewImagePath";
+        $Path = $NewImagePath;
+    }
+
+    return $Path;
 } 
 
 $directory = Get-Item -LiteralPath $DirectoryPath -Force;
