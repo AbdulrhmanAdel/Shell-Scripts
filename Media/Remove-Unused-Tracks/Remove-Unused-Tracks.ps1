@@ -33,7 +33,7 @@ function GetMediaFilesFromArchive {
 
     $archiveProcess = Start-Process 7z.exe -ArgumentList @(
         "x", 
-        $archiveFileInfo.FullName,
+        """$($archiveFileInfo.FullName)""",
         "-o$outputPath"
     ) -NoNewWindow -PassThru -Wait;
     
