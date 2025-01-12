@@ -1,4 +1,9 @@
-. Parse-Args.ps1 $args;
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files
+)
 
 $audioConfig = @{
     'mp3'  = @{ Encoder = "libmp3lame"; BitRates = @('128K', '160K', '192K', '256K', '320K') }
@@ -6,8 +11,7 @@ $audioConfig = @{
     'opus' = @{ Encoder = "libopus"; BitRates = @('64K', '96K', '128K') }
 }
 
-$files = @($args)
-if ($files.Length -le 0) { Write-Host "No Files Found" -ForegroundColor Red; Start-Sleep -Seconds 10; };
+if ($Files.Length -le 0) { Write-Host "No Files Found" -ForegroundColor Red; Start-Sleep -Seconds 10; };
 if (!$global:outputPath) {
     $global:outputPath = & Folder-Picker.ps1 -InitialDirectory "D:\";
 }

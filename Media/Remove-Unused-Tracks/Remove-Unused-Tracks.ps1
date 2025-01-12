@@ -1,7 +1,6 @@
 $outputPath = & Folder-Picker.ps1 -InitialDirectory "E:\Watch" -ExitIfNotSelected;
 
 #region Functions
-$removeSent = "-PSA|-Pahe\.in|\[AniDL\] ";
 function RemoveUnusedTracks(
     $inputPath,
     $outputPath
@@ -73,7 +72,7 @@ function HandleFile {
     }
 
     $inputPath = $pathAsAFile.FullName;
-    $newName = $pathAsAFile.Name -replace $removeSent, "";
+    $newName = Remove-UnwantedText.ps1 -Text $pathAsAFile.Name;
     $outputFilePath = "$outputPath\$newName";
     if (Test-Path -LiteralPath $outputFilePath) {
         $outputPathInfo = Get-Item -LiteralPath $outputFilePath;

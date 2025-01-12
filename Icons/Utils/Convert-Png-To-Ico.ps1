@@ -106,8 +106,8 @@ function ConvertImageToIco  (
 
 if (!$SavePath) {
     $ImageInfo = Get-Item -LiteralPath $ImagePath;
-    $SavePath = $ImageInfo.DirectoryName + "\" `
-        + $ImageInfo.Name -replace $ImageInfo.Extension, ".ico";
+    $IconName = Remove-UnwantedText.ps1 -Text ($ImageInfo.Name -replace $ImageInfo.Extension, ".ico");
+    $SavePath = $ImageInfo.DirectoryName + "\" + $IconName;
 }
 
 ConvertImageToIco `

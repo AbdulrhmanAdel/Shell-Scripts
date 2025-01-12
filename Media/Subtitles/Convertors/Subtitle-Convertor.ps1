@@ -1,10 +1,17 @@
-# & Parse-Args.ps1 $args;
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files
+)
+
+
 $modules = @{
     ".ass" = "$($PSScriptRoot)/Modules/Ass-To-Srt.ps1";
     ".srt" = "$($PSScriptRoot)/Modules/Srt-To-Ass.ps1";
 }
 
-$args | Group-Object {
+$Files | Group-Object {
     return [System.IO.Path]::GetExtension($_);
 } | ForEach-Object {
     $extension = $_.Name;
