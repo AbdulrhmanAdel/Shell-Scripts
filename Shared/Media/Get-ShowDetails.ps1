@@ -5,7 +5,7 @@ param (
     [switch]$OnlyBasicInfo
 )
 
-$canHandle = (Test-Path -LiteralPath $path) -and $path -match "(\.mkv|\.mp4|\.srt|\.ass|)$";
+$canHandle = $path -match "(\.mkv|\.mp4|\.srt|\.ass|)$";
 if (!$canHandle) {
     Throw "INVALID PATH $path";
     return;
@@ -138,10 +138,17 @@ function GetSeriesOrMovieDetails {
 }
 
 
-$info = Get-Item -LiteralPath $path -ErrorAction Ignore;
-$name = $info.Name -replace $info.Extension, "";
-$details = GetSeriesOrMovieDetails -name $name;
-$details["Info"] = $info;
-$details["FileName"] = $name;
+if (Test-Path -LiteralPath $path) {
+    $info = Get-Item -LiteralPath $path -ErrorAction Ignore;
+    $name = $info.Name -replace $info.Extension, "";
+    $details = GetSeriesOrMovieDetails -name $name;
+    $details["Info"] = $info;
+    $details["FileName"] = $name;
+    return $details;
+}
+
+$details = GetSeriesOrMovieDetails -name $Path;
+$details["Info"] = $null;
+$details["FileName"] = $Path;
 return $details;
 
