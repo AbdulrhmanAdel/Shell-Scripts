@@ -45,7 +45,6 @@ function Invoke-Request {
             -H "accept: application/json, text/plain, */*"  `
             -H "accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"  `
             -H "content-type: application/json"  `
-            -H "cookie: cf_clearance=hUr59_TvIIXES_uqq6m7RmVEha4sg5e2m0CYQQhODs0-1736735604-1.2.1.1-o.qjPKB9DZiFFvxOfMlkgcIMI_yyTNq1t_DJV1NsPJqcoC8uMrQDtg__QR7DXlQYa4_fBpVmaWYGJhhK1SqFiVG1uNzVazatbskUwZMKgHA.RSwAb.SzzG3S.W3Nqp834FLy5zgV9YqvVyVvIci.XtyI.cMoJ2nTxMhA0m0M3BYr9X1etyeOo4ftsxT1knc.mGD9uMLurUNylG3ZwGA2NMDi2bQ_G0fUwBxv6XHPodfguDenfw1fKZrXw6lnQaAuGaPCp9LX_zYrMvxFdEtirzL5a6oobVtihevNJyIbQgw"  `
             -H "dnt: 1"  `
             -H "origin: https://subsource.net"  `
             -H "priority: u=1, i"  `
