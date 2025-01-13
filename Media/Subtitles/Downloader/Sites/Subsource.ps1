@@ -38,36 +38,28 @@ function Invoke-Request {
         $property
     )
     try {
-        $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-        $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
-        $Body = ($Body | ConvertTo-Json -Depth 100)
-        $headers = @{
-            "authority"          = "api.subsource.net"
-            "method"             = "POST"
-            "path"               = "/api/$Path"
-            "scheme"             = "https"
-            "accept"             = "application/json, text/plain, */*"
-            "accept-encoding"    = "gzip, deflate, br, zstd"
-            "accept-language"    = "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"
-            "dnt"                = "1"
-            "origin"             = "https://subsource.net"
-            "priority"           = "u=1, i"
-            "referer"            = "https://subsource.net/"
-            "sec-ch-ua"          = "`"Microsoft Edge`";v=`"131`", `"Chromium`";v=`"131`", `"Not_A Brand`";v=`"24`""
-            "sec-ch-ua-mobile"   = "?0"
-            "sec-ch-ua-platform" = "`"Windows`""
-            "sec-fetch-dest"     = "empty"
-            "sec-fetch-mode"     = "cors"
-            "sec-fetch-site"     = "same-site"
-        };
-        $result = Invoke-WebRequest -Uri "$baseUrl/$Path" `
-            -Method "POST" `
-            -WebSession $session `
-            -Headers $headers `
-            -ContentType "application/json" `
-            -Body $Body;
 
-        $content = $result.Content | ConvertFrom-Json;
+        Write-Host "Invoking $Path" -ForegroundColor Yellow;
+        $Body = ($Body | ConvertTo-Json -Depth 100 -Compress)
+        $data = curl -sS "$baseUrl/$Path" `
+            -H "accept: application/json, text/plain, */*"  `
+            -H "accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"  `
+            -H "content-type: application/json"  `
+            -H "cookie: cf_clearance=hUr59_TvIIXES_uqq6m7RmVEha4sg5e2m0CYQQhODs0-1736735604-1.2.1.1-o.qjPKB9DZiFFvxOfMlkgcIMI_yyTNq1t_DJV1NsPJqcoC8uMrQDtg__QR7DXlQYa4_fBpVmaWYGJhhK1SqFiVG1uNzVazatbskUwZMKgHA.RSwAb.SzzG3S.W3Nqp834FLy5zgV9YqvVyVvIci.XtyI.cMoJ2nTxMhA0m0M3BYr9X1etyeOo4ftsxT1knc.mGD9uMLurUNylG3ZwGA2NMDi2bQ_G0fUwBxv6XHPodfguDenfw1fKZrXw6lnQaAuGaPCp9LX_zYrMvxFdEtirzL5a6oobVtihevNJyIbQgw"  `
+            -H "dnt: 1"  `
+            -H "origin: https://subsource.net"  `
+            -H "priority: u=1, i"  `
+            -H "referer: https://subsource.net/"  `
+            -H "sec-ch-ua: \"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\""  `
+            -H "sec-ch-ua-mobile: ?1"  `
+            -H "sec-ch-ua-platform: \"Android\""  `
+            -H "sec-fetch-dest: empty"  `
+            -H "sec-fetch-mode: cors"  `
+            -H "sec-fetch-site: same-site"  `
+            -H "user-agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36 Edg/131.0.0.0"  `
+            --data-raw $Body;
+
+        $content = $data | ConvertFrom-Json;
         if ($property) {
             return $content.$property;
         }
@@ -94,7 +86,7 @@ function Invoke-Request {
 }
 
 function GetSubtitles {
-    # $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
+    $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
     $searchQuery = (!!$show ? $show.id : $null) ?? (!$Year ? $title : $title + " " + $Year);
     $queryBody = @{
         query = $searchQuery
