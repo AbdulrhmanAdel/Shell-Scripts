@@ -122,6 +122,7 @@ function GetImagePath {
 } 
 
 $directory = Get-Item -LiteralPath $DirectoryPath -Force;
+Write-Host "Setting Icon For $($directory.Name)" -ForegroundColor Cyan;
 $iconPath = "$($directory.FullName)\$($directory.Name.Trim()).ico";
 $folderHasIcon = Test-Path -LiteralPath $iconPath;
 if ($folderHasIcon -and !$ImagePath) {
