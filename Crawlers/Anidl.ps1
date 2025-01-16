@@ -6,6 +6,12 @@ param (
 )
 
 $Title = $Title.Trim() -replace " +", " " -replace " ", "+";
+
+if (!$Title.EndsWith("720P")) {
+    $quality = Single-Options-Selector.ps1 -Options @("480", "720", "1080") -Title "Select Quality" -MustSelectOne;
+    $Title += "+$($quality)P"
+}
+
 $Result = curl -sS "https://anidl.org/wp-admin/admin-ajax.php"  `
     -H "accept: application/json, text/javascript, */*; q=0.01"   `
     -H "accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"   `
