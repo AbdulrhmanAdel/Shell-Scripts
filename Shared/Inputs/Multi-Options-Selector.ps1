@@ -62,12 +62,14 @@ $mainPanel.Controls.Add($submitButton, 0, $options.Count + 1);
 $width = ($checkboxes | Select-Object -ExpandProperty Width | Measure-Object -Maximum).Maximum;
 $checkboxHeight = ($checkboxes | Select-Object -ExpandProperty Height | Measure-Object -Maximum).Maximum;
 $height = $checkboxHeight * $checkboxes.Count + $submitButton.Height;
-$form.Size = New-Object System.Drawing.Size($width + 100, $height + 100)
+$width  += 100;
+$height += 100;
+$form.Size = New-Object System.Drawing.Size($width, $height)
 
 # Show the form
 $result = $form.ShowDialog();
 if ($result -eq 'OK') {
-    $selectedItems = $form.Controls | Where-Object { $_ -is [System.Windows.Forms.CheckBox] -and $_.Checked } | Select-Object -ExpandProperty Tag
+    $selectedItems = $checkboxes | Where-Object { $_.Checked } | Select-Object -ExpandProperty Tag
     return $selectedItems
 }
 

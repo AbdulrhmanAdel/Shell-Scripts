@@ -5,6 +5,11 @@ param (
     $Title
 )
 
+if (Test-Path -LiteralPath $Title) {
+    $Title = Split-Path -Path $Title -Leaf
+}
+
+Write-Host "Searching for $Title" -ForegroundColor Green;
 $Title = $Title.Trim() -replace " +", " " -replace " ", "+";
 
 if (!$Title.EndsWith("720P")) {
@@ -44,14 +49,19 @@ $links = $Date.data | ForEach-Object {
     Write-Host $link -ForegroundColor Yellow;
 
     return @{
-        Key = $fileName;
-        Value = $link;
+        Key   = $fileName;
+        Value = $link -replace "#038;", "";
     }
 };
 
 $DownloadLinks = Multi-Options-Selector.ps1 -options $links;
-$DownloadLinks | ForEach-Object {
-    Invoke-Item $_;
+if ($DownloadLinks.Count -eq 0) {
+    return;
 }
 
+$DownloadLinks | ForEach-Object {
+    Start-Process $_;
+}
 
+Set-Clipboard -Value ($DownloadLinks -join "`n")
+timeout.exe 5;

@@ -85,6 +85,13 @@ $iconsPath = @(
     }
 )
 
+$crawlersPath = @(
+    @{
+        Title = "Crawlers" 
+        Key   = "200 Crawlers" 
+    }
+)
+
 $attributesPath = @(
     @{
         Title = "Attributes"
@@ -207,6 +214,14 @@ $scripts = @(
         Key        = "9 Open Folder Icon Info.ini"
         ScriptPath = "Icons\Open-FolderIconInfo.ps1"
         Path       = $iconsPath
+        Icon       = "pwsh.exe"
+    },
+    @{
+        Extensions = @("Directory")
+        Title      = "Anidl"
+        Key        = "900 Anidl"
+        ScriptPath = "Crawlers\Anidl.ps1"
+        Path       = $crawlersPath
         Icon       = "pwsh.exe"
     }#,
     # @{
