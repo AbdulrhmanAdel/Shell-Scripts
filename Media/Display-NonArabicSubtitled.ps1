@@ -12,3 +12,5 @@ $Files | Where-Object { Is-Video.ps1 -file $_ } | ForEach-Object {
     Write-Host $_ -ForegroundColor Green;
     Write-Host "";
 }
+
+Read-Host "Press Enter to exit";
