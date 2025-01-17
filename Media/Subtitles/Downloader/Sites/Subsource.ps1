@@ -41,21 +41,10 @@ function Invoke-Request {
 
         Write-Host "Invoking $Path" -ForegroundColor Yellow;
         $Body = ($Body | ConvertTo-Json -Depth 100 -Compress)
-        $data = curl -sS "$baseUrl/$Path" `
+        $data = curl --progress-bar "$baseUrl/$Path" `
             -H "accept: application/json, text/plain, */*"  `
             -H "accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"  `
             -H "content-type: application/json"  `
-            -H "dnt: 1"  `
-            -H "origin: https://subsource.net"  `
-            -H "priority: u=1, i"  `
-            -H "referer: https://subsource.net/"  `
-            -H "sec-ch-ua: \"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\""  `
-            -H "sec-ch-ua-mobile: ?1"  `
-            -H "sec-ch-ua-platform: \"Android\""  `
-            -H "sec-fetch-dest: empty"  `
-            -H "sec-fetch-mode: cors"  `
-            -H "sec-fetch-site: same-site"  `
-            -H "user-agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36 Edg/131.0.0.0"  `
             --data-raw $Body;
 
         $content = $data | ConvertFrom-Json;
