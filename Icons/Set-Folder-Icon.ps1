@@ -123,15 +123,16 @@ function GetImagePath {
 
 $directory = Get-Item -LiteralPath $DirectoryPath -Force;
 Write-Host "Setting Icon For $($directory.Name)" -ForegroundColor Cyan;
-$iconPath = "$($directory.FullName)\$($directory.Name.Trim()).ico";
+$iconName = Remove-UnwantedText.ps1 -Text "$($directory.Name.Trim()).ico";
+$iconPath = "$($directory.FullName)\$iconName";
 $folderHasIcon = Test-Path -LiteralPath $iconPath;
 if ($folderHasIcon -and !$ImagePath) {
     Write-Host "Folder Already Has Icon. Overriding IT" -ForegroundColor Red;
-    # $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to overwrite it?";
-    # if (!$overwrite) {
-    #     # & "$PSScriptRoot/Refresh-Icon.ps1" -FolderPath $DirectoryPath;
-    #     return;
-    # }
+    $overwrite = & Prompt.ps1 -Title "Icon Already Exists" -Message "Folder Already has icon. do you want to overwrite it?";
+    if (!$overwrite) {
+        & "$PSScriptRoot/Refresh-Icon.ps1" -FolderPath $DirectoryPath;
+        return;
+    }
 }
 
 if (!$ImagePath) {
