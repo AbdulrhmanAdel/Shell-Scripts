@@ -1,11 +1,11 @@
 [CmdletBinding()]
 param (
     [string]$InitialDirectory = [Environment]::GetFolderPath('MyDocuments'),
-    [switch]$ExitIfNotSelected,
-    [switch]$Required,
-    [switch]$ShowHiddenFiles,
-    [switch]$ShowOnTop,
-    [int]$Retry
+    [switch]$ExitIfNotSelected = $false,
+    [switch]$Required = $false,
+    [switch]$ShowHiddenFiles = $false,
+    [switch]$ShowOnTop = $false,
+    [int]$Retry = 0
 )
 
 Add-Type -AssemblyName System.Windows.Forms;
