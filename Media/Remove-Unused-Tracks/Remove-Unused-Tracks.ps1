@@ -1,3 +1,14 @@
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files
+)
+
+$Files | ForEach-Object {
+    Write-Host "Handling File $_" -ForegroundColor Green;
+}
+
 $outputPath = & Folder-Picker.ps1 -InitialDirectory "E:\Watch" -ExitIfNotSelected;
 
 #region Functions
@@ -90,7 +101,7 @@ function HandleFile {
 
 $temp = $env:TEMP;
 $archiveExtensions = @('.rar', '.zip', '.7z');
-$args | Where-Object { 
+$Files | Where-Object { 
     return Test-Path -LiteralPath $_
 } | ForEach-Object {
     $pathAsAFile = Get-Item -LiteralPath $_;

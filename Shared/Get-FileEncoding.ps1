@@ -1,9 +1,13 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0, Mandatory)]
-    [string]$File
+    [string]$File,
+    [Parameter()]
+    [switch]
+    $ReturnFileContent
 )
 
+$script:FileContent = $null
 function Get-Encoding {
     param (
         [string]$filename
@@ -47,6 +51,7 @@ function TryEncoding {
     )
     # Dialogue: 0, 0:00:42.79, 0:00:46.59, Default, , 0000, 0000, 0000, , ����� ������ ��� �������� �������� (����� ��������) , ����� �
     $content = Get-Content -LiteralPath $file -Encoding $encoding;
+    $script:FileContent = $content;
     $inValidOne = $content | Where-Object {
         $_ -match "�"
     } | Select-Object -First 1;
@@ -54,9 +59,25 @@ function TryEncoding {
 }
 
 
+function ReturnResult {
+    param (
+        $Encoding
+    )
+    
+    if ($ReturnFileContent) {
+        return @{
+            Encoding    = $Encoding;
+            FileContent = $script:FileContent;
+        }
+    }
+
+
+    return $Encoding;
+}
+
 $encoding = (Get-Encoding -filename $file)[1];
 if ($encoding) {
-    return $encoding;
+    return ReturnResult -Encoding $encoding;
 }
 
 $encodings = @(
@@ -66,10 +87,10 @@ $encodings = @(
 
 foreach ($encoding in $encodings) {
     if (TryEncoding -encoding $encoding) {
-        return $encoding;
+        return ReturnResult -Encoding $encoding;
     }
 }
 
-return "UTF8";
+return ReturnResult -Encoding "UTF8";
 
 
