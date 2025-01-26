@@ -27,16 +27,20 @@ if ($data.Length -eq 0) {
 
 $links = $data | ForEach-Object {
     $fileName = $_.filename;
+    $fileName -match "(?<Size>\d+ MBs)" | Out-Null;
+    $hasArabicSub = $fileName.Contains("fi fi-sa");
+    $size = $matches["Size"];
     $endIndex = $fileName.IndexOf(" <span");
     $fileName = $fileName.Substring(4, $endIndex - 4);
     $link = $_.code;
     $linkEndIndex = $link.IndexOf(""" ");
     $link = $link.Substring(9, $linkEndIndex - 9);
+ 
     # Write-Host $fileName -NoNewline -ForegroundColor Green;
     # Write-Host " => " -NoNewline -ForegroundColor Red;
     # Write-Host $link -ForegroundColor Yellow;
     return @{
-        Key   = $fileName;
+        Key   = "$fileName $size $hasArabicSub";
         Value = $link -replace "#038;", "";
     }
 };
