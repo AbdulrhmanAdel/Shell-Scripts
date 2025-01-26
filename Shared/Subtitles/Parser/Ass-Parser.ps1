@@ -77,6 +77,7 @@ $content = Get-Content -LiteralPath $File -Encoding $encoding | ForEach-Object {
 }
 
 return @{
-    Content = $content
-    Styles  = $styles
+    Content  = $content
+    Styles   = $styles
+    Encoding = $encoding
 };

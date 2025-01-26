@@ -9,7 +9,8 @@ param (
 
 $delayTimeSpan = [timespan]::FromMilliseconds($delayMilliseconds)
 Write-Output "Start Delaying By $delayTimeSpan $($delayTimeSpan.TotalMilliseconds), Start From $startFromSecond To File: $file";
-$content = & Srt-Parser.ps1 -File $file;
+$result = & Srt-Parser.ps1 -File $file -IncludeEncoding;
+$content = $result.Content;
 $content = $content | ForEach-Object {
     $startTime = $_.StartTime;
     if ($startFromSecond) {
@@ -29,4 +30,4 @@ $content = $content | ForEach-Object {
     return $null -ne $_
 }
 
-& Srt-Assembler.ps1 -Dialogs $content -OutputPath $file -Encoding "UTF8";
+& Srt-Assembler.ps1 -Dialogs $content -OutputPath $file -Encoding $result.Encoding;

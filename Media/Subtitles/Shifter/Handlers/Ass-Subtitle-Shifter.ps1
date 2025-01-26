@@ -25,4 +25,4 @@ $assContent.Content = $assContent.Content | ForEach-Object {
     }
 
 };
-& Ass-Assembler.ps1 -Dialogs $assContent -Encoding "UTF8" -OutputPath $File;
+& Ass-Assembler.ps1 -Dialogs $assContent -Encoding $assContent.Encoding -OutputPath $File;

@@ -1,7 +1,10 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [string]$File
+    [string]$File,
+    [Parameter()]
+    [switch]
+    $IncludeEncoding
 )
 
 $encoding = & Get-FileEncoding.ps1 $File;
@@ -49,4 +52,7 @@ $dialogs += [PSCustomObject]@{
     EndTime   = $lastLine.EndTime
 }
 
-return $dialogs;
+return $IncludeEncoding ? @{
+    Content  = $dialogs
+    Encoding = $encoding
+} : $dialogs;
