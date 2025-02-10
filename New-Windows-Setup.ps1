@@ -133,9 +133,9 @@ RunReg -Path "$programsPath\Net\Torrent\qBittorrent\Data\Assign-QBittorrentToOpe
 RunProgram -Path "$programsPath\Net\Torrent\qBittorrent\qbittorrent.exe" -NoWait;
 
 #region hardware Monitor
-RunProgram -Path "$programsPath\Hardware\HWiNFO64\HWiNFO64.exe" -NoWait;
-RunPowershell -Path "$programsPath\Hardware\HWiNFO64\HWiNFO64.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
-RunProgram -Path "$programsPath\Hardware\RivaTuner Statistics Server\RTSS.exe" -NoWait;
+RunProgram -Path "$programsPath\Hardware\Monitor\HWiNFO64\HWiNFO64.exe" -NoWait;
+RunPowershell -Path "$programsPath\Hardware\Monitor\HWiNFO64\HWiNFO64.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
+RunProgram -Path "$programsPath\Hardware\Monitor\RivaTuner Statistics Server\RTSS.exe" -NoWait;
 #endregion
 RunProgram -Path "$programsPath\Tools\MEGAsync\MEGAsync.exe" -NoWait;
 

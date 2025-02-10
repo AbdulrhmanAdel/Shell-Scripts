@@ -8,6 +8,12 @@ param (
     $Destination
 )
 
+if (Prompt.ps1 -Message "Open Target Only") {
+    explorer.exe $Destination;
+    Exit;
+}
+
+
 if (-not (Test-Path -LiteralPath $Destination)) {
     New-Item -Path $Destination -ItemType Directory -ErrorAction Ignore | Out-Null
 }
