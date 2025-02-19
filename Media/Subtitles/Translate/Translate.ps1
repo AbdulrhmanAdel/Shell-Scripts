@@ -1,10 +1,16 @@
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files
+)
+
 $ParserAndAssembler = @{
     ".srt" = "$PSScriptRoot\Modules\Srt.ps1"
     ".ass" = "$PSScriptRoot\Modules\Ass.ps1"
 }
 
-$files = $args | Where-Object { & Is-Subtitle $_ };
-$files | ForEach-Object {
+$Files | Where-Object { & Is-Subtitle $_ } | ForEach-Object {
     Write-Host "=====================================";
     $fileName = [System.IO.Path]::GetFileName($_);
     $extension = [System.IO.Path]::GetExtension($_);
