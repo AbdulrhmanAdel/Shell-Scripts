@@ -1,4 +1,15 @@
-$destinitionPath = $args[0];
+[CmdletBinding()]
+param (
+    [Parameter(Position = 0)]
+    [string]
+    $DestinationPath,
+    [string]
+    $Link
+)
+
+if (!$DestinationPath) {
+    $DestinationPath = & Folder-Picker.ps1 -Required;
+}
 
 $defaultHandler = @( "-f", "ba" , "-x", "--audio-format", "m4a", "--audio-quality", "160K");
 $options = @{
@@ -10,8 +21,8 @@ $options = @{
     "Cancel" = { EXIT }
 }
 
-if (!$destinitionPath) {
-    $destinitionPath = Read-Host "Please enter destinition path?";
+if (!$DestinationPath) {
+    $DestinationPath = Read-Host "Please enter destinition path?";
 }
 
 $format = & Single-Options-Selector.ps1 -Options @(
@@ -45,14 +56,17 @@ function HandlePlaylist {
         $arguments += @("--playlist-end", $to);
     }
 
-    $arguments += @("-o", """$destinitionPath\%(playlist_index)s - %(title)s""", $url);
+    $arguments += @("-o", """$DestinationPath\%(playlist_index)s - %(title)s""", $url);
     Start-Process yt-dlp -ArgumentList $arguments  -Wait -NoNewWindow;
 }
 
 
 $playlistRegex = "https\:\/\/.*\/playlist\?list=.*"
 function download {
-    $url = Read-Host "Please enter url?";
+    param(
+        $url    
+    )
+    $url ??= Read-Host "Please enter url?";
     if (!$url) {
         Write-Host "Please enter valid url?";
         download;
@@ -63,11 +77,13 @@ function download {
         HandlePlaylist -url $url;
     }
     else {
-        $arguments = $selectedOptions + @("-o", """$destinitionPath\%(title)s.%(ext)s""", $url);
+        $arguments = $selectedOptions + @("-o", """$DestinationPath\%(title)s.%(ext)s""", $url);
         Start-Process yt-dlp -ArgumentList $arguments  -Wait -NoNewWindow;
     }
 
-    download;
+    if (!$Link) {        
+        download;
+    }
 }
 
-download;
+download -url $Link;
