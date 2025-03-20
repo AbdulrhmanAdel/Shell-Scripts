@@ -73,7 +73,20 @@ function HandleSeries {
 }
 
 $files = @();
-$args | ForEach-Object {
+$args | Where-Object {
+    # $extension = [System.IO.Path]::GetExtension($_);
+    # $fileName = Split-Path -Leaf -Path $_;
+    # if (
+    #     (
+    #         Test-Path -LiteralPath ($_ -replace $extension, '.srt') -or `
+    #             Test-Path -LiteralPath ($_ -replace $extension, '.ass')
+    #     ) -and `
+    #       !(Prompt.ps1 -Message "$fileName Already has Subtitle Do you want to override")) {
+    #     return $false;
+    # }
+
+    return $true;
+} | ForEach-Object {
     $info = Get-Item -LiteralPath $_ -ErrorAction Ignore;
     if (!$info) {
         return;

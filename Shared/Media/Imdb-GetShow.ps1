@@ -22,7 +22,7 @@ function Prompt {
                 Value = $_
             }
         }
-    ) -Title "Found Multi Possible Shows matched your criteria please select one";
+    ) -Title "Found Multi Possible Shows matched your criteria please select one with name $name";
 }
 
 function HasSameYear {

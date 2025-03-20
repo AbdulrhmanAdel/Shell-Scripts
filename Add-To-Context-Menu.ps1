@@ -143,6 +143,14 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
+        Extensions = @(".mkv", ".mp4")
+        Title      = "Copy Name"
+        Key        = "999 Copy Name"
+        ScriptPath = "Media\Copy-Name.ps1"
+        Path       = $mediaPath
+        Icon       = "pwsh.exe"
+    },
+    @{
         Extensions = @("*", "Directory")
         Title      = "TakeOwn"
         Key        = "TakeOwn"
@@ -265,13 +273,13 @@ $scripts = @(
     #     Icon       = "pwsh.exe"
     # },
     @{
-        Extensions    = @("*", "Directory")
-        Title         = "Copy"
-        Key           = "999 Copy.ps1"
-        ScriptPath    = "Tools\Copy-ToDrive.ps1"
-        Path          = $toolsPath
-        Icon          = "pwsh.exe"
-        PathParamName = "-Files"
+        Extensions     = @("*", "Directory")
+        Title          = "Copy"
+        Key            = "999 Copy.ps1"
+        ScriptPath     = "Tools\Copy-ToDrive.ps1"
+        Path           = $toolsPath
+        Icon           = "pwsh.exe"
+        PathParamName  = "-Files"
         AdditionalArgs = @("-CustomDestiniation")
     }, 
     @{
