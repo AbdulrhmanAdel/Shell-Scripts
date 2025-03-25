@@ -17,7 +17,7 @@ $menu = @(
     @{
         Name      = "03- General Tools.lnk"
         Arguments = "-File ""$scriptPath\Tools\ToolModules.ps1"""
-    },
+    }Fixe
     # @{
     #     Name      = "500- Copy To Different Drive With The Same Hierarchy.lnk"
     #     Arguments = "-File ""$scriptPath\Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"""
