@@ -6,7 +6,7 @@ param (
 )
 
 if (Test-Path -LiteralPath $Title) {
-    $Title = Split-Path -Path $Title -Leaf
+    $Title = Split-Path -Path $Title -Leaf;
 }
 
 Write-Host "Searching for $Title" -ForegroundColor Green;

@@ -1,3 +1,10 @@
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files
+)
+
 $colors = @(
     [System.ConsoleColor]::Black,
     [System.ConsoleColor]::DarkBlue,
@@ -66,7 +73,7 @@ function Handle {
     }
 }
 
-$files = $args | Where-Object { $_ -match ".*(ass|srt)$" }
+$files = $Files | Where-Object { $_ -match ".*(ass|srt)$" }
 foreach ($file in $files) {
     $info = Get-Item -LiteralPath $file;
     $videInfo = "$($info.Directory)/$($info.Name -replace $info.Extension, ".mkv")"

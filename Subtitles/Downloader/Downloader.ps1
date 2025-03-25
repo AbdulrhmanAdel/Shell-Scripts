@@ -1,3 +1,11 @@
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Paths
+)
+
+
 function HandleMovies {
     param($subs)
     $movies = $subs | Where-Object { $_.Details.Type -eq "Movie" };
@@ -73,7 +81,7 @@ function HandleSeries {
 }
 
 $files = @();
-$args | Where-Object {
+$Paths | Where-Object {
     # $extension = [System.IO.Path]::GetExtension($_);
     # $fileName = Split-Path -Leaf -Path $_;
     # if (
