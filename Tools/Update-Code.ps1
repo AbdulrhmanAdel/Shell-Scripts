@@ -25,7 +25,6 @@ if (!$archiveProcess -or $archiveProcess.ExitCode -gt 0) {
     Invoke-Item $DownloadPath;
 }
 else {
-    Stop-Process -Id $archiveProcess.Id;
     Write-Host "Visual Studio Code Updated Successfully" -ForegroundColor Green;
     Write-Host "Removing Download Zip file" -ForegroundColor Green;
     Remove-Item -Path "$Destination\locales" -Exclude "en-US.pak" -Force -Recurse;
