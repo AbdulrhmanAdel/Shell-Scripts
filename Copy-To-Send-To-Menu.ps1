@@ -8,7 +8,7 @@ $scriptPath = $PSScriptRoot;
 $menu = @(
     @{
         Name      = "01- Media Scripts.lnk"
-        Arguments = "-File ""$scriptPath\Media\Modules.ps1"""
+        Arguments = "-File ""$scriptPath\Media\Module.ps1"""
     },
     @{
         Name      = "02- Subtitle Scripts.lnk"
@@ -17,7 +17,7 @@ $menu = @(
     @{
         Name      = "03- General Tools.lnk"
         Arguments = "-File ""$scriptPath\Tools\ToolModules.ps1"""
-    }Fixe
+    }
     # @{
     #     Name      = "500- Copy To Different Drive With The Same Hierarchy.lnk"
     #     Arguments = "-File ""$scriptPath\Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"""
