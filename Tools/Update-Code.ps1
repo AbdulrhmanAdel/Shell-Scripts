@@ -17,8 +17,7 @@ Write-Host "Extracting Visual Studio Code" -ForegroundColor Green;
 $archiveProcess = Start-Process 7z.exe -ArgumentList @(
     "x", 
     """$DownloadPath""",
-    "-o$Destination",
-    "-xr!locales/"
+    "-o$Destination"
 ) -NoNewWindow -PassThru -Wait;
     
 if (!$archiveProcess -or $archiveProcess.ExitCode -gt 0) {
@@ -26,8 +25,10 @@ if (!$archiveProcess -or $archiveProcess.ExitCode -gt 0) {
     Invoke-Item $DownloadPath;
 }
 else {
+    Stop-Process -Id $archiveProcess.Id;
     Write-Host "Visual Studio Code Updated Successfully" -ForegroundColor Green;
     Write-Host "Removing Download Zip file" -ForegroundColor Green;
+    Remove-Item -Path "$Destination\locales" -Exclude "en-US.pak" -Force -Recurse;
     Remove-Item -LiteralPath $DownloadPath -Force;
 }
 
