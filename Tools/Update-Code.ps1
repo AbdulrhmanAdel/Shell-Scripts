@@ -10,7 +10,11 @@ Write-Host "Remove Old Visual Studio Code" -ForegroundColor Green;
 Stop-Process -Name Code -Force -ErrorAction SilentlyContinue;   
 $Destination = [System.Environment]::GetEnvironmentVariable("VsCodePath", "User") ?? (Folder-Picker.ps1 -InitialDirectory "D:\"); 
 if (Test-Path -LiteralPath $Destination) {
-    Remove-Item -LiteralPath $Destination -Force -Recurse;
+    Get-ChildItem -LiteralPath $Destination | Foreach-Object {
+        if ($_.Name -ne "data") {
+            Remove-Item -LiteralPath $_.FullName -Force -Recurse;
+        }
+    }
 }
 
 Write-Host "Extracting Visual Studio Code" -ForegroundColor Green;
