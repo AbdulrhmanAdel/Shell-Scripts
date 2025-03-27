@@ -7,51 +7,88 @@ param (
 
 $Options = @(
     @{
-        Key     = "Translate";
-        Handler = {
-            $path = "$PSScriptRoot/Translate/Translate.ps1";
-            &  $path -Files $Files;
-        };
-    }
-    @{
-        Key     = "Shifter";
-        Handler = {
-            $path = "$PSScriptRoot/Shifter/Shifter.ps1";
-            &  $path -Files $Files;
-        };
-    }
-    @{
-        Key     = "Shifter (Chapter Based)";
-        Handler = {
-            $path = "$PSScriptRoot/Shifter/Custom/Chapter-Based-Shifter.ps1";
-            &  $path -Files $Files;
-        };
-    }
-    @{
-        Key     = "Downloader";
-        Handler = {
+        Key        = "Downloader";
+        Extensions = @("mkv", "mp4");
+        Handler    = {
             $path = "$PSScriptRoot/Downloader/Downloader.ps1";
             &  $path -Paths $Files;
         };
     }
     @{
-        Key     = "Editor";
-        Handler = {
+        Key        = "Translate";
+        Extensions = @("srt", "ass");
+        Handler    = {
+            $path = "$PSScriptRoot/Translate/Translate.ps1";
+            &  $path -Files $Files;
+        };
+    }
+    @{
+        Key        = "Shifter";
+        Extensions = @("srt", "ass");
+        Handler    = {
+            $path = "$PSScriptRoot/Shifter/Shifter.ps1";
+            &  $path -Files $Files;
+        };
+    }
+    @{
+        Key        = "Shifter (Chapter Based)";
+        Extensions = @("srt", "ass");
+        Handler    = {
+            $path = "$PSScriptRoot/Shifter/Custom/Chapter-Based-Shifter.ps1";
+            &  $path -Files $Files;
+        };
+    }
+    @{
+        Key        = "Editor";
+        Extensions = @("srt", "ass");
+        Handler    = {
             $path = "$PSScriptRoot/Editor/Editor.ps1";
             &  $path -Files $Files;
         };
     }
     @{
-        Key     = "Convertor";
+        Key     = "Renamer";
         Handler = {
+            $path = "$PSScriptRoot/Renamer/Renamer.ps1";
+            & $path -Paths $Files;
+        };
+    }
+    @{
+        Key        = "Convertor";
+        Extensions = @("srt", "ass");
+        Handler    = {
             $path = "$PSScriptRoot/Convertor/Convertor.ps1";
+            &  $path -Files $Files;
+        };
+    }
+    @{
+        Key        = "Extract Then Translate";
+        Extensions = @("mkv", "mp4");
+        Handler    = {
+            $path = "$PSScriptRoot/Extract-Translate.ps1";
             &  $path -Files $Files;
         };
     }
 )
 
 
+$FilesExtensions = @($Files | Foreach-Object {
+        return [System.IO.Path]::GetExtension($_) -replace "^.", ""
+    })
+
+$options = $Options | Where-Object {
+    $extensions = $_.Extensions;
+    if (!$extensions) {
+        return $true
+    }
+
+    return [bool]($FilesExtensions | Where-Object { $_ -in $extensions })
+}
+
+
 $option = Single-Options-Selector.ps1 -options $Options -MustSelectOne;
 $option.Handler.Invoke();
+
+    
 
 

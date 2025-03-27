@@ -17,7 +17,7 @@ $Options = @(
         Key     = "Copy-Paths-To-Clipboard";
         Handler = {
             $path = "$PSScriptRoot/Copy-Paths-To-Clipboard.ps1";
-            &  $path $Files;
+            &  $path -Paths $Files;
         };
     }
     @{

@@ -1,5 +1,11 @@
-Write-Host $args
-$data = $args | ForEach-Object {
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Paths
+)
+
+$data = $Paths | ForEach-Object {
     $new = $_ -replace "\\", "\\";
     return """\""$new\"""""
 }

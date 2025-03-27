@@ -1,3 +1,12 @@
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files,
+    [switch]
+    $FirstSubtitle
+)
+
 enum ExtractLibraryType{
     Ffmpeg
     MkvExtract
@@ -7,17 +16,17 @@ enum ExtractLibraryType{
 
 $codecSettings = @{
     # Audio
-    "aac"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "aac"; Extension = ".aac" }
-    "m4a"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "aac"; Extension = ".m4a" }
-    "opus"         = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "libopus"; Extension = ".opus" }
-    "mp3"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "libmp3lame"; Extension = ".mp3" }
+    "aac"    = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "aac"; Extension = ".aac" }
+    "m4a"    = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "aac"; Extension = ".m4a" }
+    "opus"   = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "libopus"; Extension = ".opus" }
+    "mp3"    = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "a"; Encoder = "libmp3lame"; Extension = ".mp3" }
     # Subtitles
     # ASS (Advanced SSA) subtitle (decoders: ssa ass) (encoders: ssa ass)
-    "ass"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "ass"; Extension = ".ass" }
+    "ass"    = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "ass"; Extension = ".ass" }
     # SubRip subtitle with embedded timing
-    "srt"          = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "srt"; Extension = ".srt" }
+    "srt"    = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "srt"; Extension = ".srt" }
     # SubRip subtitle (decoders: srt subrip) (encoders: srt subrip)
-    "subrip"       = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "subrip"; Extension = ".srt" }
+    "subrip" = @{ Library = [ExtractLibraryType]::Ffmpeg; Type = "s"; Encoder = "subrip"; Extension = ".srt" }
     # DVB subtitles (decoders: dvbsub) (encoders: dvbsub)
     # "dvd_subtitle" = @{  Library = [ExtractLibraryType]::MkvExtract; Type = "s"; Extension = ".sub" }
     # "dvb_subtitle" = @{  Library = [ExtractLibraryType]::MkvExtract; Type = "s"; Extension = ".sub" }
@@ -38,6 +47,7 @@ function FfmpegExtract {
         "-map" "0:$index" `
         "-c" "copy" `
         "$output";
+    return $output;
 }
 
 function HandleTrack {
@@ -62,7 +72,7 @@ function HandleTrack {
     
         switch ($trackInfo.Settings.Library) {
             ([ExtractLibraryType]::Ffmpeg) {  
-                FfmpegExtract -FileInfo $fileInfo `
+                return FfmpegExtract -FileInfo $fileInfo `
                     -trackInfo $trackInfo;
                 break;
             }
@@ -80,6 +90,9 @@ function GetTracksInfo($inputPath) {
         "stream=index,codec_name,codec_type,codec_long_name:stream_tags=language" `
         "$inputPath" | ConvertFrom-Json;
     $tracks = @($streamsInfo.streams | Where-Object { $codecSettings.ContainsKey($_.codec_name) })
+    if ($FirstSubtitle) {
+        $tracks = @($tracks | Where-Object { $_.codec_type -eq "subtitle" } | Select-Object -First 1);
+    }
     $options = $tracks | ForEach-Object {
         $extension = ($codecSettings[$_.codec_name]).Extension;
         $text = "$($_.tags.language) - $extension - $($_.codec_long_name)";
@@ -89,7 +102,10 @@ function GetTracksInfo($inputPath) {
             Language = $_.tags.language
         } 
     };
-    $streamIndexes = Multi-Options-Selector.ps1 -options $options -MustSelectOne;
+
+    $streamIndexes = $FirstSubtitle `
+        ? ($options | Select-Object -ExpandProperty Value) `
+        : (Multi-Options-Selector.ps1 -options $options -MustSelectOne);
     return $streamIndexes | ForEach-Object {
         $streamIndex = $_;
         $selectedTrack = $tracks | Where-Object { $_.index -eq $streamIndex };
@@ -104,8 +120,8 @@ function GetTracksInfo($inputPath) {
 
 
 #endregion
-$files = $args | Where-Object { Is-Video.ps1 $_; }
-foreach ($folderPath in $files) {
+return $Files | Where-Object { Is-Video.ps1 $_; } | ForEach-Object {
+    $folderPath = $_;
     $pathInfo = Get-Item -LiteralPath $folderPath;
     if ($pathInfo -is [System.IO.DirectoryInfo]) {
         $files = Get-ChildItem -LiteralPath $pathInfo.FullName -Filter "*.mkv";
@@ -115,7 +131,7 @@ foreach ($folderPath in $files) {
         }
     }
     else {
-        HandleTrack -fileInfo $pathInfo;
+        return HandleTrack -fileInfo $pathInfo;
     }
 }
 
