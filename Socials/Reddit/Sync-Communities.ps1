@@ -5,8 +5,8 @@ function Join {
         $CommunityId
     )
 
-    # Get Session From Console Network Tab
     
+    # -Body "{`"operation`":`"UpdateSubredditSubscriptions`",`"variables`":{`"input`":{`"inputs`":[{`"subredditId`":`"$CommunityId`",`"subscribeState`":`"SUBSCRIBED`"}]}},`"csrf_token`":`"39b4989a07633c0ea5aae6a1ab36d42f`"}"
 }
 
 
