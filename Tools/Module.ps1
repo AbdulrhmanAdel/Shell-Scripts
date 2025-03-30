@@ -23,8 +23,8 @@ $Options = @(
     @{
         Key     = "Safe Delete";
         Handler = {
-            $path = "$PSScriptRoot/Safe Delete.ps1";
-            &  $path $Files;
+            $path = "$PSScriptRoot/Safe-Delete.ps1";
+            & $path -Files $Files;
         };
     }
     

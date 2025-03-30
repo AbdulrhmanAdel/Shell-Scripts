@@ -16,7 +16,7 @@ $menu = @(
     },
     @{
         Name      = "03- General Tools.lnk"
-        Arguments = "-File ""$scriptPath\Tools\ToolModules.ps1"""
+        Arguments = "-File ""$scriptPath\Tools\Module.ps1"""
     }
     # @{
     #     Name      = "500- Copy To Different Drive With The Same Hierarchy.lnk"
