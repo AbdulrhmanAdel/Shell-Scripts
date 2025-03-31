@@ -184,13 +184,13 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
-        Extensions     = @("Drive", "*", "Directory", $Recycle)
+        Extensions     = @("Drive", $Recycle)
         Title          = "Safe Delete"
         Key            = "99 Safe Delete"
         ScriptPath     = "Tools\Safe-Delete.ps1"
         Path           = @()
         Icon           = "pwsh.exe"
-        AdditionalArgs = @("--prompt")
+        AdditionalArgs = @()
     },
     @{
         Extensions = @("Directory")
@@ -292,13 +292,13 @@ $scripts = @(
         PathParamName = "-Files"
     } #, 
     # @{
-    #     Extensions     = @("Drive", "*", "Directory", $Recycle)
-    #     Title          = "Safe Delete (Prompt For Passes)"
-    #     Key            = "999 Safe Delete (Prompt For Passes)"
-    #     ScriptPath     = "Tools\Safe-Delete.ps1"
-    #     Path           = $safeDelete
-    #     Icon           = "pwsh.exe"
-    #     AdditionalArgs = @("--prompt", "--promptPasses")
+        Extensions     = @("Drive", "*", "Directory", $Recycle)
+        Title          = "Safe Delete"
+        Key            = "999 Safe Delete"
+        ScriptPath     = "Tools\Safe-Delete.ps1"
+        Path           = $safeDelete
+        Icon           = "pwsh.exe"
+        AdditionalArgs = @("--prompt", "--promptPasses")
     # },
 ) 
 #endregion
