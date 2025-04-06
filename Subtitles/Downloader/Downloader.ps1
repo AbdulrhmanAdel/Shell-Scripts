@@ -113,7 +113,7 @@ $Paths | Where-Object {
 }
 
 $subs = $files | ForEach-Object {
-    $details = & Get-ShowDetails.ps1 -Path $_.FullName;
+    $details = & Get-ShowDetails.ps1 -Path $_.FullName -UseImdb;
     if (!$details) { return $null; }
     $info = $details.Info;
     $name = $info.Name -replace $info.Extension, "";

@@ -1,28 +1,13 @@
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory)]
-    [string]$name,
-    $year,
-    $type
+    [Parameter(Mandatory)][string]$name,
+    $Year,
+    $Type
 )
 
-function Prompt {
-    param (
-        $Infos
-    )
-
-    if ($Infos.Length -eq 1) {
-        return $Infos[0];
-    }
-
-    return Single-Options-Selector.ps1 -Options @(
-        $Infos | ForEach-Object {
-            return @{
-                Key   = "$($_.id) - $($_.l) - $($_.y) - $($_.qid)"
-                Value = $_
-            }
-        }
-    ) -Title "Found Multi Possible Shows matched your criteria please select one with name $name";
+if (-not $name) {
+    Write-Host "Please provide a path or a name to search for."
+    return $null;
 }
 
 function HasSameYear {
@@ -43,40 +28,54 @@ function GetShow {
         $Year,
         $Type
     )
-
     try {
         $res = Invoke-WebRequest -Uri "https://v3.sg.media-imdb.com/suggestion/x/$Name.json?includeVideos=1"
         $json = $res.Content | ConvertFrom-Json
-        $sameTypes = $json.d | Where-Object {
-            return $_.qid -match $type;
-        } 
-        
-        $exactTitles = @($sameTypes |  Where-Object { 
+        $final = $json.d;
+        $exactTitles = @(
+            $final |  Where-Object { 
                 return $_.l -eq $Name;
-            });
-
-        if ($exactTitles.Length -eq 1) {
-            return $exactTitles[0];
-        }
-
-        if ($exactTitles.Length -gt 1) {
-            $hasSameYear = $exactTitles | Where-Object { HasSameYear -Info $_ } | Select-Object -First 1;
-            if ($hasSameYear) {
-                return $hasSameYear;
             }
-
-            $found = Prompt -Infos $exactTitles;
-            if ($found) {
-                return $found;
+        );
+        if ($exactTitles.Length -gt 0) {
+            $final = $exactTitles;
+        }
+        if ($Year) {
+            $sameYear = @(
+                $final | Where-Object { HasSameYear -Info $_ };
+            );
+            if ($sameYear.Length -gt 0) {
+                $final = $sameYear;
             }
         }
 
-        return Prompt -Infos $sameTypes;
+        if ($final.Length -eq 1) {
+            return $final[0];
+        }
+    
+        return Single-Options-Selector.ps1 -Options @(
+            $final | ForEach-Object {
+                return @{
+                    Key   = "$($_.id) - $($_.l) - $($_.y) - $($_.qid)"
+                    Value = $_
+                }
+            }
+        ) -Title "Found Multi Possible Shows matched your criteria please select one with name $name";
+    
     }
     catch {
         return $null;
     }
-    
 }
 
-return GetShow -Name $name -Year $year -Type $type;
+$show = GetShow -Name $name -Year $Year -Type $Type;
+if (!$show) {
+    return $null;
+}
+
+return @{
+    Id    = $show.id
+    Year  = $show.y
+    Title = $show.l
+    Type  = $show.q -eq 'movie' ? 'Movie' : 'Series'
+}

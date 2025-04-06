@@ -8,47 +8,40 @@ param (
     $Destination
 )
 
-if (Prompt.ps1 -Message "Open Target Only") {
-    explorer.exe $Destination;
-    Exit;
-}
-
-
 if (-not (Test-Path -LiteralPath $Destination)) {
     New-Item -Path $Destination -ItemType Directory -ErrorAction Ignore | Out-Null
 }
 
-$files = Get-ChildItem -LiteralPath $SaveCheckPath -Exclude "*.ps1", "*.lnk";
-$fileInfo = $null;
+$files = @(Get-ChildItem -LiteralPath $SaveCheckPath -Exclude "*.ps1", "*.lnk");
 if ($files.Length -gt 1) {
-    $fileInfo = Single-Options-Selector.ps1 `
-        -Options (
-        $files | ForEach-Object { return @{
-                Key   = $_.Name
-                Value = $_ 
-            }
+    $Options = $files | ForEach-Object { return @{
+            Key   = $_.Name
+            Value = $_ 
         }
-    ) -Title "There is more than one possible save, PLEASE select correct one" -MustSelectOne 
-}
-else {
-    $fileInfo = $files[0];
+    };
+    $files = Multi-Options-Selector.ps1 `
+        -Options $Options `
+        -Title "PLEASE select correct saves" -MustSelectOne 
 }
 
-if (!$fileInfo) {
+if ($files.Length -eq 0) {
     Write-Host "No Save File Selected Or Found";
     timeout.exe 15;
 }
 
-Write-Host "Copying Save $($fileInfo.Name)" -ForegroundColor Cyan
-$targetPath = "$Destination\$($fileInfo.Name)";
-if (Test-Path -LiteralPath $targetPath) {
-    Remove-Item -LiteralPath $targetPath -Force -Recurse;
+$files | ForEach-Object {
+    $fileInfo = $_;
+    Write-Host "Copying Save $($fileInfo.Name)" -ForegroundColor Cyan
+    $targetPath = "$Destination\$($fileInfo.Name)";
+    if (Test-Path -LiteralPath $targetPath) {
+        Remove-Item -LiteralPath $targetPath -Force -Recurse;
+    }
+    
+    New-Item `
+        -Path $targetPath `
+        -Target $fileInfo.FullName `
+        -ItemType SymbolicLink;
 }
-
-New-Item `
-    -Path $targetPath `
-    -Target $fileInfo.FullName `
-    -ItemType SymbolicLink;
 
 if (Prompt.ps1 -Message "Open Linked Folder") {
     explorer.exe $Destination; 

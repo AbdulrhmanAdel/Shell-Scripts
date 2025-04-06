@@ -2,6 +2,7 @@
 [CmdletBinding()]
 param (
     $options,
+    [string]$Title,
     [switch]$Multi,
     [switch]$MustSelectOne,
     $SelectedOptions
@@ -12,7 +13,7 @@ Add-Type -AssemblyName System.Drawing
 
 # Create the form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = $title ?? "Select Items"
+$form.Text = $Title ?? "Select Items"
 $form.StartPosition = "CenterScreen"
 
 $mainPanel = New-Object System.Windows.Forms.TableLayoutPanel
