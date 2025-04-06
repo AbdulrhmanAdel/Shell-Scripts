@@ -17,6 +17,7 @@ $form.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 $form.Width = 500;
 
 $flowLayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+$flowLayoutPanel.Width = 500;
 $flowLayoutPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
 $flowLayoutPanel.AutoScroll = $true
 $flowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding(10)  # Add padding
