@@ -47,6 +47,12 @@ $Options = @(
             $path = "$PSScriptRoot/Display-NonArabicSubtitled.ps1";
             &  $path $Files;
         };
+    },
+    @{
+        Key     = "Choose Another Module";
+        Handler = {
+            Module-Picker.ps1 -Files $Files;
+        };
     }
 )
 

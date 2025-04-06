@@ -10,6 +10,7 @@ param (
     [string[]]$IgnoredVersions,
     [string[]]$Keywords,
     [int]$Season,
+    [string]$ShowImdbId,
     [System.Object[]]$Episodes
 )
 
@@ -74,8 +75,11 @@ function Invoke-Request {
 }
 
 function GetSubtitles {
-    $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
-    $searchQuery = (!!$show ? $show.id : $null) ?? (!$Year ? $title : $title + " " + $Year);
+    if (!$ShowImdbId) {
+        $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
+        $ShowImdbId = $show?.id;
+    }
+    $searchQuery = $ShowImdbId ?? (!$Year ? $title : $title + " " + $Year);
     $queryBody = @{
         query = $searchQuery
     };

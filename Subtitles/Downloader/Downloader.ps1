@@ -22,6 +22,7 @@ function HandleMovies {
             -RenameTo $_.Name `
             -Year $details.Year `
             -IgnoredVersions $details.IgnoredVersions `
+            -ShowImdbId $_.Details.ImdbInfo?.Id`
             -Keywords $details.Keywords;
     }
 }
@@ -75,7 +76,8 @@ function HandleSeries {
                 -Title $serieName `
                 -Season $_ `
                 -Year $episodeWithYear.Year `
-                -Episodes $seasonEpisodes; 
+                -Episodes $seasonEpisodes `
+                -ShowImdbId  ; 
         }
     }
 }
@@ -113,7 +115,7 @@ $Paths | Where-Object {
 }
 
 $subs = $files | ForEach-Object {
-    $details = & Get-ShowDetails.ps1 -Path $_.FullName -UseImdb;
+    $details = & Get-ShowDetails.ps1 -Path $_.FullName;
     if (!$details) { return $null; }
     $info = $details.Info;
     $name = $info.Name -replace $info.Extension, "";

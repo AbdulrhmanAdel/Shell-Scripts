@@ -69,6 +69,12 @@ $Options = @(
             &  $path -Files $Files;
         };
     }
+    @{
+        Key     = "Choose Another Module";
+        Handler = {
+            Module-Picker.ps1 -Files $Files;
+        };
+    }
 )
 
 
