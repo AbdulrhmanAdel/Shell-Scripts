@@ -17,14 +17,19 @@ param (
 Stop-Process -Name $ProcessName -Force -ErrorAction SilentlyContinue;   
 $DownloadUrl ??= Input.ps1 -Title "Enter the Download URL" -DefaultValue -Required;
 $AppPath ??= Folder-Picker.ps1 -InitialDirectory "D:\" -Required;
-$AppName = Split-Path -LiteralPath $AppPath -Leaf;
+$AppName = $ProcessName;
 
 Write-Host "Remove Old $AppName" -ForegroundColor Green;
-if (Test-Path -LiteralPath AppPath) {
-    Get-ChildItem -LiteralPath AppPath | Foreach-Object {
-        if ($_.Name -ne $KeepFiles) {
-            Remove-Item -LiteralPath $_.FullName -Force -Recurse;
+if (Test-Path -LiteralPath $AppPath) {
+    if ($null -ne $KeepFiles) {
+        Get-ChildItem -LiteralPath $AppPath | Foreach-Object {
+            if ($_.Name -ne $KeepFiles) {
+                Remove-Item -LiteralPath $_.FullName -Force -Recurse;
+            }
         }
+    }
+    else {
+        Remove-Item -LiteralPath $AppPath -Force -Recurse;
     }
 }
 
@@ -58,7 +63,6 @@ if (!$archiveProcess -or $archiveProcess.ExitCode -gt 0) {
 else {
     Write-Host "$AppName Updated Successfully" -ForegroundColor Green;
     Write-Host "Removing Download Zip file" -ForegroundColor Green;
-    Remove-Item -Path "AppPath\locales" -Exclude "en-US.pak" -Force -Recurse;
     Remove-Item -LiteralPath $DownloadPath -Force;
 }
 
