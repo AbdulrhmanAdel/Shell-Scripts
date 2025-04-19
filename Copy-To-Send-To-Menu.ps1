@@ -1,4 +1,10 @@
-& Run-AsAdmin.ps1;
+[CmdletBinding()]
+param (
+    [Parameter()]
+    [switch]
+    $NoTimeout
+)
+& Run-AsAdmin.ps1 -Arguments @($NoTimeout ? '-NoTimeout' : '');
 # Install-Package SharpShell;
 
 Write-Host "Copying To Send To Menu" -ForegroundColor Green;
@@ -37,6 +43,10 @@ $menu | ForEach-Object {
     $shortCut.TargetPath = "pwsh.exe";
     $shortCut.Arguments = "-WindowStyle Maximized $($_.Arguments)";
     $shortCut.Save();
+}
+
+if ($NoTimeout) {
+    Exit;
 }
 
 Write-Host "Done" -ForegroundColor Green;

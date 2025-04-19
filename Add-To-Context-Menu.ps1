@@ -1,5 +1,10 @@
-# Max Entries = 16
-& Run-AsAdmin.ps1;
+[CmdletBinding()]
+param (
+    [Parameter()]
+    [switch]
+    $NoTimeout
+)
+& Run-AsAdmin.ps1 -Arguments @($NoTimeout ? '-NoTimeout' : '');
 
 Write-Host "Starting" -ForegroundColor Green;
 $Recycle = "RecycleBin";
@@ -43,6 +48,12 @@ function Handle {
         -target $target `
         -powershellArgs $element.PowershellArgs;
 
+    reg add "$base\$key" /d $element.Title /t REG_SZ /f | Out-Null;
+
+    if ($extension.Extended) {
+        reg add "$base\$key" /v Extended /d "" /t REG_SZ /f | Out-Null;
+    }
+    
     reg add "$base\$key" /d $element.Title /t REG_SZ /f | Out-Null;
     if ($element.Icon) {
         reg add "$base\$key" /v "Icon" /d $element.Icon /t REG_SZ /f | Out-Null;
@@ -291,7 +302,7 @@ $scripts = @(
         Icon          = "pwsh.exe"
         PathParamName = "-Files"
     } #, 
-    # @{
+    @{
         Extensions     = @("Drive", "*", "Directory", $Recycle)
         Title          = "Safe Delete"
         Key            = "999 Safe Delete"
@@ -299,7 +310,17 @@ $scripts = @(
         Path           = $safeDelete
         Icon           = "pwsh.exe"
         AdditionalArgs = @("--prompt", "--promptPasses")
-    # },
+    }
+    @{
+        Extensions     = @(".ps1")
+        Title          = "Open With Shift"
+        Key            = "999 Open With Shift"
+        ScriptPath     = "Tools\Open-WithShift.ps1"
+        Path           = $toolsPath
+        Icon           = "pwsh.exe"
+        AdditionalArgs = @()
+        Extended       = $true
+    }
 ) 
 #endregion
 
@@ -337,5 +358,8 @@ $scripts | ForEach-Object {
     }
 };
 
+if ($NoTimeout) {
+    Exit;
+}
 Write-Host "Done" -ForegroundColor Green;
 timeout.exe 5;

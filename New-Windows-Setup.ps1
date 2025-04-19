@@ -1,6 +1,22 @@
 Run-AsAdmin.ps1;
 # region Helpers
 
+function AppRegexSelector {
+    param (
+        $ParentPath,
+        $Regex
+    )
+
+    $Path = Get-ChildItem -LiteralPath $ParentPath | Where-Object { $_.Name -match $Regex } | Select-Object -First 1;
+    if ($Path) {
+        return $Path.FullName;
+    }
+    else {
+        Write-Host "No File Found for $Regex Parent With $ParentPath" -ForegroundColor Red;
+        return;
+    } 
+    
+}
 function RunPowershell {
     param (
         $Path,
@@ -9,7 +25,7 @@ function RunPowershell {
     Write-Host "===========================" ;
     Write-Host "Running $Path";
 
-    $ProcessArgs = @("-File", """$Path""");
+    $ProcessArgs = @("-File", """$Path""", "-NoTimeout");
     if ($AdditionalArgs) {
         $ProcessArgs += $AdditionalArgs;
     }
@@ -66,13 +82,26 @@ function RunProgram {
 
     Write-Host "===========================" ;
     Write-Host "Running $Path" ;
+    $isMSIPackage = $Path -match "\.msi$";
     if ($NoAdmin) {
+        if ($isMSIPackage) {
+            Start-Process -File msiexec.exe -ArgumentList "/i `"$Path`"", "/qn" -Wait;
+            return
+        }
         Start-Process -File $Path -Wait;
     }
     elseif ($NoWait) {
+        if ($isMSIPackage) {
+            Start-Process -File msiexec.exe -ArgumentList "/i `"$Path`"", "/qn" -Verb RunAs;
+            return
+        }
         Start-Process -File $Path -Verb RunAs;
     }
     else {
+        if ($isMSIPackage) {
+            Start-Process -File msiexec.exe -ArgumentList "/i `"$Path`"", "/qn" -Verb RunAs -Wait;
+            return
+        }
         Start-Process -File $Path -Verb RunAs -Wait;
     }
     Write-Host "Done" ;
@@ -87,37 +116,37 @@ RunPowershell -Path "$personalProjectPath\Add-To-Context-Menu.ps1"
 RunPowershell -Path "$personalProjectPath\Copy-To-Send-To-Menu.ps1"
 # #endregion
 
+
 # # region Programming
 $programmingPath = "D:\Programming\Programs";
-RunReg -Path "$programmingPath\1- Regisy Programs\VsCode.reg";
-RunReg -Path "$programmingPath\1- Regisy Programs\WebStorm.reg";
-RunReg -Path "$programmingPath\1- Regisy Programs\Rider.reg";
-RunReg -Path "$programmingPath\1- Regisy Programs\Terminal.reg";
-RunReg -Path "$programmingPath\1- Regisy Programs\Add-IDEsToUserEnvPath.ps1";
-RunPowershell -Path "$programmingPath\1- Programs Data\Link.ps1";
+$configPath = "$programmingPath\ Configuration";
+RunReg -Path "$configPath\Scripts\VsCode.reg";
+RunReg -Path "$configPath\Scripts\WebStorm.reg";
+RunReg -Path "$configPath\Scripts\Rider.reg";
+RunReg -Path "$configPath\Scripts\Terminal.reg";
+RunReg -Path "$configPath\Scripts\Add-ToPath.ps1";
+RunPowershell -Path "$configPath\Programs Data\Link.ps1";
 
-RunProgram -Path "$programmingPath\Git\Git-2.46.2-64-bit.exe";
-RunProgram -Path "$programmingPath\Node\node-v22.9.0-x64.msi";
+RunProgram -Path (AppRegexSelector -ParentPath "$programmingPath\Git" -Regex "^Git.*bit\.exe$");
+RunProgram -Path (AppRegexSelector -ParentPath "$programmingPath\Node" -Regex "^node.*msi$");
 # #endregion
 
 # # region Programs
 $programsPath = "D:\Programs";
-$tweakspath = "$programsPath\Windows\Tweaks"
+$tweakspath = "$programsPath\Operating System\Windows\Tweaks"
 # .Net
-Invoke-Item -LiteralPath "D:\Programs\OS\Windows\Win11_24H2_English_x64.iso";
+Invoke-Item -LiteralPath "$programsPath\Operating System\Windows\Win11_24H2_English_x64.iso";
 RunPowershell -Path "$tweaksPath\Enable-DotNet3.5Framework.ps1";
-RunCmd -Path "$programsPath\C++ Runtimes\install_all.bat"
 RunReg -Path "$tweaksPath\Power Plan\Show-TurboBoost.reg"
 RunReg -Path "$tweaksPath\Fix powershell files whitespace issue.reg"
-RunPowershell -Path "$tweaksPath\StartMenu\Sync-StartMenu.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
+RunPowershell -Path "$tweaksPath\StartMenu\Sync-StartMenu.ps1" -AdditionalArgs @("-Process", "Restore");
 RunPowershell -Path "$tweaksPath\Hib\Disable-Hib.ps1"
 RunCmd -Path "$tweaksPath\Date And Time\Change-DateFormat.bat"
 
-RunProgram -Path "$programsPath\Microsoft\PowerShell-7.4.4-win-x64.msi";
-RunProgram -Path "$programsPath\Microsoft\PowerToysUserSetup-0.85.0-x64.exe";
-RunProgram -Path "$programsPath\Media\K-Lite\K-Lite_Codec_Pack.exe";
-RunPowershell -Path "$programsPath\Media\K-Lite\K-Lite.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
-RunProgram -Path "$programsPath\Compress\7-Zip\7zFM.exe";
+RunProgram -Path (AppRegexSelector -ParentPath "$programsPath\Utilities" -Regex "PowerToysUserSet");
+RunProgram -Path "$programsPath\Media\Players\K-Lite\K-Lite_Codec_Pack.exe";
+RunPowershell -Path "$programsPath\Media\Players\K-Lite\K-Lite.ps1" -AdditionalArgs @("-Process", "Restore");
+RunProgram -Path "$programsPath\Storage & Data\Compress\7-Zip\7zFM.exe";
 
 # IDM
 RunPowershell -Path "$programsPath\Net\Downloaders\IDM\Data\Import-IDM-Registery.ps1";
@@ -144,6 +173,7 @@ $gamesPath = "$programsPath\Games";
 RunProgram -Path "$gamesPath\DirectX\DXSETUP.exe";
 RunProgram -Path "$gamesPath\Epic Games\Epic Online Services\EpicOnlineServices.exe"
 RunProgram -Path "$gamesPath\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe"
+RunCmd -Path "$gamesPath\C++ Runtimes\install_all.bat"
 #endregion
 
 
@@ -160,5 +190,3 @@ $pathes += @(
     "$programsPath\Compress\7-Zip"
 );
 [Environment]::SetEnvironmentVariable('Path', $pathes -join ";", [EnvironmentVariableTarget]::User);
-
-

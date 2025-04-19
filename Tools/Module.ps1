@@ -10,7 +10,7 @@ $Options = @(
         Key     = "Take Ownership";
         Handler = {
             $path = "$PSScriptRoot/Take-Ownership.ps1";
-            &  $path $Files;
+            &  $path -Files $Files;
         };
     }
     @{
@@ -25,6 +25,13 @@ $Options = @(
         Handler = {
             $path = "$PSScriptRoot/Safe-Delete.ps1";
             & $path -Files $Files;
+        };
+    }
+    @{
+        Key     = "Validate Shortcuts";
+        Handler = {
+            $path = "$PSScriptRoot/Validate-Shortcut.ps1";
+            & $path $Files;
         };
     }
     @{
