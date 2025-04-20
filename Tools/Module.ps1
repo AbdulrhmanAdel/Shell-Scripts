@@ -35,6 +35,20 @@ $Options = @(
         };
     }
     @{
+        Key     = "Copy";
+        Handler = {
+            $path = "$PSScriptRoot/Copy.ps1";
+            & $path $Files;
+        };
+    }
+    @{
+        Key     = "Move";
+        Handler = {
+            $path = "$PSScriptRoot/Copy.ps1";
+            & $path -Files $Files -Move;
+        };
+    }
+    @{
         Key     = "Choose Another Module";
         Handler = {
             Module-Picker.ps1 -Files $Files;
