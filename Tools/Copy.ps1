@@ -91,3 +91,4 @@ $Handlers = @(
 $mode = Single-Options-Selector.ps1 -Options $Handlers -Title "PLease Select One Copy Mode" -MustSelectOne;
 $mode.Handler.Invoke();
 timeout.exe 15;
+Read-Host "Press Any Key To Exit."

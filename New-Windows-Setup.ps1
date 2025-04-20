@@ -187,6 +187,6 @@ $pathes += @(
     "$programsPath\Media\Tools\mkvtoolnix"
     "$programsPath\Media\Tools\yt",
     "$programsPath\Tools\ImageMagick",
-    "$programsPath\Compress\7-Zip"
+    "$programsPath\Storage & Data\Compress\7-Zip"
 );
 [Environment]::SetEnvironmentVariable('Path', $pathes -join ";", [EnvironmentVariableTarget]::User);

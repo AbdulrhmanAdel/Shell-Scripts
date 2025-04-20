@@ -8,7 +8,7 @@ param (
 $Options = @(
     @{
         Key        = "Downloader";
-        Extensions = @("mkv", "mp4");
+        Extensions = @("mkv", "mp4", "Directory");
         Handler    = {
             $path = "$PSScriptRoot/Downloader/Downloader.ps1";
             &  $path -Paths $Files;
@@ -79,7 +79,11 @@ $Options = @(
 
 
 $FilesExtensions = @($Files | Foreach-Object {
-        return [System.IO.Path]::GetExtension($_) -replace "^.", ""
+        $ex = [System.IO.Path]::GetExtension($_);
+        if (!$ex) {
+            return "Directory"
+        }
+        return $ex -replace "^.", ""
     })
 
 $options = $Options | Where-Object {
@@ -94,7 +98,3 @@ $options = $Options | Where-Object {
 
 $option = Single-Options-Selector.ps1 -options $Options -MustSelectOne;
 $option.Handler.Invoke();
-
-    
-
-

@@ -23,7 +23,8 @@ function HandleMovies {
             -Year $details.Year `
             -IgnoredVersions $details.IgnoredVersions `
             -ShowImdbId $_.Details.ImdbInfo?.Id`
-            -Keywords $details.Keywords;
+            -Keywords $details.Keywords `
+            -ShowImdbId $_.Imdb.ShowId;;
     }
 }
 
@@ -60,6 +61,7 @@ function HandleSeries {
 
         $final[$details.Title] = @{
             $details.Season = @($episodeInfo)
+            ShowId          = $episode.Imdb.Id
         }
     }
 
@@ -67,7 +69,7 @@ function HandleSeries {
     $final.Keys | ForEach-Object {
         $serieName = $_;
         $serie = $final[$_];
-        $serie.Keys | ForEach-Object {
+        $serie.Keys | Where-Object { $_ -ne "ShowId" } | ForEach-Object {
             $seasonEpisodes = $serie[$_] | Sort-Object -Property Episode;
             $episodeWithYear = $seasonEpisodes | Where-Object { !!$_.Year } | Select-Object -First  1;
             & "$($PSScriptRoot)/Sites/Subsource.ps1" `
@@ -77,7 +79,7 @@ function HandleSeries {
                 -Season $_ `
                 -Year $episodeWithYear.Year `
                 -Episodes $seasonEpisodes `
-                -ShowImdbId  ; 
+                -ShowImdbId $serie.ShowId; 
         }
     }
 }
@@ -114,8 +116,12 @@ $Paths | Where-Object {
     $files += $childern;
 }
 
+$imdbCache = @{};
 $subs = $files | ForEach-Object {
     $details = & Get-ShowDetails.ps1 -Path $_.FullName;
+    if (!$imdbCache.Contains($details.Title)) {
+        $imdbCache[$details.Title] = Imdb-GetShow.ps1 -name $details.Title;
+    }
     if (!$details) { return $null; }
     $info = $details.Info;
     $name = $info.Name -replace $info.Extension, "";
@@ -123,6 +129,7 @@ $subs = $files | ForEach-Object {
         Name    = $name
         Info    = $info
         Details = $details
+        Imdb    = $imdbCache[$details.Title];
     }
 } | Where-Object {
     return $null -ne $_;
