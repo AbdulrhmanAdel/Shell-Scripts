@@ -43,8 +43,5 @@ $files | ForEach-Object {
         -ItemType SymbolicLink;
 }
 
-if (Prompt.ps1 -Message "Open Linked Folder") {
-    explorer.exe $Destination; 
-}
-
+Invoke-Item $Destination;
 timeout.exe 15;
