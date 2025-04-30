@@ -1,10 +1,18 @@
-$filePath = $args[0];
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Paths
+)
 
-if (!(Test-Path -LiteralPath $filePath)) {
-    EXIT;
+$Paths | ForEach-Object {
+    $filePath = $_;
+    Write-Host "==========================" -ForegroundColor Green;
+    Write-Host "File: $($hash.Path)";
+    $hash = Get-FileHash -LiteralPath $filePath;
+    Write-Host "Hash: $($hash.Hash)";
+    Write-Host "==========================" -ForegroundColor Green;
+    Write-Host "";
 }
 
-Get-FileHash -LiteralPath $filePath;
-
 Read-Host "PRESS ANY KEY TO EXIT."
-timeout.exe 15;

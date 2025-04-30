@@ -29,6 +29,8 @@ function RunPowershell {
     if ($AdditionalArgs) {
         $ProcessArgs += $AdditionalArgs;
     }
+
+    $ProcessArgs = @($ProcessArgs | Select-Object -Unique);
     Start-Process pwsh -ArgumentList $ProcessArgs -Wait -NoNewWindow;
     Write-Host "Done" ;
     Write-Host "===========================" ;
@@ -111,9 +113,9 @@ function RunProgram {
 
 # region Setup Personal Projects
 $personalProjectPath = $PSScriptRoot;
-RunPowershell -Path "$personalProjectPath\Add-Shared-To-Path.ps1"
-RunPowershell -Path "$personalProjectPath\Add-To-Context-Menu.ps1"
-RunPowershell -Path "$personalProjectPath\Copy-To-Send-To-Menu.ps1"
+RunPowershell -Path "$personalProjectPath\Add-Shared-To-Path.ps1" -AdditionalArgs @("-NoTimeout")
+RunPowershell -Path "$personalProjectPath\Add-To-Context-Menu.ps1" -AdditionalArgs @("-NoTimeout")
+RunPowershell -Path "$personalProjectPath\Copy-To-Send-To-Menu.ps1" -AdditionalArgs @("-NoTimeout")
 # #endregion
 
 
