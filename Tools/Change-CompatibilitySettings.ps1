@@ -17,6 +17,8 @@ $regPath = "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVer
 # $regData = Get-ItemProperty -Path $regPath -Name $ExePath -ErrorAction SilentlyContinue;
 $regData = Get-ItemProperty -Path $regPath -Name $ExePath -ErrorAction SilentlyContinue;
 if (!$regData) {
+    Write-Host "This File Has No Compatibility Settings Applied" -ForegroundColor Green;
+    timeout.exe 5;
     Exit
 }
 
@@ -28,5 +30,5 @@ if ($regValue) {
     Set-ItemProperty -Path $regPath -Name $ExePath -Value $regValue;
 }
 
-timeout 15;
+timeout 5;
 
