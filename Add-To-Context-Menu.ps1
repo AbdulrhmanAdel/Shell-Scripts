@@ -1,8 +1,9 @@
 [CmdletBinding()]
 param (
-    [Parameter()]
     [switch]
-    $NoTimeout
+    $NoTimeout,
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Rest
 )
 & Run-AsAdmin.ps1 -Arguments @($NoTimeout ? '-NoTimeout' : '');
 
@@ -316,6 +317,16 @@ $scripts = @(
         Title          = "Open With Shift"
         Key            = "999 Open With Shift"
         ScriptPath     = "Tools\Open-WithShift.ps1"
+        Path           = $toolsPath
+        Icon           = "pwsh.exe"
+        AdditionalArgs = @()
+        Extended       = $true
+    }
+    @{
+        Extensions     = @(".exe")
+        Title          = "Change Compatibility Settings"
+        Key            = "999 Change Compatibility Settings"
+        ScriptPath     = "Tools\Change-CompatibilitySettings.ps1"
         Path           = $toolsPath
         Icon           = "pwsh.exe"
         AdditionalArgs = @()
