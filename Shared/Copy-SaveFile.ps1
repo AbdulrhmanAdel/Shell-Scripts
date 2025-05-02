@@ -26,7 +26,7 @@ if ($files.Length -gt 1) {
 
 if ($files.Length -eq 0) {
     Write-Host "No Save File Selected Or Found";
-    timeout.exe 15;
+    Prompt-Exit.ps1;
 }
 
 $files | ForEach-Object {
@@ -34,6 +34,10 @@ $files | ForEach-Object {
     Write-Host "Copying Save $($fileInfo.Name)" -ForegroundColor Cyan
     $targetPath = "$Destination\$($fileInfo.Name)";
     if (Test-Path -LiteralPath $targetPath) {
+        $Item = Get-Path -LiteralPath $targetPath;
+        if ($Item.LinkType -eq "SymbolicLink") {
+            return;
+        }
         Remove-Item -LiteralPath $targetPath -Force -Recurse;
     }
     
@@ -41,7 +45,19 @@ $files | ForEach-Object {
         -Path $targetPath `
         -Target $fileInfo.FullName `
         -ItemType SymbolicLink;
+        
+    $errors = $Error;
+    if ($errors.Count -gt 0 -and $errors[0].Exception.Message -eq "Administrator privilege required for this operation.") {
+        Write-Host "Missing Admin Priv"
+        Run-AsAdmin.ps1 -Arguments @(
+            "-SaveCheckPath"
+            """$SaveCheckPath"""
+            "-Destination"
+            """$Destination"""
+        );
+        EXIT;
+    }
 }
 
 Invoke-Item $Destination;
-timeout.exe 15;
+timeout.exe 5;
