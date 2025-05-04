@@ -34,7 +34,7 @@ $files | ForEach-Object {
     Write-Host "Copying Save $($fileInfo.Name)" -ForegroundColor Cyan
     $targetPath = "$Destination\$($fileInfo.Name)";
     if (Test-Path -LiteralPath $targetPath) {
-        $Item = Get-Path -LiteralPath $targetPath;
+        $Item = Get-Item -LiteralPath $targetPath;
         if ($Item.LinkType -eq "SymbolicLink") {
             return;
         }
