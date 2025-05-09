@@ -7,8 +7,9 @@ param (
 
 $Options = @(
     @{
-        Key     = "Remove Unused Tracks";
-        Handler = {
+        Key        = "Remove Unused Tracks";
+        Extensions = @("mkv", "mp4", "zip", "rar");
+        Handler    = {
             $path = "$PSScriptRoot/Remove-Unused-Tracks/Remove-Unused-Tracks.ps1";
             &  $path -Files $Files;
         };
@@ -47,17 +48,9 @@ $Options = @(
             $path = "$PSScriptRoot/Display-NonArabicSubtitled.ps1";
             &  $path $Files;
         };
-    },
-    @{
-        Key     = "Choose Another Module";
-        Handler = {
-            Module-Picker.ps1 -Files $Files;
-        };
     }
 )
 
-
-$option = Single-Options-Selector.ps1 -options $Options -MustSelectOne;
-$option.Handler.Invoke();
+. Create-Module.ps1 -Options $Options;
 
 

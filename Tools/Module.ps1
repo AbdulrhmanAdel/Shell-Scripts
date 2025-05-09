@@ -48,17 +48,6 @@ $Options = @(
             & $path -Files $Files -Move;
         };
     }
-    @{
-        Key     = "Choose Another Module";
-        Handler = {
-            Module-Picker.ps1 -Files $Files;
-        };
-    }
-    
 )
 
-
-$option = Single-Options-Selector.ps1 -options $Options -MustSelectOne;
-$option.Handler.Invoke();
-
-
+. Create-Module.ps1 -Options $Options;
