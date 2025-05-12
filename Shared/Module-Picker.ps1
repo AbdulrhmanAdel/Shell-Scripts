@@ -18,7 +18,7 @@ $Module = Single-Options-Selector.ps1 -Options @(
         Key   = "Audio";
         Value = "$PSScriptRoot/../Tools/Module.ps1";
     }
-) -MustSelectOne;
+) -Required;
 
 if (!$Module) {
     Exit;

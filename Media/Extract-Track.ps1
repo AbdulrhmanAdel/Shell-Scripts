@@ -105,7 +105,7 @@ function GetTracksInfo($inputPath) {
 
     $streamIndexes = $FirstSubtitle `
         ? ($options | Select-Object -ExpandProperty Value) `
-        : (Multi-Options-Selector.ps1 -options $options -MustSelectOne);
+        : (Multi-Options-Selector.ps1 -options $options -Required);
     return $streamIndexes | ForEach-Object {
         $streamIndex = $_;
         $selectedTrack = $tracks | Where-Object { $_.index -eq $streamIndex };

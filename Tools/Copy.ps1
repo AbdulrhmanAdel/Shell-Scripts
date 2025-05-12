@@ -34,7 +34,7 @@ function CreateSameHierarchyWithDifferentDrive {
     $drives = Get-PSDrive -PSProvider FileSystem | `
         Where-Object { $_.Name -ne $folderDrive } | `
         Foreach-Object { return $_.Name };
-    $driveLetter = & Single-Options-Selector.ps1 -Options $drives -MustSelectOne;
+    $driveLetter = & Single-Options-Selector.ps1 -Options $drives -Required;
     $dest[0] = $driveLetter;
     $dest = $dest -join "";
     if (!(Test-Path -LiteralPath $dest)) {
@@ -88,7 +88,7 @@ $Handlers = @(
     }
 );
 
-$mode = Single-Options-Selector.ps1 -Options $Handlers -Title "PLease Select One Copy Mode" -MustSelectOne;
+$mode = Single-Options-Selector.ps1 -Options $Handlers -Title "PLease Select One Copy Mode" -Required;
 $mode.Handler.Invoke();
 timeout.exe 15;
 Read-Host "Press Any Key To Exit."

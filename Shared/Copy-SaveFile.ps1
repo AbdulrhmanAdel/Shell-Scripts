@@ -21,7 +21,7 @@ if ($files.Length -gt 1) {
     };
     $files = Multi-Options-Selector.ps1 `
         -Options $Options `
-        -Title "PLEASE select correct saves" -MustSelectOne 
+        -Title "PLEASE select correct saves" -Required 
 }
 
 if ($files.Length -eq 0) {

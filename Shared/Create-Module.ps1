@@ -29,5 +29,5 @@ $options += @{
     };
 }
 
-$option = Single-Options-Selector.ps1 -options $Options -MustSelectOne;
+$option = Single-Options-Selector.ps1 -options $Options -Required;
 $option.Handler.Invoke();

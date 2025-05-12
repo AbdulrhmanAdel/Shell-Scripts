@@ -3,7 +3,9 @@ param (
     [Parameter(Mandatory)]
     [System.Object[]]    
     $Options,
-    [switch]$MustSelectOne = $false,
+    [switch]
+    [Alias("MustSelectOne")]
+    $Required = $false,
     [string]$Title = "Select an Option",
     [System.Object]$DefaultValue
 )
@@ -61,7 +63,7 @@ if ($defaultValue) {
     return $defaultValue;
 }
 
-while ($mustSelectOne -and $result -ne [System.Windows.Forms.DialogResult]::OK) {
+while ($Required -and $result -ne [System.Windows.Forms.DialogResult]::OK) {
     Write-Host "You Must Select An Option" -ForegroundColor Red;
     $result = $form.ShowDialog();
 }

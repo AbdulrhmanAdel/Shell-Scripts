@@ -17,7 +17,7 @@ function OpenBrowser {
     if (!$Website -or $Website -eq "") {
         $Website = & Single-Options-Selector.ps1 `
             -Options @("Google", "Yandex", "Deviantart", "Bing", "DuckDuckGo") `
-            -Title "Select Icon Website" -MustSelectOne;
+            -Title "Select Icon Website" -Required;
     }
 
     $replaceText = "\[(FitGirl|Dodi).*\]";
@@ -101,7 +101,7 @@ function GetImagePath {
     $ImageSource ??= & Single-Options-Selector.ps1 `
         -Options $ImageSourceHandlers.Keys `
         -Title "Select Icon Source" `
-        -MustSelectOne;
+        -Required;
 
     $ImageSourceHandlerFn = $ImageSourceHandlers[$ImageSource];
     $Path = $ImageSourceHandlerFn.Invoke()[-1];

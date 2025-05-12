@@ -15,7 +15,7 @@ if (-not (Test-Path -LiteralPath $folderPath)) {
 }
 
 
-$open = Multi-Options-Selector.ps1 -options $Options -MustSelectOne;
+$open = Multi-Options-Selector.ps1 -options $Options -Required;
 $deskTopAndIco = Get-ChildItem -LiteralPath $folderPath -Include $open -Force;
 $deskTopAndIco | ForEach-Object {
     Start-Process -FilePath $_.FullName

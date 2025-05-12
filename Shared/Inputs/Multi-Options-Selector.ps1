@@ -4,7 +4,9 @@ param (
     $options,
     [string]$Title,
     [switch]$Multi,
-    [switch]$MustSelectOne,
+    [switch]
+    [Alias("MustSelectOne")]
+    $Required,
     $SelectedOptions
 )
 Add-Type -AssemblyName System.Windows.Forms
