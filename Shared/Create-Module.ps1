@@ -22,6 +22,10 @@ $options = $Options | Where-Object {
 }
 
 
+if ($options.Length -eq 0) {
+    $options = @();
+}
+
 $options += @{
     Key     = "Choose Another Module";
     Handler = {

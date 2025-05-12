@@ -53,7 +53,7 @@ function Convert() {
     Write-Host "==========================" -ForegroundColor DarkBlue;
 }
 
-function Prepeare(
+function Compress(
     $inputPath,
     $outputPath
 ) { 
@@ -82,7 +82,7 @@ function Prepeare(
             return;
         } 
 
-        Prepeare -inputPath $_.FullName -outputPath $finalOutputPath;
+        Compress -inputPath $_.FullName -outputPath $finalOutputPath;
     }
 }
 
@@ -99,6 +99,6 @@ $keepMetadata = & Prompt.ps1 -title "Keep Metadata?" -defaultValue $false -messa
 
 #endregion
 
-$args | ForEach-Object {
-    Prepeare -inputPath $_ -outputPath $global:outputPath;
+$Files | ForEach-Object {
+    Compress -inputPath $_ -outputPath $global:outputPath;
 }

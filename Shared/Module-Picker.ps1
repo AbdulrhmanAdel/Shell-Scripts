@@ -15,7 +15,7 @@ $Module = Single-Options-Selector.ps1 -Options @(
         Value = "$PSScriptRoot/../Subtitles/Module.ps1";
     }
     @{
-        Key   = "Audio";
+        Key   = "Tools";
         Value = "$PSScriptRoot/../Tools/Module.ps1";
     }
 ) -Required;
