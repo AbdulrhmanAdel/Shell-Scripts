@@ -8,9 +8,11 @@ param (
 $Paths | ForEach-Object {
     $filePath = $_;
     Write-Host "==========================" -ForegroundColor Green;
-    Write-Host "File: $($hash.Path)";
+    Write-Host "File: " -NoNewline;
+    Write-Host $filePath -ForegroundColor Green;
     $hash = Get-FileHash -LiteralPath $filePath;
-    Write-Host "Hash: $($hash.Hash)";
+    Write-Host "$($hash.Algorithm): $($hash.Hash)";
+    Set-Clipboard -Value $hash.Hash;
     Write-Host "==========================" -ForegroundColor Green;
     Write-Host "";
 }
