@@ -178,11 +178,10 @@ $scripts = @(
         Path       = $toolsPath
         Icon       = "pwsh.exe"
     },
-    
     @{
         Extensions = @("*")
-        Title      = "Get Hash"
-        Key        = "999-Get Hash"
+        Title      = "Display Hash"
+        Key        = "999-Display Hash"
         ScriptPath = "Tools\Hash\Display-Hash.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
