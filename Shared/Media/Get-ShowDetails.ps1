@@ -2,7 +2,8 @@
 param (
     [Parameter(Position = 0, Mandatory)]
     [string]$Path,
-    [switch]$OnlyBasicInfo
+    [switch]$OnlyBasicInfo,
+    [switch]$UseImdb
 )
 
 $canHandle = $path -match "(\.mkv|\.mp4|\.srt|\.ass|)$";
@@ -69,7 +70,7 @@ $qualitiesRegex = @(
         Value = "WEB(-| )?(DL|RIP).*HEVC"
     }
 );
-function GetQuailty {
+function GetQuality {
     param (
         $name
     )
@@ -96,7 +97,7 @@ function GetSeriesOrMovieDetails {
     )
     $name = NormalizeName -name $name;
     if (!$onlyBasicInfo) {
-        $quality = GetQuailty -name $name;
+        $quality = GetQuality -name $name;
         $matchedKeywords = @($keywords | Where-Object { $name -match $_ }) ?? @();
         $ignoredVersions = @($keywords | Where-Object { $_ -notin $matchedKeywords });
     }
@@ -107,7 +108,9 @@ function GetSeriesOrMovieDetails {
         IgnoredVersions = $ignoredVersions
         Keywords        = $matchedKeywords
     };
-    
+
+
+
     $showName = $null;
     if ($name -match $seriesRegex) {
         $showName = $Matches["Title"].Trim();
@@ -117,6 +120,13 @@ function GetSeriesOrMovieDetails {
     }
     elseif ($name -match $moviesRegex) {
         $showName = $Matches["Title"].Trim();
+    }
+
+    $imdbInfo = $null;
+    if ($UseImdb) {
+        $imdbInfo = & Imdb-GetShow.ps1 -Name $showName;
+        $details.Type = $imdbInfo.Type;
+        $details.ImdbInfo = $imdbInfo;
     }
 
     $showName ??= $name;

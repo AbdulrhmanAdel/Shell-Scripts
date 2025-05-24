@@ -32,7 +32,7 @@ $format = & Single-Options-Selector.ps1 -Options @(
     "480p",
     "720p",
     "Cancel"
-) -Title "Please enter format you want?" -MustSelectOne;
+) -Title "Please enter format you want?" -Required;
 
 if ($format -eq "Cancel") {
     EXIT;

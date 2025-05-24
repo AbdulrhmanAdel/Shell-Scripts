@@ -1,3 +1,10 @@
+[CmdletBinding()]
+param (
+    [Parameter()]
+    [switch]
+    $NoTimeout
+)
+
 $parentDirectory = "$PSScriptRoot\Shared"
 # Retrieve all directory paths
 $directories = Get-ChildItem -Path $parentDirectory -Directory -Recurse | Where-Object {
@@ -14,4 +21,7 @@ $pathes += $directories + $parentDirectory;
 # Set the new path
 [System.Environment]::SetEnvironmentVariable("Path", $pathes -join ";", "User");
 
+if ($NoTimeout) {
+    Exit;
+}
 timeout 5;

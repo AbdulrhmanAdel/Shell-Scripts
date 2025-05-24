@@ -1,7 +1,9 @@
 [CmdletBinding()]
 param (
     [Parameter(Position = 0)]
-    $Arguments = @()
+    $Arguments = @(),
+    [switch]
+    $UseSameArguments
 )
 
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {

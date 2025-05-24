@@ -1,6 +1,14 @@
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Paths
+)
+
 Add-Type -AssemblyName Microsoft.VisualBasic
 
-$args | ForEach-Object {
+$Paths | ForEach-Object {
+    # [System.IO.Path]::
     $info = Get-Item -LiteralPath $_;
     Write-Host "Moving $_ TO RycleBin" -ForegroundColor Red;
     if ($info -is [System.IO.FileInfo]) { 

@@ -3,7 +3,9 @@ param (
     [Parameter(Mandatory)]
     [System.Object[]]    
     $Options,
-    [switch]$MustSelectOne = $false,
+    [switch]
+    [Alias("MustSelectOne")]
+    $Required = $false,
     [string]$Title = "Select an Option",
     [System.Object]$DefaultValue
 )
@@ -17,6 +19,7 @@ $form.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 $form.Width = 500;
 
 $flowLayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+$flowLayoutPanel.Width = 500;
 $flowLayoutPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
 $flowLayoutPanel.AutoScroll = $true
 $flowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding(10)  # Add padding
@@ -60,7 +63,7 @@ if ($defaultValue) {
     return $defaultValue;
 }
 
-while ($mustSelectOne -and $result -ne [System.Windows.Forms.DialogResult]::OK) {
+while ($Required -and $result -ne [System.Windows.Forms.DialogResult]::OK) {
     Write-Host "You Must Select An Option" -ForegroundColor Red;
     $result = $form.ShowDialog();
 }

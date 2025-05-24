@@ -1,3 +1,11 @@
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Paths
+)
+
+
 function HandleMovies {
     param($subs)
     $movies = $subs | Where-Object { $_.Details.Type -eq "Movie" };
@@ -14,7 +22,9 @@ function HandleMovies {
             -RenameTo $_.Name `
             -Year $details.Year `
             -IgnoredVersions $details.IgnoredVersions `
-            -Keywords $details.Keywords;
+            -ShowImdbId $_.Details.ImdbInfo?.Id`
+            -Keywords $details.Keywords `
+            -ShowImdbId $_.Imdb.ShowId;;
     }
 }
 
@@ -51,6 +61,7 @@ function HandleSeries {
 
         $final[$details.Title] = @{
             $details.Season = @($episodeInfo)
+            ShowId          = $episode.Imdb.Id
         }
     }
 
@@ -58,7 +69,7 @@ function HandleSeries {
     $final.Keys | ForEach-Object {
         $serieName = $_;
         $serie = $final[$_];
-        $serie.Keys | ForEach-Object {
+        $serie.Keys | Where-Object { $_ -ne "ShowId" } | ForEach-Object {
             $seasonEpisodes = $serie[$_] | Sort-Object -Property Episode;
             $episodeWithYear = $seasonEpisodes | Where-Object { !!$_.Year } | Select-Object -First  1;
             & "$($PSScriptRoot)/Sites/Subsource.ps1" `
@@ -67,13 +78,27 @@ function HandleSeries {
                 -Title $serieName `
                 -Season $_ `
                 -Year $episodeWithYear.Year `
-                -Episodes $seasonEpisodes; 
+                -Episodes $seasonEpisodes `
+                -ShowImdbId $serie.ShowId; 
         }
     }
 }
 
 $files = @();
-$args | ForEach-Object {
+$Paths | Where-Object {
+    # $extension = [System.IO.Path]::GetExtension($_);
+    # $fileName = Split-Path -Leaf -Path $_;
+    # if (
+    #     (
+    #         Test-Path -LiteralPath ($_ -replace $extension, '.srt') -or `
+    #             Test-Path -LiteralPath ($_ -replace $extension, '.ass')
+    #     ) -and `
+    #       !(Prompt.ps1 -Message "$fileName Already has Subtitle Do you want to override")) {
+    #     return $false;
+    # }
+
+    return $true;
+} | ForEach-Object {
     $info = Get-Item -LiteralPath $_ -ErrorAction Ignore;
     if (!$info) {
         return;
@@ -91,8 +116,12 @@ $args | ForEach-Object {
     $files += $childern;
 }
 
+$imdbCache = @{};
 $subs = $files | ForEach-Object {
     $details = & Get-ShowDetails.ps1 -Path $_.FullName;
+    if (!$imdbCache.Contains($details.Title)) {
+        $imdbCache[$details.Title] = Imdb-GetShow.ps1 -name $details.Title;
+    }
     if (!$details) { return $null; }
     $info = $details.Info;
     $name = $info.Name -replace $info.Extension, "";
@@ -100,6 +129,7 @@ $subs = $files | ForEach-Object {
         Name    = $name
         Info    = $info
         Details = $details
+        Imdb    = $imdbCache[$details.Title];
     }
 } | Where-Object {
     return $null -ne $_;

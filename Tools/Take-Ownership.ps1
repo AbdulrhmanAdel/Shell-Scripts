@@ -1,6 +1,14 @@
-& Run-AsAdmin.ps1 -Arguments ($args | ForEach-Object {return """$_"""});
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files
+)
+
+& Run-AsAdmin.ps1 -Arguments ($Files | ForEach-Object {return """$_"""});
+Write-Host $Files;
 $takeOwn = "TakeOwn";
-foreach ($file in $args) {
+foreach ($file in $Files) {
     $fileInfo = Get-Item -LiteralPath $file;
     if ($fileInfo -is [System.IO.FileInfo]) {
         &$takeOwn /f "$file"

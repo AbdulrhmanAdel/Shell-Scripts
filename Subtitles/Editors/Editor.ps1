@@ -1,4 +1,11 @@
-$files = $args | Where-Object {
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files
+)
+
+$files = $Files | Where-Object {
     $_ -match "\.ass|\.srt"
 };
 

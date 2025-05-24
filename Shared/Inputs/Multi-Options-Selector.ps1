@@ -2,8 +2,11 @@
 [CmdletBinding()]
 param (
     $options,
+    [string]$Title,
     [switch]$Multi,
-    [switch]$MustSelectOne,
+    [switch]
+    [Alias("MustSelectOne")]
+    $Required,
     $SelectedOptions
 )
 Add-Type -AssemblyName System.Windows.Forms
@@ -12,8 +15,9 @@ Add-Type -AssemblyName System.Drawing
 
 # Create the form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = $title ?? "Select Items"
-$form.StartPosition = "CenterScreen"
+$form.Text = $Title ?? "Select Items"
+$form.StartPosition = 'CenterScreen'
+$form.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 
 $mainPanel = New-Object System.Windows.Forms.TableLayoutPanel
 $mainPanel.ColumnCount = 1
@@ -33,7 +37,7 @@ $checkboxes = $options | ForEach-Object {
     $checkbox.AutoSize = $true;
     if ($item.Key) {
         $checkbox.Text = $item.Key;
-        $checkbox.Tag = $item.Value;
+        $checkbox.Tag = $item.Value ?? $item;
     }
     else {
         $checkbox.Tag = $checkbox.Text = $item;
@@ -62,10 +66,10 @@ $mainPanel.Controls.Add($submitButton, 0, $options.Count + 1);
 $width = ($checkboxes | Select-Object -ExpandProperty Width | Measure-Object -Maximum).Maximum;
 $checkboxHeight = ($checkboxes | Select-Object -ExpandProperty Height | Measure-Object -Maximum).Maximum;
 $height = $checkboxHeight * $checkboxes.Count + $submitButton.Height;
-$width  += 100;
+$width += 100;
 $height += 100;
 $form.Size = New-Object System.Drawing.Size($width, $height)
-
+$submitButton.Width = $width;
 # Show the form
 $result = $form.ShowDialog();
 if ($result -eq 'OK') {

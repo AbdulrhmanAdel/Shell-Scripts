@@ -9,7 +9,7 @@ else {
     $drives = Get-PSDrive -PSProvider FileSystem | `
         Where-Object { $_.Name -ne $folderDrive } | `
         Foreach-Object { return $_.Name };
-    $driveLetter = & Single-Options-Selector.ps1 -Options $drives -MustSelectOne;
+    $driveLetter = & Single-Options-Selector.ps1 -Options $drives -Required;
 }
 
 if (!$driveLetter) {

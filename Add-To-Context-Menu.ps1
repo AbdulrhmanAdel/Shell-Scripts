@@ -1,5 +1,11 @@
-# Max Entries = 16
-& Run-AsAdmin.ps1;
+[CmdletBinding()]
+param (
+    [switch]
+    $NoTimeout,
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Rest
+)
+& Run-AsAdmin.ps1 -Arguments @($NoTimeout ? '-NoTimeout' : '');
 
 Write-Host "Starting" -ForegroundColor Green;
 $Recycle = "RecycleBin";
@@ -43,6 +49,12 @@ function Handle {
         -target $target `
         -powershellArgs $element.PowershellArgs;
 
+    reg add "$base\$key" /d $element.Title /t REG_SZ /f | Out-Null;
+
+    if ($extension.Extended) {
+        reg add "$base\$key" /v Extended /d "" /t REG_SZ /f | Out-Null;
+    }
+    
     reg add "$base\$key" /d $element.Title /t REG_SZ /f | Out-Null;
     if ($element.Icon) {
         reg add "$base\$key" /v "Icon" /d $element.Icon /t REG_SZ /f | Out-Null;
@@ -143,6 +155,14 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
+        Extensions = @(".mkv", ".mp4")
+        Title      = "Copy Name"
+        Key        = "999 Copy Name"
+        ScriptPath = "Media\Copy-Name.ps1"
+        Path       = $mediaPath
+        Icon       = "pwsh.exe"
+    },
+    @{
         Extensions = @("*", "Directory")
         Title      = "TakeOwn"
         Key        = "TakeOwn"
@@ -158,12 +178,11 @@ $scripts = @(
         Path       = $toolsPath
         Icon       = "pwsh.exe"
     },
-    
     @{
         Extensions = @("*")
-        Title      = "Get Hash"
-        Key        = "999-Get Hash"
-        ScriptPath = "Tools\Display-Hash.ps1"
+        Title      = "Display Hash"
+        Key        = "999-Display Hash"
+        ScriptPath = "Tools\Hash\Display-Hash.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
     },
@@ -176,13 +195,13 @@ $scripts = @(
         Icon       = "pwsh.exe"
     },
     @{
-        Extensions     = @("Drive", "*", "Directory", $Recycle)
+        Extensions     = @("Drive", $Recycle)
         Title          = "Safe Delete"
         Key            = "99 Safe Delete"
         ScriptPath     = "Tools\Safe-Delete.ps1"
         Path           = @()
         Icon           = "pwsh.exe"
-        AdditionalArgs = @("--prompt")
+        AdditionalArgs = @()
     },
     @{
         Extensions = @("Directory")
@@ -265,13 +284,13 @@ $scripts = @(
     #     Icon       = "pwsh.exe"
     # },
     @{
-        Extensions    = @("*", "Directory")
-        Title         = "Copy"
-        Key           = "999 Copy.ps1"
-        ScriptPath    = "Tools\Copy-ToDrive.ps1"
-        Path          = $toolsPath
-        Icon          = "pwsh.exe"
-        PathParamName = "-Files"
+        Extensions     = @("*", "Directory")
+        Title          = "Copy"
+        Key            = "999 Copy.ps1"
+        ScriptPath     = "Tools\Copy-ToDrive.ps1"
+        Path           = $toolsPath
+        Icon           = "pwsh.exe"
+        PathParamName  = "-Files"
         AdditionalArgs = @("-CustomDestiniation")
     }, 
     @{
@@ -283,15 +302,35 @@ $scripts = @(
         Icon          = "pwsh.exe"
         PathParamName = "-Files"
     } #, 
-    # @{
-    #     Extensions     = @("Drive", "*", "Directory", $Recycle)
-    #     Title          = "Safe Delete (Prompt For Passes)"
-    #     Key            = "999 Safe Delete (Prompt For Passes)"
-    #     ScriptPath     = "Tools\Safe-Delete.ps1"
-    #     Path           = $safeDelete
-    #     Icon           = "pwsh.exe"
-    #     AdditionalArgs = @("--prompt", "--promptPasses")
-    # },
+    @{
+        Extensions     = @("Drive", "*", "Directory", $Recycle)
+        Title          = "Safe Delete"
+        Key            = "999 Safe Delete"
+        ScriptPath     = "Tools\Safe-Delete.ps1"
+        Path           = $safeDelete
+        Icon           = "pwsh.exe"
+        AdditionalArgs = @("--prompt", "--promptPasses")
+    }
+    @{
+        Extensions     = @(".ps1")
+        Title          = "Open With Shift"
+        Key            = "999 Open With Shift"
+        ScriptPath     = "Tools\Open-WithShift.ps1"
+        Path           = $toolsPath
+        Icon           = "pwsh.exe"
+        AdditionalArgs = @()
+        Extended       = $true
+    }
+    @{
+        Extensions     = @(".exe")
+        Title          = "Change Compatibility Settings"
+        Key            = "999 Change Compatibility Settings"
+        ScriptPath     = "Tools\Change-CompatibilitySettings.ps1"
+        Path           = $toolsPath
+        Icon           = "pwsh.exe"
+        AdditionalArgs = @()
+        Extended       = $true
+    }
 ) 
 #endregion
 
@@ -329,5 +368,8 @@ $scripts | ForEach-Object {
     }
 };
 
+if ($NoTimeout) {
+    Exit;
+}
 Write-Host "Done" -ForegroundColor Green;
 timeout.exe 5;

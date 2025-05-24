@@ -1,3 +1,10 @@
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files
+)
+
 $handlers = @{
     ".ass" = "$($PSScriptRoot)/handlers/Ass-Subtitle-Shifter.ps1";
     ".srt" = "$($PSScriptRoot)/handlers/Srt-Subtitle-Shifter.ps1";
@@ -48,7 +55,7 @@ function HandleFiles {
     }
 }
 
-$files = $args | Where-Object { Is-Subtitle.ps1 $_ };
-HandleFiles -files $files;
+$files = $Files | Where-Object { Is-Subtitle.ps1 $_ };
+HandleFiles -files $Files;
 Write-Host "Subtitles adjusted."
 timeout.exe  20 /nobreak;
