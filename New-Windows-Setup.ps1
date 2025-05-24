@@ -1,4 +1,14 @@
-Run-AsAdmin.ps1;
+[CmdletBinding()]
+param (
+    [Parameter()]
+    [string[]]
+    $IgnoreScripts = @()
+)
+
+
+Run-AsAdmin.ps1 -Arguments @(
+    "-IgnoreScripts", $IgnoreScripts
+);
 # region Helpers
 
 function RunPowershell {
@@ -6,6 +16,12 @@ function RunPowershell {
         $Path,
         $AdditionalArgs
     )
+
+    if ($IgnoreScripts -contains "pwsh") {
+        Write-Host "Skipping $Path" -ForegroundColor Yellow;
+        return;
+    }
+    
     Write-Host "===========================" ;
     Write-Host "Running $Path";
 
@@ -23,6 +39,12 @@ function RunReg {
         $Path
     )
 
+    if ($IgnoreScripts -contains "reg") {
+        Write-Host "Skipping $Path" -ForegroundColor Yellow;
+        return;
+    }
+    
+
     Write-Host "===========================" ;
     Write-Host "Running $Path" ;
     reg import "$Path";
@@ -34,6 +56,12 @@ function RunCmd {
     param (
         $Path
     )
+
+    if ($IgnoreScripts -contains "cmd") {
+        Write-Host "Skipping $Path" -ForegroundColor Yellow;
+        return;
+    }
+    
     
     Write-Host "===========================" ;
     Write-Host "Running $Path" ;
@@ -51,6 +79,12 @@ function RunProgram {
         [switch]$NoAdmin
     )
     
+    if ($IgnoreScripts -contains "program") {
+        Write-Host "Skipping $Path" -ForegroundColor Yellow;
+        return;
+    }
+    
+
     if (!$NoWait) {
         $InstallSource = (Split-Path -LiteralPath $Path) + "\";
         $PackageName = Split-Path $Path -Leaf;
