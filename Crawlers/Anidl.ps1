@@ -5,7 +5,29 @@ param (
     $Title
 )
 
+function GetEpisodeNumber() {
+    param (
+        [string]$Name
+    )
+    $info = Get-ShowDetails.ps1 -Path $Name;
+    if ($info.Episode) {
+        return $info.Episode;
+    }
+
+    if ($info.Title -match "\d+") {
+        return [int]::Parse($Matches[0]);
+    }
+
+    return $null; 
+}
+
+$DownloadedEpisodes = @();
 if (Test-Path -LiteralPath $Title) {
+    $DownloadedEpisodes = Get-ChildItem -LiteralPath $Title -Include *.mkv | ForEach-Object {
+        return GetEpisodeNumber -Name $_.Name;
+    } | Where-Object {
+        $null -ne $_
+    };
     $Title = Split-Path -Path $Title -Leaf;
 }
 
@@ -14,6 +36,10 @@ $Title = $Title.Trim() -replace "-", " " -replace " +", " " -replace " ", "+";
 if (!$Title.EndsWith("720P")) {
     $Title += "+720P";
 }
+
+
+
+
 $Result = curl 'https://anidl.org/wp-admin/admin-ajax.php' `
     -H 'accept: application/json, text/javascript, */*; q=0.01' `
     -H 'accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6,ru;q=0.5' `
@@ -55,11 +81,18 @@ $links = $data | ForEach-Object {
     # Write-Host " => " -NoNewline -ForegroundColor Red;
     # Write-Host $link -ForegroundColor Yellow;
     return @{
-        Key   = "$fileName $size $hasArabicSub";
-        Value = $link -replace "#038;", "";
+        Key      = "$fileName $size $hasArabicSub";
+        FileName = $fileName
+        Value    = $link -replace "#038;", "";
     }
 };
 
+if ($DownloadedEpisodes.Length -gt 0) {
+    $links = $links | Where-Object {
+        $episode = GetEpisodeNumber -Name $_.FileName;
+        return $episode -notin $DownloadedEpisodes
+    }
+}
 $DownloadLinks = Multi-Options-Selector.ps1 -options $links;
 if ($DownloadLinks.Count -eq 0) {
     return;
