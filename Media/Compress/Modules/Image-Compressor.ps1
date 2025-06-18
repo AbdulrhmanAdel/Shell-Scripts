@@ -1,3 +1,10 @@
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files
+)
+
 $sharedArgs = @(
     "-interlace", "JPEG"
 );
@@ -15,7 +22,7 @@ if ($newSize -ne "AsSource") {
     $sharedArgs += @("-resize", "$newSize");
 }
 
-$args | ForEach-Object {
+$Files | ForEach-Object {
     $file = $_;
     Write-Host "Compressing $file" -ForegroundColor Green;
     $fileInfo = Get-Item -LiteralPath $file;

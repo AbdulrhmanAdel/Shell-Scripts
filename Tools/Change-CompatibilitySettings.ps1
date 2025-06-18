@@ -22,11 +22,34 @@ if (!$regData) {
     Exit
 }
 
-$AdminFlag = "~ RUNASADMIN";
+$currentSettings = @{};
+$settingsFlags = @(
+    @{
+        Regex       = "~? ?RUNASADMIN";
+        Description = "Run as administrator";
+    }
+);
+
+$settingsFlags | ForEach-Object {
+    $flag = $_.Regex;
+    $description = $_.Description;
+    if ($regData.$($ExePath) -match $flag) {
+        $currentSettings[$description] = $true;
+    }
+    else {
+        $currentSettings[$description] = $false;
+    }
+}
+
+
+
+
+
+
 $regValue = $regData.$($ExePath);
 Write-Host "Current Settings: $($regValue ?? 'No Settings')" -ForegroundColor Green;
 if ($regValue) {
-    $regValue = ($regValue -replace [regex]::Escape($AdminFlag), '').Trim()
+    $regValue = ($regValue -replace $AdminFlag, '').Trim()
     Set-ItemProperty -Path $regPath -Name $ExePath -Value $regValue;
 }
 

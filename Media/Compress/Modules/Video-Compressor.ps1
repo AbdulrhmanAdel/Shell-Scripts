@@ -1,19 +1,25 @@
+[CmdletBinding()]
+param (
+
+    [Parameter()]
+    [string]
+    $OutputPath,
+    [string[]]
+    $Files
+)
 # DOCS URL https://handbrake.fr/docs/en/latest/cli/command-line-reference.html 
 #region function
-
-
-$intialDir = Split-Path $args[0];
-$outputPath = & Folder-Picker.ps1 -InitialDirectory $intialDir;
 function Compress {
     param (
         $file
     )
     
     $file = $_;
-    Write-Host "Compressing $file" -ForegroundColor Green;
+    Write-Host "======================" -ForegroundColor Green;
+    Write-Host "Start Compressing $file" -ForegroundColor Green;
     $fileInfo = Get-Item -LiteralPath $file;
     $newFileName = $fileInfo.Name.Replace($fileInfo.Extension, " - $($height)x$($width)-$($encoder)-$($encoderPreset)$($fileInfo.Extension)")
-    $newFilePath = "$($outputPath ?? $fileInfo.Directory)\$newFileName";
+    $newFilePath = "$($OutputPath ?? $fileInfo.Directory)\$newFileName";
     if (Test-Path -LiteralPath $newFileName) {
         if (!(& Prompt.ps1 -message "File Already Exists. Do You Want To Override it?" -defaultValue $false)) {
             return;
@@ -21,12 +27,15 @@ function Compress {
     }
     $arguments = @($sharedArgs) + @("-i", """$file""", "-o", """$newFilePath""");
     Start-Process handbrake -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
-    Write-Host "Compressing $file" -ForegroundColor Green;
+    Write-Host "Finished Compressing $file" -ForegroundColor Green;
+    Write-Host "======================" -ForegroundColor Green;
 }
-
-# $usePredifindConfig = & Prompt.ps1 -Message "Use Predifined Config";
 #endregion
 
+if (!$OutputPath) {
+    $VideosParentFolder = Split-Path -Path $Files[0];
+    $OutputPath = & Folder-Picker.ps1 -InitialDirectory $VideosParentFolder;
+}
 $width, $height = (& Single-Options-Selector.ps1 `
         -Options @("480x640", "720x1280", "1080x1920") `
         -Title "Select Video Resoluation" `
@@ -117,7 +126,7 @@ if ($keepSubtitles) {
 }
 
 $allowedExtensions = "mkv$|mp4$";
-$args | ForEach-Object {
+$Files | ForEach-Object {
     $info = Get-Item -LiteralPath $_ -ErrorAction Ignore;
     if (!$info) {
         return;
@@ -125,14 +134,12 @@ $args | ForEach-Object {
 
     if ($info -is [System.IO.FileInfo] -and $info.Extension -match $allowedExtensions) {
         Compress -file $_;
-        # CopyOriginalFile -File $_ -Destination "$($info.DirectoryName)\Original";
         return;
     } 
 
     $files = Get-ChildItem -LiteralPath $info.FullName -Filter $allowedExtensions;
     $files | ForEach-Object {
         Compress -file $_;
-        # CopyOriginalFile -File $_ -Destination "$($info.DirectoryName)\Original";
     }
 }
     
