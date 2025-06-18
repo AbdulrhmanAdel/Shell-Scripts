@@ -13,6 +13,7 @@ if (!$canHandle) {
 }
 
 $seriesRegex = "(?<Title>.*) *(S|Season) *(?<SeasonNumber>\d{1,2}) *( |Episode|Ep|E|-|\d+X) *(?<EpisodeNumber>\d+) *(?<Rest>.*)";
+$seriesRegexV2 = "(?<Title>.*)(?<EpisodeNumber>\d{1,3}) (720|480|1080)P?.*";
 $moviesRegex = "(?<Title>.*)(?<Rest>(720|480|1080)P?.*)";
 $yearRegex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
 function GetYear {
@@ -112,11 +113,11 @@ function GetSeriesOrMovieDetails {
 
 
     $showName = $null;
-    if ($name -match $seriesRegex) {
+    if ($name -match $seriesRegex -or $name -match $seriesRegexV2) {
         $showName = $Matches["Title"].Trim();
         $details.Type = "Series"
-        $details.Season = [Int32]::Parse( $Matches["SeasonNumber"]);
-        $details.Episode = [Int32]::Parse( $Matches["EpisodeNumber"]);
+        $details.Season = $Matches["SeasonNumber"] ? [Int32]::Parse( $Matches["SeasonNumber"]) : $null;
+        $details.Episode = $Matches["EpisodeNumber"] ? [Int32]::Parse( $Matches["EpisodeNumber"]) : $null;
     }
     elseif ($name -match $moviesRegex) {
         $showName = $Matches["Title"].Trim();

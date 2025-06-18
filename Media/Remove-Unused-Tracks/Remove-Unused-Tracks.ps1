@@ -5,10 +5,6 @@ param (
     $Files
 )
 
-$Files | ForEach-Object {
-    Write-Host "Handling File $_" -ForegroundColor Green;
-}
-
 $outputPath = & Folder-Picker.ps1 -InitialDirectory "E:\Watch" -ExitIfNotSelected;
 
 #region Functions
