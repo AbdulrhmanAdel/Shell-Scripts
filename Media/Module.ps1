@@ -10,7 +10,7 @@ $Options = @(
         Key        = "Remove Unused Tracks";
         Extensions = @("mkv", "mp4", "zip", "rar");
         Handler    = {
-            $path = "$PSScriptRoot/Remove-Unused-Tracks/Remove-Unused-Tracks.ps1";
+            $path = "$PSScriptRoot/Remove-Unused-Tracks/Remove-UnnecessaryTracks.ps1";
             &  $path -Files $Files;
         };
     }
@@ -46,6 +46,13 @@ $Options = @(
         Key     = "Display Videos with Non-Arabic Subtitle";
         Handler = {
             $path = "$PSScriptRoot/Display-NonArabicSubtitled.ps1";
+            &  $path $Files;
+        };
+    }
+    @{
+        Key     = "Fix Names";
+        Handler = {
+            $path = "$PSScriptRoot/FIx-SeriesNames.ps1";
             &  $path $Files;
         };
     }
