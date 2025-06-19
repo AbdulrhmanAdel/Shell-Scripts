@@ -4,7 +4,9 @@ param (
     [string]
     $DestinationPath,
     [string]
-    $Link
+    $Link,
+    [switch]
+    $NoExit
 )
 
 if (!$DestinationPath) {
@@ -66,12 +68,6 @@ function download {
     param(
         $url    
     )
-    $url ??= Read-Host "Please enter url?";
-    if (!$url) {
-        Write-Host "Please enter valid url?";
-        download;
-    }
-
     $isPlaylist = $url -match $playlistRegex;
     if ($isPlaylist) {
         HandlePlaylist -url $url;
@@ -80,10 +76,20 @@ function download {
         $arguments = $selectedOptions + @("-o", """$DestinationPath\%(title)s.%(ext)s""", $url);
         Start-Process yt-dlp -ArgumentList $arguments  -Wait -NoNewWindow;
     }
+}
 
-    if (!$Link) {        
-        download;
+if (!$Link) {
+    $urls = Input.ps1 -Title "Please enter url(s) separated by new lines" -MultiLine;
+    $urls.Split([Environment]::NewLine) | ForEach-Object {
+        download -url $_;
     }
+    while ($NoExit) {
+        $urls = Input.ps1 -Title "Please enter url(s) separated by new lines" -MultiLine;
+        $urls.Split([Environment]::NewLine) | ForEach-Object {
+            download -url $_;
+        }
+    }
+    Exit;
 }
 
 download -url $Link;

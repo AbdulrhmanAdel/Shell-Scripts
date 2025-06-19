@@ -4,6 +4,7 @@ param (
     [string]$Message = "Please Enter Value",
     [ArgumentCompletions('Text', 'Number')]
     [string]$Type = "Text",
+    [switch]$MultiLine,
     [switch]$Required = $false,
     $DefaultValue,
     # Number Specific Args
@@ -15,13 +16,12 @@ param (
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
 $width = 200 + ($Title.Length -gt 50 ? 50 : $Title.Length) * 5;
-
+$formHeight = 100;
 # Create a form
 $form = New-Object System.Windows.Forms.Form
 $form.Text = $Title;
 $form.StartPosition = "CenterScreen"
 $form.AutoSize = $false; # Changed to false to manually control size
-$form.ClientSize = New-Object System.Drawing.Size($width, 120)  # Set fixed size
 
 # Message Label
 if ($Message) {
@@ -45,19 +45,27 @@ switch ($Type) {
     }
     Default {
         $formInput = New-Object System.Windows.Forms.TextBox
-        $formInput.Text = $DefaultValue
+        $formInput.Multiline = $MultiLine;
+        $formInput.Text = $DefaultValue;
         break;
     }
 }
 
+$formInputHeight = 20;
+if ($MultiLine) {
+    $formInput.ScrollBars = "Vertical"
+    $formInputHeight = 150;
+}
+
+$formHeight += $formInputHeight;
 $formInput.Location = New-Object System.Drawing.Point(10, 40)  # Adjusted position
-$formInput.Size = New-Object System.Drawing.Size(($width - 20), 20)  # Set size
+$formInput.Size = New-Object System.Drawing.Size(($width - 20), $formInputHeight)  # Set size
 $form.Controls.Add($formInput)
 
 # OK Button
 $button = New-Object System.Windows.Forms.Button
 $button.Text = "Ok"
-$button.Location = New-Object System.Drawing.Point(10, 70)  # Adjusted position
+$button.Location = New-Object System.Drawing.Point(10, (50 + $formInputHeight))  # Adjusted position
 $button.Size = New-Object System.Drawing.Size(($width - 20), 30)  # Set size
 $button.Add_Click(
     {
@@ -65,6 +73,7 @@ $button.Add_Click(
     }
 );
 $form.Controls.Add($button)
+$form.ClientSize = New-Object System.Drawing.Size($width, $formHeight)  # Set fixed size
 
 # Show the form
 $result = $form.ShowDialog();
