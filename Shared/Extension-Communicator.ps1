@@ -73,7 +73,16 @@ while ($true) {
         $MessageHandler.Invoke($json);
     }
     catch {
-        Add-Content "Error.txt" $_.ScriptStackTrace;
+        $errorDetails = @"
+        =======================
+        Timestamp: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+        Exception Message: $($_.Exception.Message)
+        Exception Type: $($_.Exception.GetType().FullName)
+        Stack Trace: $($_.Exception.StackTrace)
+        Inner Exception: $($_.Exception.InnerException)
+        =======================
+"@
+        Add-Content "Error.txt" $errorDetails;
         EXIT;
     }
     Log -text "=======================";

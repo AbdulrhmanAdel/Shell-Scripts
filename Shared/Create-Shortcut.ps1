@@ -18,5 +18,4 @@ if ((Test-Path -LiteralPath $Target) -and $force) {
 $shell = New-Object -comObject WScript.Shell
 $shortcut = $shell.CreateShortcut($Target)
 $shortcut.TargetPath = $Source;
-$shortcut.Arguments = """$arguments"""
 $shortcut.Save();
