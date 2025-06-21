@@ -188,9 +188,9 @@ $scripts = @(
     },
     @{
         Extensions = @("Directory")
-        Title      = "Download Youtube Video"
-        Key        = "90 Download Youtube Video"
-        ScriptPath = "Youtube\Download-Video.ps1"
+        Title      = "Youtube Downloader"
+        Key        = "90 Youtube Downloader"
+        ScriptPath = "Youtube\Downloader.ps1"
         Path       = @()
         Icon       = "pwsh.exe"
     },

@@ -34,7 +34,7 @@ Extension-Communicator.ps1 -MessageHandler {
 
     switch ($Data.action) {
         'Youtube' { 
-            & "D:\Programming\Projects\Personal Projects\Shell-Scripts\Youtube\Download-Video.ps1" -Link $Data.link
+            & "D:\Programming\Projects\Personal Projects\Shell-Scripts\Youtube\Downloader.ps1" -Link $Data.link
         }
         Default {
             Set-Content "Test.txt" $Data;
