@@ -5,14 +5,17 @@ param (
     $SaveCheckPath,
     [Parameter(Mandatory)]
     [string]
-    $Destination
+    $Destination,
+    [Parameter()]
+    [string]
+    $TargetName
 )
 
 if (-not (Test-Path -LiteralPath $Destination)) {
     New-Item -Path $Destination -ItemType Directory -ErrorAction Ignore | Out-Null
 }
 
-$files = @(Get-ChildItem -LiteralPath $SaveCheckPath -Exclude "*.ps1", "*.lnk");
+$files = @(Get-ChildItem -LiteralPath $SaveCheckPath -Exclude "*.ps1", "*.lnk", "*.txt");
 if ($files.Length -gt 1) {
     $Options = $files | ForEach-Object { return @{
             Key   = $_.Name
@@ -30,9 +33,13 @@ if ($files.Length -eq 0) {
 }
 
 $files | ForEach-Object {
+    Write-Host "Creating symbolic link for: $($_.Name)";
     $fileInfo = $_;
-    Write-Host "Copying Save $($fileInfo.Name)" -ForegroundColor Cyan
-    $targetPath = "$Destination\$($fileInfo.Name)";
+    if (!$TargetName) {
+        $TargetName = $fileInfo.Name;
+    }
+
+    $targetPath = "$Destination\$TargetName";
     if (Test-Path -LiteralPath $targetPath) {
         $Item = Get-Item -LiteralPath $targetPath;
         if ($Item.LinkType -eq "SymbolicLink") {
