@@ -12,6 +12,7 @@ function HandleMovies {
     $movies | Where-Object {
         $info = $_.Info;
         $details = $_.Details;
+        $imdb = $imdbCache[$details.Title];
         Write-Host $details;    
         & "$($PSScriptRoot)/Sites/Subsource.ps1" `
             -DownloadPath $downloadPath `
@@ -22,9 +23,8 @@ function HandleMovies {
             -RenameTo $_.Name `
             -Year $details.Year `
             -IgnoredVersions $details.IgnoredVersions `
-            -ShowImdbId $_.Details.ImdbInfo?.Id`
             -Keywords $details.Keywords `
-            -ShowImdbId $_.Imdb.ShowId;;
+            -ShowImdbId $imdb.Id;
     }
 }
 
@@ -85,20 +85,7 @@ function HandleSeries {
 }
 
 $files = @();
-$Paths | Where-Object {
-    # $extension = [System.IO.Path]::GetExtension($_);
-    # $fileName = Split-Path -Leaf -Path $_;
-    # if (
-    #     (
-    #         Test-Path -LiteralPath ($_ -replace $extension, '.srt') -or `
-    #             Test-Path -LiteralPath ($_ -replace $extension, '.ass')
-    #     ) -and `
-    #       !(Prompt.ps1 -Message "$fileName Already has Subtitle Do you want to override")) {
-    #     return $false;
-    # }
-
-    return $true;
-} | ForEach-Object {
+$Paths | ForEach-Object {
     $info = Get-Item -LiteralPath $_ -ErrorAction Ignore;
     if (!$info) {
         return;
