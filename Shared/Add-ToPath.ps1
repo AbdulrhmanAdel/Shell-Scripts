@@ -1,12 +1,12 @@
 [CmdletBinding()]
 param (
-
-    [Parameter(ValueFromRemainingArguments = $true)]
     [switch]
     $NoTimeout,
+    [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]
     $Paths
 )
+    
 $path = [Environment]::GetEnvironmentVariable('path', [EnvironmentVariableTarget]::User);
 $savedPaths = $path -split ";";
 $newPaths = $Paths | Where-Object { !$savedPaths.Contains($_); };
@@ -21,7 +21,6 @@ Write-Host "Adding New Paths to User Environment Variable" -ForegroundColor Gree
 $newPaths | ForEach-Object { Write-Host $_ };
 $finalPaths = ($savedPaths + $newPaths) -join ";";
 [Environment]::SetEnvironmentVariable('Path', $finalPaths, [EnvironmentVariableTarget]::User);
-
 if (-not $NoTimeout) {
     Exit;
 }

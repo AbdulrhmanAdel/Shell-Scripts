@@ -174,7 +174,7 @@ $scripts = @(
         Extensions = @("Directory")
         Title      = "Add To Path"
         Key        = "Add To Path"
-        ScriptPath = "Tools\Add-ToPath.ps1"
+        ScriptPath = "Shared\Add-ToPath.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
     },

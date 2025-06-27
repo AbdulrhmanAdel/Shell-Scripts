@@ -6,21 +6,42 @@ param (
 )
 
 $parentDirectory = "$PSScriptRoot\Shared"
+$TargetFolder = "$PSScriptRoot\.path";
+if (-not (Test-Path -LiteralPath $TargetFolder)) {
+    New-Item -Path $TargetFolder -ItemType Directory | Out-Null;
+}
+
+Get-ChildItem -Path $parentDirectory -File | ForEach-Object {
+    New-Item `
+        -Path "$TargetFolder\$($_.Name)" `
+        -Target $_.FullName `
+        -ItemType SymbolicLink -ErrorAction SilentlyContinue;
+    
+}
+
 # Retrieve all directory paths
-$directories = Get-ChildItem -Path $parentDirectory -Directory -Recurse | Where-Object {
+Get-ChildItem -Path $parentDirectory -Directory -Recurse | Where-Object {
     return $_.FullName -notmatch "Ignore|Modules"
-} | Select-Object -ExpandProperty FullName
+} | Select-Object -ExpandProperty FullName | ForEach-Object {
+    Get-ChildItem -Path $_ -File | ForEach-Object {
+        New-Item `
+            -Path "$TargetFolder\$($_.Name)" `
+            -Target $_.FullName `
+            -ItemType SymbolicLink -ErrorAction SilentlyContinue;
+    }
+}
 
 # Current system path
 $currentPath = [System.Environment]::GetEnvironmentVariable("Path", "User");
-$pathes = @($currentPath -split ";" | Where-Object {
-    return !$_.StartsWith($parentDirectory)
-});
+$paths = $currentPath -split ";";
 
-$pathes += $directories + $parentDirectory;
-# Set the new path
-[System.Environment]::SetEnvironmentVariable("Path", $pathes -join ";", "User");
-
+if ($paths.Contains($TargetFolder)) {
+    Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;
+    Exit;
+}
+$paths += $TargetFolder;
+[System.Environment]::SetEnvironmentVariable("Path", $paths -join ";", "User");
+Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;
 if ($NoTimeout) {
     Exit;
 }
