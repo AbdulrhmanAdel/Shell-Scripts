@@ -1,10 +1,11 @@
 [CmdletBinding()]
 param (
-    [Parameter(Position = 0)]
     [string]
     $DestinationPath,
     [string]
     $Link,
+    [string]
+    $Format,
     [switch]
     $NoExit
 )
@@ -27,7 +28,7 @@ if (!$DestinationPath) {
     $DestinationPath = Read-Host "Please enter destinition path?";
 }
 
-$format = & Single-Options-Selector.ps1 -Options @(
+$Format ??= & Single-Options-Selector.ps1 -Options @(
     "mp3",
     "m4a",
     "opus",
