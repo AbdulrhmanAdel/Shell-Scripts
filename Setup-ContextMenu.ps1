@@ -172,9 +172,9 @@ $scripts = @(
     },
     @{
         Extensions = @("Directory")
-        Title      = "Add To Environment Varaibles"
-        Key        = "Add To Environment Varaibles"
-        ScriptPath = "Tools\Add-To-Environment-Varaibles.ps1"
+        Title      = "Add To Path"
+        Key        = "Add To Path"
+        ScriptPath = "Tools\Add-ToPath.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
     },
@@ -329,6 +329,18 @@ $scripts = @(
         Path           = $toolsPath
         Icon           = "pwsh.exe"
         AdditionalArgs = @()
+        Extended       = $true
+    }
+    @{
+        Extensions     = @("*", "Directory")
+        Title          = "Create Symbol Link"
+        Key            = "999 Create Symbol Link"
+        ScriptPath     = "Shared\Create-SymbolicLink.ps1"
+        Path           = $toolsPath
+        Icon           = "pwsh.exe"
+        AdditionalArgs = @(
+            "-Source"
+        )
         Extended       = $true
     }
 ) 

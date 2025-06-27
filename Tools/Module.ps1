@@ -48,6 +48,15 @@ $Options = @(
             & $path -Files $Files -Move;
         };
     }
+    @{
+        Key     = "Create SymbolicLink";
+        Handler = {
+            $Target = Folder-Picker.ps1 -InitialDirectory ([System.IO.Path]::GetDirectoryName($Files[0])) -Required;
+            $Files | ForEach-Object {
+                & Create-SymbolicLink.ps1 -Source $_ -Target $Target
+            }
+        };
+    }
 )
 
 . Create-Module.ps1 -Options $Options;

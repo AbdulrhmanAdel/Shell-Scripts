@@ -1,9 +1,7 @@
 [CmdletBinding()]
 param (
-    [string[]]
-    $IgnoreScripts = @(),
-    [switch]
-    $AddToShared = $true
+    [string[]]$IgnoreScripts = @(),
+    [switch]$SkipShared
 )
 
 Run-AsAdmin.ps1 -Arguments @(
@@ -147,8 +145,7 @@ function RunProgram {
 
 # region Setup Personal Projects
 $personalProjectPath = $PSScriptRoot;
-
-if ($AddToShared) {
+if (!$SkipShared) {
     RunPowershell -Path "$personalProjectPath\Add-SharedToPath.ps1" -AdditionalArgs @("-NoTimeout")
     Start-Process pwsh.exe -ArgumentList @(
         "-File", "$PSScriptRoot\New-WindowsSetup.ps1"
@@ -156,14 +153,19 @@ if ($AddToShared) {
     Exit;
 }
 
+Write-Host "Please Select ProgramsPath" -ForegroundColor Green
+$ProgramsPath = Folder-Picker.ps1 -InitialDirectory "D:\";
+Write-Host "=================" -ForegroundColor Black;
+Write-Host "Please Select ProgrammingPath" -ForegroundColor Green
+$ProgrammingPath = Folder-Picker.ps1 -InitialDirectory "D:\";
+
 RunPowershell -Path "$personalProjectPath\Setup-ContextMenu.ps1" -AdditionalArgs @("-NoTimeout")
 RunPowershell -Path "$personalProjectPath\Setup-SendToMenu.ps1" -AdditionalArgs @("-NoTimeout")
 # #endregion
 
 
 # # region Programming
-$programmingPath = "D:\Programming\Programs";
-$configPath = "$programmingPath\ Configuration";
+$configPath = "$ProgrammingPath\ Configuration";
 RunReg -Path "$configPath\Scripts\VsCode.reg";
 RunReg -Path "$configPath\Scripts\WebStorm.reg";
 RunReg -Path "$configPath\Scripts\Rider.reg";
@@ -171,15 +173,14 @@ RunReg -Path "$configPath\Scripts\Terminal.reg";
 RunReg -Path "$configPath\Scripts\Add-ToPath.ps1";
 RunPowershell -Path "$configPath\Programs Data\Link.ps1";
 
-RunProgram -Path (AppRegexSelector -ParentPath "$programmingPath\Git" -Regex "^Git.*bit\.exe$");
-RunProgram -Path (AppRegexSelector -ParentPath "$programmingPath\Node" -Regex "^node.*msi$");
+RunProgram -Path (AppRegexSelector -ParentPath "$ProgrammingPath\Git" -Regex "^Git.*bit\.exe$");
+RunProgram -Path (AppRegexSelector -ParentPath "$ProgrammingPath\Node" -Regex "^node.*msi$");
 # #endregion
 
 # # region Programs
-$programsPath = "D:\Programs";
-$tweakspath = "$programsPath\Operating System\Windows\Tweaks"
+$tweakspath = "$ProgramsPath\Operating System\Windows\Tweaks"
 # .Net
-Invoke-Item -LiteralPath "$programsPath\Operating System\Windows\Win11_24H2_English_x64.iso";
+Invoke-Item -LiteralPath "$ProgramsPath\Operating System\Windows\Win11_24H2_English_x64.iso";
 RunPowershell -Path "$tweaksPath\Enable-DotNet3.5Framework.ps1";
 RunReg -Path "$tweaksPath\Power Plan\Show-TurboBoost.reg"
 RunReg -Path "$tweaksPath\Fix powershell files whitespace issue.reg"
@@ -187,50 +188,42 @@ RunPowershell -Path "$tweaksPath\StartMenu\Sync-StartMenu.ps1" -AdditionalArgs @
 RunPowershell -Path "$tweaksPath\Hib\Disable-Hib.ps1"
 RunCmd -Path "$tweaksPath\Date And Time\Change-DateFormat.bat"
 
-RunProgram -Path (AppRegexSelector -ParentPath "$programsPath\Utilities" -Regex "PowerToysUserSet");
-RunProgram -Path "$programsPath\Media\Players\K-Lite\K-Lite_Codec_Pack.exe";
-RunPowershell -Path "$programsPath\Media\Players\K-Lite\K-Lite.ps1" -AdditionalArgs @("-Process", "Restore");
-RunProgram -Path "$programsPath\Storage & Data\Compress\7-Zip\7zFM.exe";
+RunProgram -Path (AppRegexSelector -ParentPath "$ProgramsPath\Utilities" -Regex "PowerToysUserSet");
+RunProgram -Path "$ProgramsPath\Media\Players\K-Lite\K-Lite_Codec_Pack.exe";
+RunPowershell -Path "$ProgramsPath\Media\Players\K-Lite\K-Lite.ps1" -AdditionalArgs @("-Process", "Restore");
+RunProgram -Path "$ProgramsPath\Storage & Data\Compress\7-Zip\7zFM.exe";
 
 # IDM
-RunPowershell -Path "$programsPath\Net\Downloaders\IDM\Data\Import-IDM-Registery.ps1";
-RunPowershell -Path "$programsPath\Net\Downloaders\IDM\Data\Link-IDMDataFolder.ps1";
-RunReg -Path "$programsPath\Net\Downloaders\IDM\Data\Register-Native-Messaging.reg"
-RunProgram -Path "$programsPath\Net\Downloaders\IDM\IDMan.exe" -NoWait;
+RunPowershell -Path "$ProgramsPath\Net\Downloaders\IDM\Data\Import-IDM-Registery.ps1";
+RunPowershell -Path "$ProgramsPath\Net\Downloaders\IDM\Data\Link-IDMDataFolder.ps1";
+RunReg -Path "$ProgramsPath\Net\Downloaders\IDM\Data\Register-Native-Messaging.reg"
+RunProgram -Path "$ProgramsPath\Net\Downloaders\IDM\IDMan.exe" -NoWait;
 
 
 # QBittorrent
-RunPowershell -Path "$programsPath\Net\Torrent\qBittorrent\Data\Link-QBitTorrentDataFolder.ps1"
-RunReg -Path "$programsPath\Net\Torrent\qBittorrent\Data\Register-QBitTorrentMagnet.reg"
-RunReg -Path "$programsPath\Net\Torrent\qBittorrent\Data\Assign-QBittorrentToOpenTorrentFiles.reg"
-RunProgram -Path "$programsPath\Net\Torrent\qBittorrent\qbittorrent.exe" -NoWait;
+RunPowershell -Path "$ProgramsPath\Net\Torrent\qBittorrent\Data\Link-QBitTorrentDataFolder.ps1"
+RunReg -Path "$ProgramsPath\Net\Torrent\qBittorrent\Data\Register-QBitTorrentMagnet.reg"
+RunReg -Path "$ProgramsPath\Net\Torrent\qBittorrent\Data\Assign-QBittorrentToOpenTorrentFiles.reg"
+RunProgram -Path "$ProgramsPath\Net\Torrent\qBittorrent\qbittorrent.exe" -NoWait;
 
 #region hardware Monitor
-RunProgram -Path "$programsPath\Hardware\Monitor\HWiNFO64\HWiNFO64.exe" -NoWait;
-RunPowershell -Path "$programsPath\Hardware\Monitor\HWiNFO64\HWiNFO64.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
-RunProgram -Path "$programsPath\Hardware\Monitor\RivaTuner Statistics Server\RTSS.exe" -NoWait;
+RunProgram -Path "$ProgramsPath\Hardware\Monitor\HWiNFO64\HWiNFO64.exe" -NoWait;
+RunPowershell -Path "$ProgramsPath\Hardware\Monitor\HWiNFO64\HWiNFO64.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
+RunProgram -Path "$ProgramsPath\Hardware\Monitor\RivaTuner Statistics Server\RTSS.exe" -NoWait;
 #endregion
-RunProgram -Path "$programsPath\Tools\MEGAsync\MEGAsync.exe" -NoWait;
+RunProgram -Path "$ProgramsPath\Tools\MEGAsync\MEGAsync.exe" -NoWait;
 
 #region Games
-$gamesPath = "$programsPath\Games";
+$gamesPath = "$ProgramsPath\Games";
 RunProgram -Path "$gamesPath\DirectX\DXSETUP.exe";
 RunProgram -Path "$gamesPath\Epic Games\Epic Online Services\EpicOnlineServices.exe"
 RunProgram -Path "$gamesPath\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe"
 RunCmd -Path "$gamesPath\C++ Runtimes\install_all.bat"
 #endregion
 
+& "$PSScriptRoot\Tools\Add-ToPath.ps1" -Paths @(
+    "$ProgramsPath\Binaries"
+) -NoTimeout;
 
-$pathEnvironmentVariable = [Environment]::GetEnvironmentVariable('path', [EnvironmentVariableTarget]::User) ?? "";
-$pathes = @($pathEnvironmentVariable -split ";");
-$pathes += @(
-    "$programsPath\Windows\General Tools"
-    "$programsPath\Media\Tools\Ffmpeg\bin"
-    "$programsPath\Media\Tools\HandBrake"
-    "$programsPath\Media\Tools\MediaInfo"
-    "$programsPath\Media\Tools\mkvtoolnix"
-    "$programsPath\Media\Tools\yt",
-    "$programsPath\Tools\ImageMagick",
-    "$programsPath\Storage & Data\Compress\7-Zip"
-);
-[Environment]::SetEnvironmentVariable('Path', $pathes -join ";", [EnvironmentVariableTarget]::User);
+Write-Host "Setup Completed Successfully" -ForegroundColor Green;
+timeout.exe 10;
