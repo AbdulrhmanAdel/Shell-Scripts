@@ -5,7 +5,10 @@ param (
     $ProgramPath,
     [Parameter()]
     [string[]]
-    $Extensions
+    $Extensions,
+    [Parameter()]
+    [switch]
+    $Machine
 )
 
 $global:programName = $ProgramPath;
@@ -14,6 +17,10 @@ if (Test-Path -LiteralPath $ProgramPath ) {
 }
 
 $classPath = "HKEY_CURRENT_USER\Software\Classes";
+if ($Machine) {
+    $classPath = "HKEY_CURRENT_MACHINE\Software\Classes";
+}
+
 $Extensions | ForEach-Object {
     $extension = $_;
     $base = $classPath;

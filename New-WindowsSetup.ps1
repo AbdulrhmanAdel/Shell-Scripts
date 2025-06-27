@@ -1,10 +1,10 @@
 [CmdletBinding()]
 param (
-    [Parameter()]
     [string[]]
-    $IgnoreScripts = @()
+    $IgnoreScripts = @(),
+    [switch]
+    $AddToShared = $true
 )
-
 
 Run-AsAdmin.ps1 -Arguments @(
     "-IgnoreScripts", $IgnoreScripts
@@ -147,9 +147,17 @@ function RunProgram {
 
 # region Setup Personal Projects
 $personalProjectPath = $PSScriptRoot;
-RunPowershell -Path "$personalProjectPath\Add-Shared-To-Path.ps1" -AdditionalArgs @("-NoTimeout")
-RunPowershell -Path "$personalProjectPath\Add-To-Context-Menu.ps1" -AdditionalArgs @("-NoTimeout")
-RunPowershell -Path "$personalProjectPath\Copy-To-Send-To-Menu.ps1" -AdditionalArgs @("-NoTimeout")
+
+if ($AddToShared) {
+    RunPowershell -Path "$personalProjectPath\Add-SharedToPath.ps1" -AdditionalArgs @("-NoTimeout")
+    Start-Process pwsh.exe -ArgumentList @(
+        "-File", "$PSScriptRoot\New-WindowsSetup.ps1"
+    )
+    Exit;
+}
+
+RunPowershell -Path "$personalProjectPath\Setup-ContextMenu.ps1" -AdditionalArgs @("-NoTimeout")
+RunPowershell -Path "$personalProjectPath\Setup-SendToMenu.ps1" -AdditionalArgs @("-NoTimeout")
 # #endregion
 
 
