@@ -58,6 +58,12 @@ $Options = @(
         };
     }
     @{
+        Key     = "Create PathShortcut";
+        Handler = {
+            & "$PSScriptRoot\Create-PathShortcut.ps1" -Files $Files
+        };
+    }
+    @{
         Key     = "Check Folder Sync";
         Handler = {
             $Source = $Files.Length -gt 0 ? $Files[0] : (Folder-Picker.ps1 -Title "Please Pick Source Folder." -ShowOnTop -Required);

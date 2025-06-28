@@ -10,7 +10,7 @@ $Options = @(
         Key        = "Remove Unused Tracks";
         Extensions = @("mkv", "mp4", "zip", "rar");
         Handler    = {
-            $path = "$PSScriptRoot/Remove-Unused-Tracks/Remove-UnnecessaryTracks.ps1";
+            $path = "$PSScriptRoot/Remove-UnusedTracks/Main.ps1";
             &  $path -Files $Files;
         };
     }
