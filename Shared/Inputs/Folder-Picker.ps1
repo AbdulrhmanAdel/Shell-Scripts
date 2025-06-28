@@ -2,6 +2,7 @@
 param (
     [string]$InitialDirectory = [Environment]::GetFolderPath('MyDocuments'),
     [switch]$ExitIfNotSelected = $false,
+    [string]$Title = "Select Directory",
     [switch]$Required = $false,
     [switch]$ShowHiddenFiles = $false,
     [switch]$ShowOnTop = $false,
@@ -11,6 +12,8 @@ param (
 Add-Type -AssemblyName System.Windows.Forms;
 $foldername = New-Object System.Windows.Forms.FolderBrowserDialog;
 $foldername.InitialDirectory = $InitialDirectory;
+$foldername.Description = $Title;
+$foldername.UseDescriptionForTitle = $true;
 $foldername.Dispose();
 $foldername.ShowHiddenFiles = $ShowHiddenFiles;
 $dialogOption = New-Object System.Windows.Forms.Form;

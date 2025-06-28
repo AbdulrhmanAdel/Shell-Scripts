@@ -12,6 +12,7 @@ param (
 Add-Type -AssemblyName System.Windows.Forms;
 $openFileDialog = New-Object System.Windows.Forms.OpenFileDialog;
 $openFileDialog.InitialDirectory = $InitialDirectory;
+$openFileDialog.Title = $Title;
 $openFileDialog.ShowHiddenFiles = $ShowHiddenFiles
 if ($Filter) {
     $openFileDialog.Filter = $Filter;
