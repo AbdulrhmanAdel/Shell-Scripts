@@ -7,7 +7,9 @@ param (
     [string]
     $Target,
     [switch]
-    $CheckHashes
+    $CheckHashes,
+    [switch]
+    $ReverseCheck
 )
 
 $global:checkedFolder = 0;
@@ -29,7 +31,7 @@ function CheckFiles {
         $global:checkedFiles += 1;
         $filePath = "$TargetSource\$($_.Name)";
         if (-not (Test-Path -LiteralPath $filePath)) {
-            Write-Host "File not found: $filePath" -ForegroundColor Green;
+            Write-Host "File not found: Source: $($_.FullName) => Target: $filePath" -ForegroundColor Green;
         }
 
         if ($CheckHashes) {
@@ -52,7 +54,7 @@ function CheckFolders {
         $global:checkedFolder += 1; ;
         $TargetPath = GetTargetFromSource -SourcePath $_.FullName;
         if (-not (Test-Path -LiteralPath $TargetPath)) {
-            Write-Host "Folder not found: $Target\$path\$($_.Name)" -ForegroundColor Green;
+            Write-Host "Folder not found: Source: $($_.FullName) => Target: $TargetPath" -ForegroundColor Green;
             return;
         }
         else {
@@ -63,7 +65,20 @@ function CheckFolders {
     CheckFiles -FolderSource $SourceFolder;
 }
 
+Write-Host "Results" -ForegroundColor Cyan;
+Write-Host "==================" -ForegroundColor Cyan;
+Write-Host "Checking folders and files from $Source to $Target";
 CheckFolders -SourceFolder $Source;
-
 Write-Host "Checked $global:checkedFolder folders and $global:checkedFiles files.";
+Write-Host "==================" -ForegroundColor Cyan;
+if ($ReverseCheck) {
+    Write-Host "Reversing check from $Target to $Source";
+    $Source, $Target = $Target, $Source;
+    $global:checkedFolder = 0;
+    $global:checkedFiles = 0;
+    CheckFolders -SourceFolder $Source;
+    Write-Host "Checked $global:checkedFolder folders and $global:checkedFiles files.";
+    Write-Host "==================" -ForegroundColor Cyan;
+}
+
 timeout.exe 10;
