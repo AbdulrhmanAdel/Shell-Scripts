@@ -5,36 +5,49 @@ param (
     $NoTimeout
 )
 
-$parentDirectory = "$PSScriptRoot\Shared"
 $TargetFolder = "$PSScriptRoot\.path";
-if (-not (Test-Path -LiteralPath $TargetFolder)) {
-    New-Item -Path $TargetFolder -ItemType Directory | Out-Null;
+if (Test-Path -LiteralPath $TargetFolder) {
+    Remove-Item -LiteralPath $TargetFolder -Force -Recurse -ErrorAction SilentlyContinue;
+    New-Item -Path $TargetFolder -ItemType Directory -Force;
+}
+else {
+    New-Item -Path $TargetFolder -ItemType Directory -Force;
 }
 
-Get-ChildItem -Path $parentDirectory -File | ForEach-Object {
-    New-Item `
-        -Path "$TargetFolder\$($_.Name)" `
-        -Target $_.FullName `
-        -ItemType SymbolicLink -ErrorAction SilentlyContinue;
-    
-}
+$sharedPath = "$PSScriptRoot\Shared";
+$SourceFoldersAndFiles = @($sharedPath, @{
+    Path = "$PSScriptRoot\Youtube\Downloader.ps1";
+    Name = "Youtube-Downloader.ps1"
+});
 
-# Retrieve all directory paths
-Get-ChildItem -Path $parentDirectory -Directory -Recurse | Where-Object {
-    return $_.FullName -notmatch "Ignore|Modules"
-} | Select-Object -ExpandProperty FullName | ForEach-Object {
-    Get-ChildItem -Path $_ -File | ForEach-Object {
-        New-Item `
-            -Path "$TargetFolder\$($_.Name)" `
-            -Target $_.FullName `
-            -ItemType SymbolicLink -ErrorAction SilentlyContinue;
+Get-ChildItem -Path $sharedPath -Directory -Recurse | Where-Object {
+    if ($_.FullName -notmatch "Ignore|Modules") {
+        $SourceFoldersAndFiles += $_;
     }
+} 
+
+$SourceFoldersAndFiles | ForEach-Object {
+    $itemInfo = Get-Item -LiteralPath ($_.Path ?? $_);
+    if ($itemInfo -is [System.IO.DirectoryInfo]) {
+        Get-ChildItem -Path $_ -File | ForEach-Object {
+            New-Item `
+                -Path "$TargetFolder\$($_.Name)" `
+                -Target $_.FullName `
+                -ItemType SymbolicLink -ErrorAction SilentlyContinue;
+        }
+        return;
+    }
+
+    $targetName = $_.Name ?? $itemInfo.Name;
+    New-Item `
+        -Path "$TargetFolder\$targetName" `
+        -Target $itemInfo.FullName `
+        -ItemType SymbolicLink -ErrorAction SilentlyContinue;
 }
 
 # Current system path
 $currentPath = [System.Environment]::GetEnvironmentVariable("Path", "User");
 $paths = $currentPath -split ";";
-
 if ($paths.Contains($TargetFolder)) {
     Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;
     Exit;
