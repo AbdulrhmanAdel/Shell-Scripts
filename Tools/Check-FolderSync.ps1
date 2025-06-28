@@ -6,9 +6,9 @@ param (
     [Parameter(Mandatory, Position = 1)]
     [string]
     $Target,
-    [switch]
+    [bool]
     $CheckHashes,
-    [switch]
+    [bool]
     $ReverseCheck
 )
 
