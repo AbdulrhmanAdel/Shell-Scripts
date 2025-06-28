@@ -57,6 +57,14 @@ $Options = @(
             }
         };
     }
+    @{
+        Key     = "Check Folder Sync";
+        Handler = {
+            $Source = $Files.Length -gt 0 ? $Files[0] : (Folder-Picker.ps1 -Title "Please Pick Source Folder." -ShowOnTop -Required);
+            $Target = $Files.Length -gt 1  ? $Files?[1] : (Folder-Picker.ps1 -Title "Please Pick Target Folder." -ShowOnTop -Required);
+            & "$PSScriptRoot\Check-FolderSync.ps1" -Source $Source -Target $Target;
+        };
+    }
 )
 
 . Create-Module.ps1 -Options $Options;
