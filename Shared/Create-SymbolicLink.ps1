@@ -1,37 +1,34 @@
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory, Position = 1)]
-    [string]
-    [Alias("Source")]
-    $LinkToPath,
     [string]
     [Alias("Target")]
     $SymbolLinkPath,
-    [switch]
-    $NoReplace
+    [Parameter(Mandatory)]
+    [string]
+    [Alias("Source")]
+    $LinkToPath,
+    [bool]
+    $NoReplace = $false
 )
 
 Write-Host 
-if ($SymbolLinkPath -eq $null -or $SymbolLinkPath -eq "") {
-    $SymbolLinkPath = Folder-Picker.ps1 -InitialDirectory ([System.IO.Path]::GetDirectoryName($Source)) -Required;
+if ($null -eq $SymbolLinkPath -or $SymbolLinkPath -eq "") {
+    $SymbolLinkPath = Folder-Picker.ps1 -InitialDirectory ([System.IO.Path]::GetDirectoryName($LinkToPath)) -Required;
 }
 
-
-if ($Source.StartsWith("c") -or $SymbolLinkPath.StartsWith("c")) {
+if ($LinkToPath.StartsWith("c") -or $SymbolLinkPath.StartsWith("c")) {
     Run-AsAdmin.ps1 -Arguments @(
-        "-Source", $Source,
-        "-Target", $SymbolLinkPath,
+        "-LinkToPath", $LinkToPath,
+        "-SymbolLinkPath", $SymbolLinkPath,
         "-NoReplace", $NoReplace
     );
 }
 
-
-
-$isSourceFile = (Get-Item -LiteralPath $Source) -is [System.IO.FileInfo];
+$isSourceFile = (Get-Item -LiteralPath $LinkToPath) -is [System.IO.FileInfo];
 $isTargetFile = (Get-Item -LiteralPath $SymbolLinkPath) -is [System.IO.FileInfo];
 if ($isSourceFile -and !$isTargetFile) {
-    $SourceName = Split-Path -Path $Source -Leaf
-    $SymbolLinkPath = "$SymbolLinkPath\$SourceName";
+    $LinkToPathName = Split-Path -Path $LinkToPath -Leaf
+    $SymbolLinkPath = "$SymbolLinkPath\$LinkToPathName";
 }
 
 if (!$NoReplace -and (Test-Path -LiteralPath $SymbolLinkPath)) {
@@ -40,6 +37,6 @@ if (!$NoReplace -and (Test-Path -LiteralPath $SymbolLinkPath)) {
 
 New-Item `
     -Path $SymbolLinkPath `
-    -Target $Source `
+    -Target $LinkToPath `
     -ItemType SymbolicLink;
     
