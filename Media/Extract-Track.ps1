@@ -77,7 +77,7 @@ function HandleTrack {
                 break;
             }
             ([ExtractLibraryType]::MkvExtract) { 
-                & mkvextract.exe "$($fileInfo.FullName)" tracks "$($trackInfo.Index):$output"
+                & mkvextract "$($fileInfo.FullName)" tracks "$($trackInfo.Index):$output"
                 break; 
             }
             Default {}

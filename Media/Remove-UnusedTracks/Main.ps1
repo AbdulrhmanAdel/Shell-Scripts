@@ -37,7 +37,7 @@ function GetMediaFilesFromArchive {
         & Remove-ToRecycleBin.ps1 $outputPath;
     }
 
-    $archiveProcess = Start-Process 7z.exe -ArgumentList @(
+    $archiveProcess = Start-Process 7z -ArgumentList @(
         "x", 
         """$($archiveFileInfo.FullName)""",
         "-o$outputPath"

@@ -162,7 +162,7 @@ function DownloadSubtitle {
     $tempPath = "$downloadPath/$( $downloadSubDetails.fileName )";
     Invoke-WebRequest -Uri $downloadLink -OutFile $tempPath;
     $extractLocation = "$downloadPath\$( Get-Date -Format 'yyyy-MM-dd-HH-mm-ss' )"
-    & 7z.exe  x $tempPath -aoa -bb0 -o"$extractLocation" | Out-Null;
+    & 7z  x $tempPath -aoa -bb0 -o"$extractLocation" | Out-Null;
     $downloadSubtitleCache[$sub.subId] = $extractLocation;
     Start-Sleep -Milliseconds 500;
     return $extractLocation;

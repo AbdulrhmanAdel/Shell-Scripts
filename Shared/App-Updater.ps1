@@ -42,7 +42,7 @@ if (-not (Test-Path -LiteralPath $DownloadPath)) {
 Write-Host "Extracting $AppName" -ForegroundColor Green;
 if ($ArchiveType -eq "Electron") {
     $Destination = "$env:TEMP\$ProcessName-$(Get-Date -Format 'yyyyMMdd-HHmmss')";
-    Start-Process 7z.exe -ArgumentList @(
+    Start-Process 7z -ArgumentList @(
         "x", 
         """$DownloadPath""",
         "-o$Destination"
@@ -50,7 +50,7 @@ if ($ArchiveType -eq "Electron") {
     $DownloadPath = "$Destination\$('$PLUGINSDIR')\app-64.7z";
 }
 
-$archiveProcess = Start-Process 7z.exe -ArgumentList @(
+$archiveProcess = Start-Process 7z -ArgumentList @(
     "x", 
     """$DownloadPath""",
     "-o$AppPath"

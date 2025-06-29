@@ -110,7 +110,7 @@ function GetImagePath {
         return $Path;
     }
 
-    $Width, $Hight = (& magick.exe identify -format "%w %h" "$Path").Split(" ");
+    $Width, $Hight = (& magick identify -format "%w %h" "$Path").Split(" ");
     if ($Width -ne $Hight) {
         $PathInfo = Get-Item -LiteralPath $Path;
         $NewImagePath = "$($PathInfo.Directory.FullName)\$($PathInfo.BaseName)-resized$($PathInfo.Extension)";

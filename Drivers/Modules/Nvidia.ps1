@@ -283,7 +283,7 @@ Write-Host "Extracting the driver to $DriverPath, Please insure 7zip is installe
 $extractPath = "$($env:TEMP)\NvidiaDriver\$version";
 if (-not (Test-Path -LiteralPath $DriverPath)) {
 
-    Start-Process 7z.exe -ArgumentList @(
+    Start-Process 7z -ArgumentList @(
         "x", 
         """$($DriverPath)""",
         "-o$extractPath"
