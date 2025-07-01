@@ -12,6 +12,9 @@ $savedPaths = $path -split ";";
 $newPaths = $Paths | Where-Object { !$savedPaths.Contains($_); };
 
 if ($newPaths.Count -eq 0) {
+    if (-not $NoTimeout) {
+        Exit;
+    }
     Write-Host "No New Paths Provided" -ForegroundColor Red;
     timeout.exe 5;
     Exit;
