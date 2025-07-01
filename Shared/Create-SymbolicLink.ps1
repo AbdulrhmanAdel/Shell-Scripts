@@ -24,8 +24,10 @@ if ($LinkToPath.StartsWith("c") -or $SymbolLinkPath.StartsWith("c")) {
     );
 }
 
-$isSourceFile = (Get-Item -LiteralPath $LinkToPath) -is [System.IO.FileInfo];
-$isTargetFile = (Get-Item -LiteralPath $SymbolLinkPath) -is [System.IO.FileInfo];
+$isSourceFile = (Test-Path -LiteralPath $LinkToPath) `
+    -and (Get-Item -LiteralPath $LinkToPath) -is [System.IO.FileInfo];
+$isTargetFile = (Test-Path -LiteralPath $SymbolLinkPath) `
+    -and (Get-Item -LiteralPath $SymbolLinkPath) -is [System.IO.FileInfo];
 if ($isSourceFile -and !$isTargetFile) {
     $LinkToPathName = Split-Path -Path $LinkToPath -Leaf
     $SymbolLinkPath = "$SymbolLinkPath\$LinkToPathName";
