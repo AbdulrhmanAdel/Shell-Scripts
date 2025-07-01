@@ -12,20 +12,19 @@ $Recycle = "RecycleBin";
 $baseScriptsPath = $PSScriptRoot;
 function BuildScript {
     param (
-        [string]$scriptPath,
-        [string]$PathParamName,
-        [string[]]$additionalArgs,
-        [string]$target,
-        [string]$powershellArgs
+        [object]$Element
     )
 
-    $finalArgs = "";
-    if ($additionalArgs) {
-        $finalArgs = ($additionalArgs | ForEach-Object { return "$_" }) -join " "
+    $File = $element.File;
+    $arguments = $element.Arguments -join ' ';
+    
+    if ($Element.Command) {
+        return "pwsh.exe -Command & {
+            $($Element.Command) $arguments
+        }";
     }
-
-    $target ??= "%1";
-    return "pwsh.exe $($powershellArgs) -file ""$baseScriptsPath\$scriptPath"" $PathParamName ""$target"" $finalArgs";
+    
+    return "pwsh.exe -File ""$baseScriptsPath\$File"" $($arguments)";
 }
 
 function Handle {
@@ -42,13 +41,7 @@ function Handle {
     }
 
     $key = $element.Key;
-    $target = $extension -eq $Recycle ? "$($env:SystemDrive)\`$Recycle.bin" : "%1";
-    $command = BuildScript -scriptPath $element.ScriptPath `
-        -PathParamName $element.PathParamName `
-        -additionalArgs $element.AdditionalArgs `
-        -target $target `
-        -powershellArgs $element.PowershellArgs;
-
+    $command = BuildScript -Element $element;
     reg add "$base\$key" /d $element.Title /t REG_SZ /f | Out-Null;
 
     if ($extension.Extended) {
@@ -83,6 +76,9 @@ function CreateMenu {
 #     }
 # )
 
+
+$FolderPlaceholder = """%1""";
+$DefaultArgument = @($FolderPlaceholder);
 $mediaPath = @(
     @{
         Title = "Media" 
@@ -142,112 +138,124 @@ $scripts = @(
         Extensions = @(".mp3", ".m4a", ".mp4", ".mkv")
         Title      = "Crop"
         Key        = "999 Crop"
-        ScriptPath = "Media\Crop.ps1"
+        File       = "Media\Crop.ps1"
         Path       = $mediaPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @(".mkv", ".mp4")
         Title      = "Display Chapters Info"
         Key        = "000 Display Chapters Info"
-        ScriptPath = "Media\Display-Chapter-Info.ps1"
+        File       = "Media\Display-Chapter-Info.ps1"
         Path       = $mediaPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @(".mkv", ".mp4")
         Title      = "Copy Name"
         Key        = "999 Copy Name"
-        ScriptPath = "Media\Copy-Name.ps1"
+        File       = "Media\Copy-Name.ps1"
         Path       = $mediaPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @("*", "Directory")
         Title      = "TakeOwn"
         Key        = "TakeOwn"
-        ScriptPath = "Tools\Takeown.ps1"
+        File       = "Tools\Takeown.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
         Title      = "Add To Path"
         Key        = "Add To Path"
-        ScriptPath = "Shared\Add-ToPath.ps1"
+        Command    = "Add-ToPath.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @("*")
         Title      = "Display Hash"
         Key        = "999-Display Hash"
-        ScriptPath = "Tools\Hash\Display-Hash.ps1"
+        File       = "Tools\Hash\Display-Hash.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
         Title      = "Youtube Downloader"
         Key        = "90 Youtube Downloader"
-        ScriptPath = "Youtube\Downloader.ps1"
+        File       = "Youtube\Downloader.ps1"
         Path       = @()
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
-        Extensions     = @("Drive", $Recycle)
-        Title          = "Safe Delete"
-        Key            = "99 Safe Delete"
-        ScriptPath     = "Tools\Safe-Delete.ps1"
-        Path           = @()
-        Icon           = "pwsh.exe"
-        AdditionalArgs = @()
+        Extensions = @("Drive", $Recycle)
+        Title      = "Safe Delete"
+        Key        = "99 Safe Delete"
+        File       = "Tools\Safe-Delete.ps1"
+        Path       = @()
+        Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
         Title      = "Set Or Refresh Icon"
         Key        = "0 Set Or Refresh Icon"
-        ScriptPath = "Icons\Set-Folder-Icon.ps1"
+        File       = "Icons\Set-Folder-Icon.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
         Title      = "Remove Icon"
         Key        = "8 Remove Icon"
-        ScriptPath = "Icons\Remove-Icon.ps1"
+        File       = "Icons\Remove-Icon.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @(".png")
         Title      = "Convert To Icon"
         Key        = "0 Convert To Icon"
-        ScriptPath = "Icons\Utils\Convert-Png-To-Ico.ps1"
+        File       = "Icons\Utils\Convert-Png-To-Ico.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
         Title      = "Open Folder Icon Info.ini"
         Key        = "9 Open Folder Icon Info.ini"
-        ScriptPath = "Icons\Open-FolderIconInfo.ps1"
+        File       = "Icons\Open-FolderIconInfo.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
         Title      = "Anidl"
         Key        = "900 Anidl"
-        ScriptPath = "Crawlers\Anidl.ps1"
+        File       = "Crawlers\Anidl.ps1"
         Path       = $crawlersPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     }#,
     # @{
     #     Extensions = @("*", "Directory")
     #     Title      = "Display Attributes"
     #     Key        = "Display Attributes"
-    #     ScriptPath = "Attributes\Display-Attributes.ps1"
+    #     File = "Attributes\Display-Attributes.ps1"
     #     Path       = $attributesPath
     #     Icon       = "pwsh.exe"
     # },
@@ -255,7 +263,7 @@ $scripts = @(
     #     Extensions = @("*", "Directory")
     #     Title      = "Change Attributes"
     #     Key        = "Change Attributes"
-    #     ScriptPath = "Attributes\Change-Attributes.ps1"
+    #     File = "Attributes\Change-Attributes.ps1"
     #     Path       = $attributesPath
     #     Icon       = "pwsh.exe"
     # }#,
@@ -263,7 +271,7 @@ $scripts = @(
     #     Extensions = @("Directory")
     #     Title      = "Display Folder Content"
     #     Key        = "Display Folder Content"
-    #     ScriptPath = "Tools\Display-Folder-Content.ps1"
+    #     File = "Tools\Display-Folder-Content.ps1"
     #     Path       = $infoPath
     #     Icon       = "pwsh.exe"
     # },
@@ -271,77 +279,101 @@ $scripts = @(
         Extensions = @("*")
         Title      = "Pin To Start"
         Key        = "Pin To Start"
-        ScriptPath = "Tools\Pin-File-To-Start.ps1"
+        File       = "Tools\Pin-File-To-Start.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
+        Arguments = $DefaultArgument
     } #,
     # @{
     #     Extensions = @("*", "Directory")
     #     Title      = "Create Symblink"
     #     Key        = "Create Symblink"
-    #     ScriptPath = "Tools\Create-Symblink.ps1"
+    #     File = "Tools\Create-Symblink.ps1"
     #     Path       = $toolsPath
     #     Icon       = "pwsh.exe"
     # },
     @{
-        Extensions     = @("*", "Directory")
-        Title          = "Copy"
-        Key            = "999 Copy.ps1"
-        ScriptPath     = "Tools\Copy-ToDrive.ps1"
-        Path           = $toolsPath
-        Icon           = "pwsh.exe"
-        PathParamName  = "-Files"
-        AdditionalArgs = @("-CustomDestiniation")
-    }, 
-    @{
         Extensions    = @("*", "Directory")
-        Title         = "Copy To Different Drive With The Same Hierarchy"
-        Key           = "999-Copy-ToDrive.ps1"
-        ScriptPath    = "Tools\Copy-ToDrive.ps1"
+        Title         = "Copy"
+        Key           = "999 Copy.ps1"
+        File          = "Tools\Copy-ToDrive.ps1"
         Path          = $toolsPath
         Icon          = "pwsh.exe"
         PathParamName = "-Files"
+        Arguments     = @(
+            "-Files"
+            $FolderPlaceholder
+            "-CustomDestiniation"
+        );
+    }, 
+    @{
+        Extensions = @("*", "Directory")
+        Title      = "Copy To Different Drive With The Same Hierarchy"
+        Key        = "999-Copy-ToDrive.ps1"
+        File       = "Tools\Copy-ToDrive.ps1"
+        Path       = $toolsPath
+        Icon       = "pwsh.exe"
+        Arguments  = @(
+            "-Files"
+            $FolderPlaceholder
+        );
     } #, 
     @{
-        Extensions     = @("Drive", "*", "Directory", $Recycle)
-        Title          = "Safe Delete"
-        Key            = "999 Safe Delete"
-        ScriptPath     = "Tools\Safe-Delete.ps1"
-        Path           = $safeDelete
-        Icon           = "pwsh.exe"
-        AdditionalArgs = @("--prompt", "--promptPasses")
+        Extensions = @("Drive", "*", "Directory", $Recycle)
+        Title      = "Safe Delete"
+        Key        = "999 Safe Delete"
+        File       = "Tools\Safe-Delete.ps1"
+        Path       = $safeDelete
+        Icon       = "pwsh.exe"
+        Arguments  = @(
+            $FolderPlaceholder,
+            "-Prompt",
+            "-PromptPasses"
+        );
     }
     @{
-        Extensions     = @(".ps1")
-        Title          = "Open With Shift"
-        Key            = "999 Open With Shift"
-        ScriptPath     = "Tools\Open-WithShift.ps1"
-        Path           = $toolsPath
-        Icon           = "pwsh.exe"
-        AdditionalArgs = @()
-        Extended       = $true
+        Extensions = @($Recycle)
+        Title      = "Safe Delete"
+        Key        = "999 Safe Delete"
+        File       = "Tools\Safe-Delete.ps1"
+        Path       = $safeDelete
+        Icon       = "pwsh.exe"
+        Arguments  = @(
+            "$($env:SystemDrive)\`$Recycle.bin"
+        );
     }
     @{
-        Extensions     = @(".exe")
-        Title          = "Change Compatibility Settings"
-        Key            = "999 Change Compatibility Settings"
-        ScriptPath     = "Tools\Change-CompatibilitySettings.ps1"
-        Path           = $toolsPath
-        Icon           = "pwsh.exe"
-        AdditionalArgs = @()
-        Extended       = $true
+        Extensions = @(".ps1")
+        Title      = "Open With Shift"
+        Key        = "999 Open With Shift"
+        File       = "Tools\Open-WithShift.ps1"
+        Path       = $toolsPath
+        Icon       = "pwsh.exe"
+        Extended   = $true
+        Arguments = $DefaultArgument
     }
     @{
-        Extensions     = @("*", "Directory")
-        Title          = "Create Symbol Link"
-        Key            = "999 Create Symbol Link"
-        ScriptPath     = "Shared\Create-SymbolicLink.ps1"
-        Path           = $toolsPath
-        Icon           = "pwsh.exe"
-        AdditionalArgs = @(
-            "-Source"
-        )
-        Extended       = $true
+        Extensions = @(".exe")
+        Title      = "Change Compatibility Settings"
+        Key        = "999 Change Compatibility Settings"
+        File       = "Tools\Change-CompatibilitySettings.ps1"
+        Path       = $toolsPath
+        Icon       = "pwsh.exe"
+        Extended   = $true
+        Arguments = $DefaultArgument
+    }
+    @{
+        Extensions = @("*", "Directory")
+        Title      = "Create Symbol Link"
+        Key        = "999 Create Symbol Link"
+        File       = "Shared\Create-SymbolicLink.ps1"
+        Path       = $toolsPath
+        Icon       = "pwsh.exe"
+        Arguments  = @(
+            "-LinkToPath"
+            $FolderPlaceholder
+        );
+        Extended   = $true
     }
 ) 
 #endregion
