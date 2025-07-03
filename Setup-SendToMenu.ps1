@@ -13,21 +13,21 @@ $scriptPath = $PSScriptRoot;
 #region Menu
 $menu = @(
     @{
-        Name      = "01- Media Scripts.lnk"
-        Arguments = "-File ""$scriptPath\Media\Module.ps1"""
-    },
-    @{
-        Name      = "02- Subtitle Scripts.lnk"
-        Arguments = "-File ""$scriptPath\Subtitles\Module.ps1"""
-    },
-    @{
-        Name      = "03- General Tools.lnk"
-        Arguments = "-File ""$scriptPath\Tools\Module.ps1"""
+        Name = "Module Picker"
+        Arguments = "-File ""$scriptPath\Shared\Module-Picker.ps1"""
     }
     # @{
-    #     Name      = "500- Copy To Different Drive With The Same Hierarchy.lnk"
-    #     Arguments = "-File ""$scriptPath\Tools\Copy-To-Different-Drive-With-The-Same-Hierarchy.ps1"""
+    #     Name      = "01- Media Scripts"
+    #     Arguments = "-File ""$scriptPath\Media\Module.ps1"""
     # },
+    # @{
+    #     Name      = "02- Subtitle Scripts"
+    #     Arguments = "-File ""$scriptPath\Subtitles\Module.ps1"""
+    # },
+    # @{
+    #     Name      = "03- General Tools"
+    #     Arguments = "-File ""$scriptPath\Tools\Module.ps1"""
+    # }
 )
      
 #endregion
@@ -38,7 +38,7 @@ if (!(Test-Path -LiteralPath $sendToMenuFolder)) {
 
 $menu | ForEach-Object {
     $sh = New-Object -ComObject WScript.Shell
-    $path = "$sendToMenuFolder/$($_.Name)";
+    $path = "$sendToMenuFolder/$($_.Name).lnk";
     $shortCut = $sh.CreateShortcut($path);
     $shortCut.TargetPath = "pwsh.exe";
     $shortCut.Arguments = "-WindowStyle Maximized $($_.Arguments)";
