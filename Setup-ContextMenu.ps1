@@ -5,6 +5,12 @@ param (
     [Parameter(ValueFromRemainingArguments = $true)]
     $Rest
 )
+
+$Ids = @{
+    Scripts        = "0 Scripts"
+    SpecialScripts = "0 Special Scripts"
+}
+
 & Run-AsAdmin.ps1 -Arguments @($NoTimeout ? '-NoTimeout' : '');
 
 Write-Host "Starting" -ForegroundColor Green;
@@ -141,7 +147,7 @@ $scripts = @(
         File       = "Media\Crop.ps1"
         Path       = $mediaPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @(".mkv", ".mp4")
@@ -150,7 +156,7 @@ $scripts = @(
         File       = "Media\Display-Chapter-Info.ps1"
         Path       = $mediaPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @(".mkv", ".mp4")
@@ -159,7 +165,7 @@ $scripts = @(
         File       = "Media\Copy-Name.ps1"
         Path       = $mediaPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("*", "Directory")
@@ -168,7 +174,7 @@ $scripts = @(
         File       = "Tools\Takeown.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -177,7 +183,7 @@ $scripts = @(
         Command    = "Add-ToPath.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("*")
@@ -186,7 +192,7 @@ $scripts = @(
         File       = "Tools\Hash\Display-Hash.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -195,7 +201,7 @@ $scripts = @(
         File       = "Youtube\Downloader.ps1"
         Path       = @()
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Drive", $Recycle)
@@ -204,7 +210,7 @@ $scripts = @(
         File       = "Tools\Safe-Delete.ps1"
         Path       = @()
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -213,7 +219,7 @@ $scripts = @(
         File       = "Icons\Set-Folder-Icon.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -222,7 +228,7 @@ $scripts = @(
         File       = "Icons\Remove-Icon.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @(".png")
@@ -231,7 +237,7 @@ $scripts = @(
         File       = "Icons\Utils\Convert-Png-To-Ico.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -240,7 +246,7 @@ $scripts = @(
         File       = "Icons\Open-FolderIconInfo.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -249,7 +255,7 @@ $scripts = @(
         File       = "Crawlers\Anidl.ps1"
         Path       = $crawlersPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     }#,
     # @{
     #     Extensions = @("*", "Directory")
@@ -282,7 +288,7 @@ $scripts = @(
         File       = "Tools\Pin-File-To-Start.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     } #,
     # @{
     #     Extensions = @("*", "Directory")
@@ -350,7 +356,7 @@ $scripts = @(
         Path       = $toolsPath
         Icon       = "pwsh.exe"
         Extended   = $true
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     }
     @{
         Extensions = @(".exe")
@@ -360,7 +366,7 @@ $scripts = @(
         Path       = $toolsPath
         Icon       = "pwsh.exe"
         Extended   = $true
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     }
     @{
         Extensions = @("*", "Directory")

@@ -4,6 +4,11 @@ param (
     [string[]]
     $Files
 )
+$Ids = @{
+    Scripts        = "0 Scripts"
+    SpecialScripts = "0 Special Scripts"
+}
+
 
 function AddRegIfNotExist {
     param (
@@ -44,7 +49,7 @@ $Targets = @(
         Key   = "Directories"
         Value = @{
             Builder = { 
-                return BuildPrefix -Base "HKEY_CURRENT_USER\Software\Classes\Directory\shell";
+                return BuildPrefix -Base "HKEY_CURRENT_USER\Software\Classes\Directory\shell\$($Ids.SpecialScripts)";
             }
         }
     }
@@ -54,7 +59,7 @@ $Targets = @(
             Builder = {
                 $Extensions = Input.ps1 -Title "Please Type extension sepreated by ',' or ' ' without '.'"
                 ($Extensions -split ",| ") | ForEach-Object {
-                    return BuildPrefix -Base ".$_"
+                    return BuildPrefix -Base "HKEY_CURRENT_USER\Software\Classes\.$_\shell\$($Ids.SpecialScripts)";
                 }
             }
         }
