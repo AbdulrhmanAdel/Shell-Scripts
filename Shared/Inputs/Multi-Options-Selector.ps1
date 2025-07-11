@@ -1,7 +1,7 @@
 # Load the necessary assembly for creating forms
 [CmdletBinding()]
 param (
-    $options,
+    $Options,
     [string]$Title,
     [switch]$Multi,
     [switch]
@@ -21,7 +21,7 @@ $form.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 
 $mainPanel = New-Object System.Windows.Forms.TableLayoutPanel
 $mainPanel.ColumnCount = 1
-$mainPanel.RowCount = $options.Count + 1
+$mainPanel.RowCount = $Options.Count + 1
 $mainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill;
 $mainPanel.AutoScroll = $true;
 $mainPanel.Margin = New-Object System.Windows.Forms.Padding(10, 0, 10, 0);
@@ -31,7 +31,7 @@ $mainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill;
 $form.Controls.Add($mainPanel);
 $currentRow = 0;
 $selectedOptions ??= @();
-$checkboxes = $options | ForEach-Object {
+$checkboxes = $Options | ForEach-Object {
     $item = $_;
     $checkbox = New-Object System.Windows.Forms.CheckBox
     $checkbox.AutoSize = $true;
@@ -61,7 +61,7 @@ $submitButton.Add_Click(
     {
         $form.Close()
     });
-$mainPanel.Controls.Add($submitButton, 0, $options.Count + 1);
+$mainPanel.Controls.Add($submitButton, 0, $Options.Count + 1);
 
 $width = ($checkboxes | Select-Object -ExpandProperty Width | Measure-Object -Maximum).Maximum;
 $checkboxHeight = ($checkboxes | Select-Object -ExpandProperty Height | Measure-Object -Maximum).Maximum;

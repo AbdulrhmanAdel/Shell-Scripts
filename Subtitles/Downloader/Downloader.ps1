@@ -110,6 +110,8 @@ $subs = $files | ForEach-Object {
         $imdbCache[$details.Title] = Imdb-GetShow.ps1 -name $details.Title;
     }
     if (!$details) { return $null; }
+    $imdb = $imdbCache[$details.Title];
+    $details.Type = $imdb.type;
     $info = $details.Info;
     $name = $info.Name -replace $info.Extension, "";
     return @{

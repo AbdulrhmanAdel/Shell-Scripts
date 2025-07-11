@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param (
-    [Parameter()]
+    [Parameter(ValueFromRemainingArguments)]
     [string[]]
     $Files
 )
@@ -8,15 +8,15 @@ param (
 $Module = Single-Options-Selector.ps1 -Options @(
     @{
         Key   = "Media";
-        Value = "$PSScriptRoot/../Media/Module.ps1";
+        Value = @{ Title = "Media"; Path = "$PSScriptRoot/../Media/Module.ps1" };
     }
     @{
         Key   = "Subtitles";
-        Value = "$PSScriptRoot/../Subtitles/Module.ps1";
+        Value = @{ Title = "Subtitles"; Path = "$PSScriptRoot/../Subtitles/Module.ps1" };
     }
     @{
         Key   = "Tools";
-        Value = "$PSScriptRoot/../Tools/Module.ps1";
+        Value = @{ Title = "Tools"; Path = "$PSScriptRoot/../Tools/Module.ps1" };
     }
 ) -Required;
 
@@ -24,8 +24,7 @@ if (!$Module) {
     Exit;
 }
 
-# Write-Host "Selected Module: $Module" -ForegroundColor Green;
-$ModulePath = Resolve-Path -Path $Module -ErrorAction Ignore;
-Write-Host "Selected Module: $Module" -ForegroundColor Green;
+$ModulePath = Resolve-Path -Path $Module.Path -ErrorAction Ignore;
+Write-Host "Selected Module: $($Module.Title)" -ForegroundColor Green;
 & $ModulePath.Path -Files $Files;
 timeout.exe 20

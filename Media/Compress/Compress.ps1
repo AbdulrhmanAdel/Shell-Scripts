@@ -53,11 +53,11 @@ $Files | ForEach-Object {
 };
 
 if ($source -match "All|Images" -and $images.Count) {
-    & "$modulesPath\Video-Compressor.ps1" -Files $images;
+    & "$modulesPath\Image-Compressor.ps1" -Files $images;
 }
 
 if ($source -match "All|Audio" -and $audio.Count) {
-    & "$modulesPath\Video-Compressor.ps1" -Files $audio;
+    & "$modulesPath\Audio-Compressor.ps1" -Files $audio;
 }
 if ($source -match "All|Videos" -and $videos.Count) {
     & "$modulesPath\Video-Compressor.ps1" -Files $videos;

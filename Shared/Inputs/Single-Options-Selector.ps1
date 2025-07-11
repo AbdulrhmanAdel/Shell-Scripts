@@ -29,12 +29,11 @@ function CreateButton($option) {
     $button = New-Object System.Windows.Forms.Button
     if ($option.Key) {
         $button.Text = $option.Key
-        $button.Tag = $option.Value ?? $option;
     }
     else {
         $button.Text = $option
-        $button.Tag = $option
     }
+    $button.Tag = $option.Value ?? $option;
     $button.AutoSize = $true
     $button.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
     $button.Padding = New-Object System.Windows.Forms.Padding(5)  # Add button padding 
