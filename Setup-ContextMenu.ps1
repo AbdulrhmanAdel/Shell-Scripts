@@ -375,6 +375,19 @@ $scripts = @(
         );
         Extended   = $true
     }
+    @{
+        Extensions = @(".appx", ".Msixbundle", ".Msix")
+        Title      = "Install"
+        Key        = "999 Install"
+        File       = "Windows\Install-Package.ps1"
+        Path       = $toolsPath
+        Icon       = "pwsh.exe"
+        Arguments  = @(
+            "-Path"
+            $FolderPlaceholder
+        );
+        Extended   = $true
+    }
 ) 
 #endregion
 
