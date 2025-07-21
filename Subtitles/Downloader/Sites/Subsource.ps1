@@ -289,6 +289,7 @@ $Episodes | ForEach-Object {
     } | Select-Object -First 1;
 
     if (!$matchedSubtitle) {
+        Write-Host "Trying complete season subtitle" -ForegroundColor Green;
         $matchedSubtitle = $wholeSeasonSubtitles | Where-Object { 
             MatchRelease -releaseName $_.releaseName`
                 -qualityRegex $qualityRegex `
@@ -297,7 +298,7 @@ $Episodes | ForEach-Object {
         } | Select-Object -First 1;
     }
 
-    $matchedSubtitle ??= $episodeSubtitles[0];
+    $matchedSubtitle ??= $episodeSubtitles[0] ?? $wholeSeasonSubtitles[0];
     if (!$matchedSubtitle) {
         Write-Host "CAN'T FIND Subtitle FOR $title => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
         Write-Host "$global:subtitlePageLink" -ForegroundColor Blue;
