@@ -50,5 +50,11 @@ foreach ($menu in $Menus) {
     BuildMenu -Menu $menu;
 }
 
-$SavePath = [Environment]::GetEnvironmentVariable("Nile-Soft", "User") + "\imports\my-config.nss"
+$nileSoftPath = [Environment]::GetEnvironmentVariable("Nile-Soft", "User");
+if (-not $nileSoftPath) {
+    $nileSoftPath = Folder-Picker.ps1 -InitialDirectory "D:\";
+    [Environment]::SetEnvironmentVariable("Nile-Soft", $nileSoftPath, "User");
+}
+
+$SavePath = "$nileSoftPath\imports\my-config.nss"
 Set-Content $SavePath -Value $global:FinalContent;
