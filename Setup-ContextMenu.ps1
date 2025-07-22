@@ -2,10 +2,14 @@
 param (
     [switch]
     $NoTimeout,
-    [Parameter(ValueFromRemainingArguments = $true)]
-    $Rest
+    [switch]
+    $Remove
 )
-& Run-AsAdmin.ps1 -Arguments @($NoTimeout ? '-NoTimeout' : '');
+
+& Run-AsAdmin.ps1 -Arguments @(
+    ($NoTimeout ? '-NoTimeout' : $null)
+    ($Remove ? '-Remove' : $null)
+);
 
 Write-Host "Starting" -ForegroundColor Green;
 $Recycle = "RecycleBin";
@@ -141,7 +145,7 @@ $scripts = @(
         File       = "Media\Crop.ps1"
         Path       = $mediaPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @(".mkv", ".mp4")
@@ -150,7 +154,7 @@ $scripts = @(
         File       = "Media\Display-Chapter-Info.ps1"
         Path       = $mediaPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @(".mkv", ".mp4")
@@ -159,7 +163,7 @@ $scripts = @(
         File       = "Media\Copy-Name.ps1"
         Path       = $mediaPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("*", "Directory")
@@ -168,7 +172,7 @@ $scripts = @(
         File       = "Tools\Takeown.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -177,7 +181,7 @@ $scripts = @(
         Command    = "Add-ToPath.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("*")
@@ -186,7 +190,7 @@ $scripts = @(
         File       = "Tools\Hash\Display-Hash.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -195,7 +199,7 @@ $scripts = @(
         File       = "Youtube\Downloader.ps1"
         Path       = @()
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Drive", $Recycle)
@@ -204,7 +208,7 @@ $scripts = @(
         File       = "Tools\Safe-Delete.ps1"
         Path       = @()
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -213,7 +217,7 @@ $scripts = @(
         File       = "Icons\Set-Folder-Icon.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -222,7 +226,7 @@ $scripts = @(
         File       = "Icons\Remove-Icon.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @(".png")
@@ -231,7 +235,7 @@ $scripts = @(
         File       = "Icons\Utils\Convert-Png-To-Ico.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -240,7 +244,7 @@ $scripts = @(
         File       = "Icons\Open-FolderIconInfo.ps1"
         Path       = $iconsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     },
     @{
         Extensions = @("Directory")
@@ -249,7 +253,7 @@ $scripts = @(
         File       = "Crawlers\Anidl.ps1"
         Path       = $crawlersPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     }#,
     # @{
     #     Extensions = @("*", "Directory")
@@ -282,7 +286,7 @@ $scripts = @(
         File       = "Tools\Pin-File-To-Start.ps1"
         Path       = $toolsPath
         Icon       = "pwsh.exe"
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     } #,
     # @{
     #     Extensions = @("*", "Directory")
@@ -350,7 +354,7 @@ $scripts = @(
         Path       = $toolsPath
         Icon       = "pwsh.exe"
         Extended   = $true
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     }
     @{
         Extensions = @(".exe")
@@ -360,7 +364,7 @@ $scripts = @(
         Path       = $toolsPath
         Icon       = "pwsh.exe"
         Extended   = $true
-        Arguments = $DefaultArgument
+        Arguments  = $DefaultArgument
     }
     @{
         Extensions = @("*", "Directory")
@@ -396,10 +400,17 @@ $specialsExtensions = @("*", "Directory", "Drive");
     if ($_ -in $specialsExtensions) {
         reg delete "HKEY_CURRENT_USER\Software\Classes\$_\shell\0 Scripts" /f;
     }
+    elseif ($_ -eq $Recycle) {
+        reg delete "HKEY_CLASSES_ROOT\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}\shell\0 Scripts" /f;
+    }
     else {
         reg delete "HKEY_CLASSES_ROOT\SystemFileAssociations\$_\shell\0 Special Scripts" /f;
     }
 };
+
+if ($Remove) {
+    return;
+}
 
 $scripts | ForEach-Object {
     $element = $_;
@@ -428,5 +439,6 @@ $scripts | ForEach-Object {
 if ($NoTimeout) {
     Exit;
 }
+
 Write-Host "Done" -ForegroundColor Green;
 timeout.exe 5;
