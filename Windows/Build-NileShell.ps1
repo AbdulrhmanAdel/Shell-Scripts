@@ -79,6 +79,11 @@ $Menus = @(
                         Title    = "Display Hash"
                         FilePath = "$ShellScripsPath\Tools\Hash\Display-Hash.ps1"
                     }
+                    @{
+                        Target   = "file|dir"
+                        Title    = "Copy Names"
+                        FilePath = "$ShellScripsPath\Tools\Copy-FileNames.ps1"
+                    }
                 )
             }
             @{
