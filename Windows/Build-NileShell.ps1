@@ -21,14 +21,14 @@ $Menus = @(
                     @{
                         Mode     = "single"
                         Target   = "file"
-                        Filter   = ExtensionFilter -Extensions @(".mp3", ".m4a", ".mp4", ".mkv")
+                        Filter   = ".mp3|.m4a|.mp4|.mkv"
                         Title    = "Crop"
                         FilePath = "$ShellScripsPath\Media\Crop.ps1"
                     }
                     @{
                         Mode     = "single"
                         Target   = "file"
-                        Filter   = ExtensionFilter -Extensions @(".mkv", ".mp4")
+                        Filter   = ".mkv|.mp4"
                         Title    = "Display Chapters Info"
                         FilePath = "$ShellScripsPath\Media\Display-Chapter-Info.ps1"
                     }
@@ -93,6 +93,7 @@ $Menus = @(
                 )
             }
             @{
+                Target   = "dir"
                 Title    = "Youtube Downloader"
                 FilePath = "Youtube\Downloader.ps1"
             },
@@ -126,13 +127,31 @@ function BuildMenu {
     $global:FinalContent += "$tab}"
 }
 
+function BuildCommand {
+    param (
+        $Item
+    )
+    if ($Item.FilePath) {
+        $isAbsolute = [System.IO.Path]::IsPathRooted($Item.FilePath);
+        $filePath = $isAbsolute ? $Item.FilePath : "$ShellScripsPath\$($Item.FilePath)";
+        return "cmd='pwsh.exe' args='-File ""$($filePath)"" @sel(true, ' ')'";
+    }
+
+    return "cmd='pwsh.exe' args='-Command $($Item.Command) @sel(true, ' ')'";
+}
+
 function BuildItem {
     param (
         $Item,
         [Int16]$Depth = 1
     )
     $tab = (New-Object string[] $Depth) -join "  ";
-    $global:FinalContent += "$($tab)item(title='$($Item.Title)' image=inherit cmd='pwsh.exe' args='-File ""$($Item.FilePath)"" @sel(true, "" "")')";
+    $image = $Item.Image ? " image=$($Item.Image) " : " image=inherit";
+    $command = BuildCommand -Item $Item;
+    $mode = $Item.Mode ? " mode='$Item.Mode' " : "";
+    $target = $Item.Target ? " type='$($Item.Target)' " : "";
+    $filter = $Item.Filter ? " find='$($Item.Filter)' " : "";
+    $global:FinalContent += "$($tab)item(title='$($Item.Title)'$($image)$($mode)$($target)$($filter)$($command))";
 }
 
 
