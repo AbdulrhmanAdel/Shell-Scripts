@@ -8,8 +8,98 @@ $Menus = @(
         Image    = "\uE1F4"
         Children = @(
             @{
+                Target   = "file|dir"
                 Title    = "Module Picker"
                 FilePath = "$ShellScripsPath\Shared\Module-Picker.ps1"
+            }
+            @{
+                Title    = "Media"
+                Mode     = "multiple"
+                Target   = "file|dir"
+                Image    = "\uE1F4"
+                Children = @(
+                    @{
+                        Mode     = "single"
+                        Target   = "file"
+                        Filter   = ExtensionFilter -Extensions @(".mp3", ".m4a", ".mp4", ".mkv")
+                        Title    = "Crop"
+                        FilePath = "$ShellScripsPath\Media\Crop.ps1"
+                    }
+                    @{
+                        Mode     = "single"
+                        Target   = "file"
+                        Filter   = ExtensionFilter -Extensions @(".mkv", ".mp4")
+                        Title    = "Display Chapters Info"
+                        FilePath = "$ShellScripsPath\Media\Display-Chapter-Info.ps1"
+                    }
+                )
+            }
+            @{
+                Title    = "Icons"
+                Mode     = "single"
+                Target   = "file|dir"
+                Image    = "\uE1F4"
+                Children = @(
+                    @{
+                        Target   = "dir"
+                        Title    = "Set Or Refresh Icon"
+                        FilePath = "Icons\Set-Folder-Icon.ps1"
+                    },
+                    @{
+                        Target   = "dir"
+                        Title    = "Remove Icon"
+                        FilePath = "Icons\Remove-Icon.ps1"
+                    },
+                    @{
+                        Target   = "file"
+                        Filter   = ".png"
+                        Title    = "Convert To Icon"
+                        FilePath = "Icons\Utils\Convert-Png-To-Ico.ps1"
+                    }
+                )
+            }
+            @{
+                Title    = "Tools"
+                Mode     = "multiple"
+                Target   = "file|dir"
+                Children = @(
+                    @{
+                        Target   = "file|dir"
+                        Title    = "TakeOwn"
+                        FilePath = "$ShellScripsPath\Tools\Takeown.ps1"
+                    }
+                    @{
+                        Target  = "file|dir"
+                        Title   = "Add To Path"
+                        Command = "Add-ToPath.ps1"
+                    }
+                    @{
+                        Target   = "file"
+                        Title    = "Display Hash"
+                        FilePath = "$ShellScripsPath\Tools\Hash\Display-Hash.ps1"
+                    }
+                )
+            }
+            @{
+                Title    = "Crawlers"
+                Mode     = "single"
+                Target   = "dir"
+                Children = @(
+                    @{
+                        Target   = "dir"
+                        Title    = "Anidl"
+                        FilePath = "Crawlers\Anidl.ps1"
+                    }
+                )
+            }
+            @{
+                Title    = "Youtube Downloader"
+                FilePath = "Youtube\Downloader.ps1"
+            },
+            @{
+                Target   = "file|dir|drive"
+                Title    = "Safe Delete"
+                FilePath = "Tools\Safe-Delete.ps1"
             }
         )
     }
@@ -23,15 +113,15 @@ function BuildMenu {
 
     $tab = (New-Object string[] $Depth) -join "  ";
     $Depth++;
-    $global:FinalContent += "$($tab)menu(where=sel.count>0 type='$($Menu.Target)' mode=""$($Menu.Mode)"" title='$($Menu.Title)' image=$($Menu.Image))";
+    $global:FinalContent += "$($tab)menu(where=sel.count>0 type='$($Menu.Target)' mode=""$($Menu.Mode)"" title='$($Menu.Title)' image=$($Menu.Image ? $Menu.Image : "inherit"))";
     $global:FinalContent += "$tab{"
     foreach ($child in $Menu.Children) {
-        if ($child.Type -eq "Menu") {
-            BuildMenu -Menu $child -Depth $Depth;
+        if (-not $child.Children) {
+            BuildItem -Item $child -Depth $Depth;
             continue;
         }
 
-        BuildItem -Item $child -Depth $Depth;
+        BuildMenu -Menu $child -Depth $Depth;
     }
     $global:FinalContent += "$tab}"
 }
