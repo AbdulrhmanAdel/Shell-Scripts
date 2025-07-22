@@ -66,6 +66,7 @@ $Menus = @(
                     @{
                         Target   = "file|dir"
                         Title    = "TakeOwn"
+                        Image    = "[\uE194,#f00]"
                         FilePath = "$ShellScripsPath\Tools\Takeown.ps1"
                     }
                     @{
@@ -95,11 +96,13 @@ $Menus = @(
             @{
                 Target   = "dir"
                 Title    = "Youtube Downloader"
+                Image    = "icon.youtube"
                 FilePath = "Youtube\Downloader.ps1"
             },
             @{
                 Target   = "file|dir|drive"
                 Title    = "Safe Delete"
+                Image    = "icon.delete"
                 FilePath = "Tools\Safe-Delete.ps1"
             }
         )
@@ -146,7 +149,7 @@ function BuildItem {
         [Int16]$Depth = 1
     )
     $tab = (New-Object string[] $Depth) -join "  ";
-    $image = $Item.Image ? " image=$($Item.Image) " : " image=inherit";
+    $image = $Item.Image ? " image=$($Item.Image) " : "";
     $command = BuildCommand -Item $Item;
     $mode = $Item.Mode ? " mode='$Item.Mode' " : "";
     $target = $Item.Target ? " type='$($Item.Target)' " : "";
