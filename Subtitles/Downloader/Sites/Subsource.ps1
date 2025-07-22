@@ -15,7 +15,7 @@ param (
 )
 
 $subsourceSiteDomain = "https://subsource.net";
-$baseUrl = "https://api.subsource.net/api";
+$baseUrl = "https://api.subsource.net/v1";
 $global:subtitlePageLink = "";
 Write-Host "Using Subsource API" -ForegroundColor Magenta;
 Write-Host "==============================" -ForegroundColor Red;
@@ -25,11 +25,9 @@ Write-Host "Type: $type " -ForegroundColor Green -NoNewline;
 if ($type -eq "Series") {
     Write-Host "Season: $season; " -ForegroundColor Green -NoNewline;
     Write-Host "Episodes: " -ForegroundColor Green -NoNewline;
-    Write-Host ($Episodes | ForEach-Object { return $_.Episode }) -Separator ", " -ForegroundColor Green;
+    Write-Host ($Episodes | ForEach-Object { return $_.Episode }) -Separator ", " -ForegroundColor Green -NoNewline;
 }
-else {
-    Write-Host ""
-}
+Write-Host ""
 
 #region Functions
 function Invoke-Request {
@@ -41,12 +39,21 @@ function Invoke-Request {
     try {
 
         Write-Host "Invoking $Path" -ForegroundColor Yellow;
-        $Body = ($Body | ConvertTo-Json -Depth 100 -Compress)
-        $data = curl --progress-bar "$baseUrl/$Path" `
-            -H "accept: application/json, text/plain, */*"  `
-            -H "accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"  `
-            -H "content-type: application/json"  `
-            --data-raw $Body;
+        if ($Body) {
+            $Body = ($Body | ConvertTo-Json -Depth 100 -Compress)
+            $data = curl --progress-bar "$baseUrl/$Path" `
+                -H "accept: application/json, text/plain, */*"  `
+                -H "accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"  `
+                -H "content-type: application/json"  `
+                --data-raw $Body;
+        }
+        else {
+            $data = curl --progress-bar "$baseUrl/$Path" `
+                -H "accept: application/json, text/plain, */*"  `
+                -H "accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"  `
+                -H "content-type: application/json"  `
+        
+        }
 
         $content = $data | ConvertFrom-Json;
         if ($property) {
@@ -75,69 +82,60 @@ function Invoke-Request {
 }
 
 function GetSubtitles {
-    if (!$ShowImdbId) {
-        $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
-        $ShowImdbId = $show?.id;
+    function GetByTitle {
+        $queryBody = @{
+            query = $Title
+        };
+
+        $Result = Invoke-Request -path "movie/search" -body $queryBody -property "results";
+        if ($Result.Length -gt 1) {
+            $Selected = Single-Options-Selector.ps1 -Options (
+                $Result | ForEach-Object {
+                    return @{
+                        Key   = "$($_.title)-$($_.releaseYear)-$($_.type)";
+                        Value = $_
+                    }
+                } 
+            ) -Title "Found Multiple Results For $Title, Please Select The Correct One.";
+            return @($Selected);
+        }
+
+        return $Result;
     }
-    $searchQuery = $ShowImdbId ?? (!$Year ? $title : $title + " " + $Year);
-    $queryBody = @{
-        query = $searchQuery
-    };
-    
-    $searchResult = @(Invoke-Request -path "searchMovie" -body $queryBody -property "found");
+
+    function GetByImdbId {
+        if (!$ShowImdbId) {
+            $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
+            $ShowImdbId = $show?.id;
+        }
+
+        $searchQuery = $ShowImdbId ?? (!$Year ? $title : $title + " " + $Year);
+        $queryBody = @{
+            query = $searchQuery
+        };
+
+        return Invoke-Request -path "movie/search" -body $queryBody -property "results"
+    }
+
+    $searchResult = GetByImdbId
+    $searchResult ??= GetByTitle
     if ($searchResult.Length -eq 0) {
-        Start-Process "$subsourceSiteDomain/search/$title"
+        Write-Host "No Results Found For $title Or $ShowImdbId" -ForegroundColor Red;
+        Start-Process "$subsourceSiteDomain/search?q=$title"
+        timeout.exe 5;
         EXIT;
     }
 
     $movieInfo = $searchResult[0];
-    if (!$show) {
-        $subsourceType = $type -eq "Series" ? "TVSeries": "Movie";
-        $sameTypeShows = @($searchResult | Where-Object { $_.type -eq $subsourceType });
-        if ($sameTypeShows.Length -gt 1) {
-            $year ??= Read-Host "Multi matched Shows please enter correct Year";
-            $sameYearsShows = @(
-                $sameTypeShows | Where-Object {
-                    $_.releaseYear -eq $Year
-                }
-            );
-
-            $exactTitleShow = $sameTypeShows | Where-Object {
-                $_.title -eq $title
-            }  | Select-Object -First 1;
-
-            if ($exactTitleShow) {
-                $movieInfo = $exactTitleShow;
-            } 
-            elseif ($sameTypeShows.Length -gt 1) {
-                Write-Host "There is multi shows with the same year and name"
-                $script:index = 0;
-                $sameTypeShows | ForEach-Object {
-                    Write-Host "$($script:index + 1) " -ForegroundColor Green -NoNewline;
-                    Write-Host "$($_.title)" -ForegroundColor Green;
-                    $script:index++;
-                }
-
-                $chosedIndex = (Read-Host "Please Pick one with the number") - 1;
-                $movieInfo = $sameYearsShows[$chosedIndex];
-            }
-            else {
-                $movieInfo = $sameYearsShows[0];
-            }
-        }
-        $movieInfo = $movieInfo ?? $sameTypeShows[0];
-    }
-    $global:subtitlePageLink = "$subsourceSiteDomain/subtitles/$( $movieInfo.linkName )"
-    $body = @{
-        langs     = @("Arabic")
-        movieName = $movieInfo.linkName
-    };
+    $name = ($movieInfo.link -split "/")[-1]
+    $path = "subtitles/$name";
     if ($season -and $type -eq "Series") {
-        $body["season"] = "season-$season";
         $global:subtitlePageLink += "/season-$season"
+        $path += "/season-$season";
     }
+    $path += "?language=arabic&sort_by_date=false"
     Write-Host "Subtitle Page $global:subtitlePageLink" -ForegroundColor Green;
-    return Invoke-Request -path "getMovie" -Body $body -property "subs";
+    return Invoke-Request -path $path -property "subtitles";
 }
 
 $downloadSubtitleCache = @{ };
@@ -146,24 +144,21 @@ function DownloadSubtitle {
         $sub
     )
     Write-Host "Downloading Subtitle From => "  -NoNewLine;
-    Write-Host "$subsourceSiteDomain$($sub.fullLink)" -ForegroundColor Blue;
+    Write-Host "$subsourceSiteDomain$($sub.link)" -ForegroundColor Blue;
     Write-Host "Release Name " -NoNewLine;
-    Write-Host "$($sub.releaseName)" -ForegroundColor Blue;
-    if ($downloadSubtitleCache[$sub.subId]) {
-        return $downloadSubtitleCache[$sub.subId];
+    Write-Host "$($sub.release_info)" -ForegroundColor Blue;
+    if ($downloadSubtitleCache[$sub.id]) {
+        return $downloadSubtitleCache[$sub.id];
     }
-    $downloadSubDetails = Invoke-Request -path "getSub" -Body @{
-        movie = $sub.linkName
-        lang  = $sub.lang
-        id    = $sub.subId
-    } -property "sub";
-    $downloadToken = $downloadSubDetails.downloadToken;
-    $downloadLink = "$baseUrl/downloadSub/$downloadToken";
-    $tempPath = "$downloadPath/$( $downloadSubDetails.fileName )";
+    $downloadSubDetails = Invoke-Request -path "subtitle/$($sub.link)" -property "subtitle";
+    $downloadToken = $downloadSubDetails.download_token;
+    $downloadLink = "$baseUrl/subtitle/download/$downloadToken";
+    $fileName = $sub.release_info -replace '[<>:"/\\|?*]', ' ' -replace '  *', ' ';
+    $tempPath = "$downloadPath/$fileName";
     Invoke-WebRequest -Uri $downloadLink -OutFile $tempPath;
     $extractLocation = "$downloadPath\$( Get-Date -Format 'yyyy-MM-dd-HH-mm-ss' )"
     & 7z  x $tempPath -aoa -bb0 -o"$extractLocation" | Out-Null;
-    $downloadSubtitleCache[$sub.subId] = $extractLocation;
+    $downloadSubtitleCache[$sub.id] = $extractLocation;
     Start-Sleep -Milliseconds 500;
     return $extractLocation;
 }
@@ -218,38 +213,35 @@ function CopySubtitle {
 #endregion
 function MatchRelease {
     param (
-        [string]$releaseName,
+        [string]$release_info,
         [string]$qualityRegex,
         [string[]]$ignoredVersions,
         [string[]]$keywords
     )
 
     # Check if release matches quality regex
-    if ($releaseName -notmatch $qualityRegex) {
+    if ($release_info -notmatch $qualityRegex) {
         return $false
     }
 
     # Check if any keyword matches
     if ($keywords.Length -gt 0) {
 
-        $keywordMatched = $keywords | Where-Object { $releaseName -match $_ }
+        $keywordMatched = $keywords | Where-Object { $release_info -match $_ }
         if ($keywordMatched) {
             return $true
         }
     }
 
     # Check if version is ignored
-    $isIgnoredVersion = $ignoredVersions | Where-Object { $releaseName -match $_ }
+    $isIgnoredVersion = $ignoredVersions | Where-Object { $release_info -match $_ }
     return -not $isIgnoredVersion
 }
 
-$arabicSubs = GetSubtitles | Where-Object {
-    return $_.lang -eq "Arabic"
-};
-
+$arabicSubs = GetSubtitles;
 if ($type -eq "Movie") {
     $matchedSubtitle = $arabicSubs | Where-Object { 
-        MatchRelease -releaseName $_.releaseName `
+        MatchRelease -release_info $_.release_info `
             -qualityRegex $Quality `
             -ignoredVersions $IgnoredVersions `
             -keywords $Keywords;
@@ -265,9 +257,9 @@ $wholeSeasonRegex = "(S0$season)([^EX0-9]|$)|" + `
     "(S0$season)E\d\d*(>|~)E\d\d*";
 $wholeSeasonSubtitles = @(
     $arabicSubs | Where-Object {
-        return $_.releaseName -replace "\.| ", "" -match $wholeSeasonRegex `
+        return $_.release_info -replace "\.| ", "" -match $wholeSeasonRegex `
             -or $_.commentary -contains "الموسم كامل" `
-            -or $_releaseName -match "Complete(\.| )?Season"
+            -or $_release_info -match "Complete(\.| )?Season"
     }
 );
 
@@ -279,10 +271,17 @@ $Episodes | ForEach-Object {
     Write-Host "Episode $($episode.Episode)" -ForegroundColor Yellow;
     $episodeNumber = $episode.Episode;
     $qualityRegex = $episode.Quality
-    $episodeRegex = "(S?0*$season)?(\.| )*(E|\d+X|Episode|EP)0*$episodeNumber(\D+|$)"
-    $episodeSubtitles = @($arabicSubs | Where-Object { $_.releaseName -match $episodeRegex });
+    $episodeRegex = $null;
+    if ($Title -contains $episodeNumber) {
+        $episodeRegex = "(S?0*$season)?(\.| )*(E|\d+X|Episode|EP)0*$episodeNumber(\D+|$)"
+    }
+    else {
+        $episodeNumberGtNine = $episodeNumber -gt 9;
+        $episodeRegex = "(\.|\|| |-|E)$($episodeNumberGtNine ? $episodeNumber : "0*$episodeNumber")(\.| |-|\|)"
+    }
+    $episodeSubtitles = @($arabicSubs | Where-Object { $_.release_info -match $episodeRegex });
     $matchedSubtitle = $episodeSubtitles | Where-Object { 
-        MatchRelease -releaseName $_.releaseName`
+        MatchRelease -release_info $_.release_info`
             -qualityRegex $qualityRegex `
             -ignoredVersions $episode.IgnoredVersions `
             -keywords $episode.Keywords; 
@@ -291,7 +290,7 @@ $Episodes | ForEach-Object {
     if (!$matchedSubtitle) {
         Write-Host "Trying complete season subtitle" -ForegroundColor Green;
         $matchedSubtitle = $wholeSeasonSubtitles | Where-Object { 
-            MatchRelease -releaseName $_.releaseName`
+            MatchRelease -release_info $_.release_info`
                 -qualityRegex $qualityRegex `
                 -ignoredVersions $episode.IgnoredVersions `
                 -keywords $episode.Keywords; 
