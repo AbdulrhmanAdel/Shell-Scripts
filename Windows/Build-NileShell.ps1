@@ -167,3 +167,8 @@ if (-not $nileSoftPath) {
 
 $SavePath = "$nileSoftPath\imports\my-config.nss"
 Set-Content $SavePath -Value $global:FinalContent;
+
+if (Prompt.ps1 -Message "Do you want to restart Explorer?") {
+    $RestartExplorerPath = "$ShellScripsPath\Tools\Restart-Explorer.ps1";
+    & $RestartExplorerPath;
+}
