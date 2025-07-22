@@ -106,12 +106,15 @@ function GetSubtitles {
     function GetByImdbId {
         if (!$ShowImdbId) {
             $show = & Imdb-GetShow.ps1 -Name $title -Type $type -Year $Year;
-            $ShowImdbId = $show?.id;
+            $ShowImdbId = ($show)?.id;
         }
 
-        $searchQuery = $ShowImdbId ?? (!$Year ? $title : $title + " " + $Year);
+        if (!$ShowImdbId) {
+            return $null;
+        }
+
         $queryBody = @{
-            query = $searchQuery
+            query = $ShowImdbId
         };
 
         return Invoke-Request -path "movie/search" -body $queryBody -property "results"
