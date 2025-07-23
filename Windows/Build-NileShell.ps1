@@ -67,7 +67,7 @@ $Menus = @(
                         Target   = "file|dir"
                         Title    = "TakeOwn"
                         Image    = "[\uE194,#f00]"
-                        FilePath = "$ShellScripsPath\Tools\Takeown.ps1"
+                        FilePath = "Tools\Take-Ownership.ps1"
                     }
                     @{
                         Target  = "file|dir"
