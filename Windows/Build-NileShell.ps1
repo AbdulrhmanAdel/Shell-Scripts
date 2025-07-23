@@ -4,8 +4,7 @@ $Menus = @(
     @{
         Title    = "Scripts"
         Mode     = "multiple"
-        Target   = "file|dir|drive|namespace|back"
-        Image    = "\uE1F4"
+        Target   = "file|dir|drive|RecycleBin"
         Children = @(
             @{
                 Target   = "file|dir"
@@ -16,7 +15,6 @@ $Menus = @(
                 Title    = "Media"
                 Mode     = "multiple"
                 Target   = "file|dir"
-                Image    = "\uE1F4"
                 Children = @(
                     @{
                         Mode     = "single"
@@ -38,7 +36,6 @@ $Menus = @(
                 Title    = "Icons"
                 Mode     = "single"
                 Target   = "file|dir"
-                Image    = "\uE1F4"
                 Children = @(
                     @{
                         Target   = "dir"
@@ -105,7 +102,7 @@ $Menus = @(
                 FilePath = "Youtube\Downloader.ps1"
             },
             @{
-                Target   = "file|dir|drive"
+                Target   = "file|dir|drive|RecycleBin"
                 Title    = "Safe Delete"
                 Image    = "icon.delete"
                 FilePath = "Tools\Safe-Delete.ps1"
@@ -154,7 +151,7 @@ function BuildItem {
         [Int16]$Depth = 1
     )
     $tab = (New-Object string[] $Depth) -join "  ";
-    $image = $Item.Image ? " image=$($Item.Image) " : "";
+    $image = $Item.Image ? " image=$($Item.Image) " : " image ";
     $command = BuildCommand -Item $Item;
     $mode = $Item.Mode ? " mode='$Item.Mode' " : "";
     $target = $Item.Target ? " type='$($Item.Target)' " : "";
