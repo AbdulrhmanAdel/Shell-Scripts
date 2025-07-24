@@ -1,4 +1,11 @@
-$args | Where-Object { $_ -match ".*(.mkv)$" }  | ForEach-Object {
+[CmdletBinding()]
+param (
+    [Parameter(ValueFromRemainingArguments)]
+    [string[]]
+    $Files
+)
+
+$Files | Where-Object { $_ -match ".*(.mkv)$" }  | ForEach-Object {
     Write-Host "===================================" -ForegroundColor Red;
     $fileName = [System.IO.Path]::GetFileName($_);
     Write-Host "Info For $fileName" -ForegroundColor Green;

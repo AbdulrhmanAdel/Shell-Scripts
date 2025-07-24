@@ -32,7 +32,7 @@ $Menus = @(
                         Target   = "file"
                         Filter   = ".mkv|.mp4"
                         Title    = "Display Chapters Info"
-                        FilePath = "$ShellScripsPath\Media\Display-Chapter-Info.ps1"
+                        FilePath = "$ShellScripsPath\Media\Display-ChaptersInfo.ps1"
                     }
                 )
             }

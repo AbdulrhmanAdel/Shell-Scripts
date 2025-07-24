@@ -31,7 +31,7 @@ $Options = @(
     @{
         Key     = "Display Chapter Info";
         Handler = {
-            $path = "$PSScriptRoot/Display-Chapter-Info.ps1";
+            $path = "$PSScriptRoot/Display-ChaptersInfo.ps1";
             &  $path $Files;
         };
     }
