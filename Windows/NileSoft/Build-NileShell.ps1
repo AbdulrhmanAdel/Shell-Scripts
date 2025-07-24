@@ -1,4 +1,4 @@
-$ShellScripsPath = Resolve-Path "$PSScriptRoot\..";
+$ShellScripsPath = Resolve-Path "$PSScriptRoot\..\..";
 $global:FinalContent = @();
 $Menus = @(
     @{
@@ -16,87 +16,9 @@ $Menus = @(
                 Title    = "Module Picker"
                 FilePath = "$ShellScripsPath\Shared\Module-Picker.ps1"
             }
-            @{
-                Title    = "Media"
-                Target   = "file"
-                Filter   = ".mp3|.m4a|.opus|.mp4|.mkv"
-                Children = @(
-                    @{
-                        Target   = "file"
-                        Filter   = ".mp3|.m4a|.opus|.mp4|.mkv"
-                        Title    = "Crop"
-                        FilePath = "$ShellScripsPath\Media\Crop.ps1"
-                    }
-                    @{
-
-                        Target   = "file"
-                        Filter   = ".mkv|.mp4"
-                        Title    = "Display Chapters Info"
-                        FilePath = "$ShellScripsPath\Media\Display-ChaptersInfo.ps1"
-                    }
-                )
-            }
-            @{
-                Title    = "Icons"
-                Target   = "dir"
-                Children = @(
-                    @{
-                        Title          = "Set Or Refresh Icon"
-                        FilePath       = "Icons\Set-Folder-Icon.ps1"
-                        MultiExecution = $true
-                    },
-                    @{
-                        Title          = "Remove Icon"
-                        FilePath       = "Icons\Remove-Icon.ps1"
-                        MultiExecution = $true
-                    }
-                )
-            }
-            @{
-                Title    = "Icons"
-                Filter   = ".png"
-                Target   = "file"
-                Children = @(
-                    @{
-                        Title          = "Convert To Icon"
-                        FilePath       = "Icons\Utils\Convert-Png-To-Ico.ps1"
-                        MultiExecution = $true
-                    }
-                )
-            }
-            @{
-                Title    = "Tools"
-                Mode     = "multiple"
-                Target   = "file|dir"
-                Children = @(
-                    @{
-                        Target   = "file|dir"
-                        Title    = "TakeOwn"
-                        Image    = "\uE194"
-                        FilePath = "Tools\Take-Ownership.ps1"
-                    }
-                    @{
-                        Target  = "dir"
-                        Title   = "Add To Path"
-                        Command = "Add-ToPath.ps1"
-                    }
-                    @{
-                        Target   = "file"
-                        Title    = "Display Hash"
-                        FilePath = "$ShellScripsPath\Tools\Hash\Display-Hash.ps1"
-                    }
-                    @{
-                        Target   = "file|dir"
-                        Title    = "Copy Paths"
-                        FilePath = "$ShellScripsPath\Tools\Copy-PathsToClipboard.ps1"
-                    }
-                    @{
-                        Target   = "file|dir"
-                        Title    = "Copy Names"
-                        FilePath = "$ShellScripsPath\Tools\Copy-FileNames.ps1"
-                    }
-                )
-            }
+            & "$PSScriptRoot\Configs\Media.ps1"
+            & "$PSScriptRoot\Configs\Icons.ps1"
+            & "$PSScriptRoot\Configs\Tools.ps1"
             @{
                 Title    = "Crawlers"
                 Target   = "dir"
