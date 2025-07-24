@@ -99,7 +99,7 @@ if (!$ShellProjectPath) {
     $ShellProjectPath = Folder-Picker.ps1 -InitialDirectory "D:\" -ShowOnTop;
 }
 
-RunPowershell "$ShellProjectPath\Add-SharedToPath.ps1" -NoTimeout;
+RunPowershell "$ShellProjectPath\Setup-EnvironmentVariable.ps1" -NoTimeout;
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "User");
 RunPowershell -Path "$ShellProjectPath\Setup-ContextMenu.ps1" -AdditionalArgs @("-NoTimeout")
 RunPowershell -Path "$ShellProjectPath\Setup-SendToMenu.ps1" -AdditionalArgs @("-NoTimeout")

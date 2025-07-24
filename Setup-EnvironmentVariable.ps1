@@ -5,6 +5,8 @@ param (
     $NoTimeout
 )
 
+[System.Environment]::SetEnvironmentVariable("Shell-Scripts", $PSScriptRoot, "User");
+
 $TargetFolder = "$PSScriptRoot\.path";
 if (Test-Path -LiteralPath $TargetFolder) {
     Remove-Item -LiteralPath $TargetFolder -Force -Recurse -ErrorAction SilentlyContinue;
@@ -16,9 +18,9 @@ else {
 
 $sharedPath = "$PSScriptRoot\Shared";
 $SourceFoldersAndFiles = @($sharedPath, @{
-    Path = "$PSScriptRoot\Youtube\Downloader.ps1";
-    Name = "Youtube-Downloader.ps1"
-});
+        Path = "$PSScriptRoot\Youtube\Downloader.ps1";
+        Name = "Youtube-Downloader.ps1"
+    });
 
 Get-ChildItem -Path $sharedPath -Directory -Recurse | Where-Object {
     if ($_.FullName -notmatch "Ignore|Modules") {
