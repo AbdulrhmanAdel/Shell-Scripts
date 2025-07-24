@@ -2,10 +2,14 @@ $ShellScripsPath = Resolve-Path "$PSScriptRoot\..";
 $global:FinalContent = @();
 $Menus = @(
     @{
-        Title    = "Scripts"
-        Mode     = "multiple"
-        Target   = "file|dir|drive|RecycleBin"
-        Children = @(
+        Title      = "Scripts"
+        Mode       = "multiple"
+        Target     = "file|dir|drive|RecycleBin"
+        Separators = @{
+            Top    = $true
+            Bottom = $true
+        }
+        Children   = @(
             @{
                 Target   = "file|dir"
                 Title    = "Module Picker"
@@ -14,12 +18,13 @@ $Menus = @(
             @{
                 Title    = "Media"
                 Mode     = "multiple"
-                Target   = "file|dir"
+                Target   = "file"
+                Filter   = ".mp3|.m4a|.opus|.mp4|.mkv"
                 Children = @(
                     @{
                         Mode     = "single"
                         Target   = "file"
-                        Filter   = ".mp3|.m4a|.mp4|.mkv"
+                        Filter   = ".mp3|.m4a|.opus|.mp4|.mkv"
                         Title    = "Crop"
                         FilePath = "$ShellScripsPath\Media\Crop.ps1"
                     }
@@ -35,21 +40,25 @@ $Menus = @(
             @{
                 Title    = "Icons"
                 Mode     = "single"
-                Target   = "file|dir"
+                Target   = "dir"
                 Children = @(
                     @{
-                        Target   = "dir"
                         Title    = "Set Or Refresh Icon"
                         FilePath = "Icons\Set-Folder-Icon.ps1"
                     },
                     @{
-                        Target   = "dir"
                         Title    = "Remove Icon"
                         FilePath = "Icons\Remove-Icon.ps1"
-                    },
+                    }
+                )
+            }
+            @{
+                Title    = "Icons"
+                Mode     = "single"
+                Filter   = ".png"
+                Target   = "file"
+                Children = @(
                     @{
-                        Target   = "file"
-                        Filter   = ".png"
                         Title    = "Convert To Icon"
                         FilePath = "Icons\Utils\Convert-Png-To-Ico.ps1"
                     }
@@ -63,11 +72,11 @@ $Menus = @(
                     @{
                         Target   = "file|dir"
                         Title    = "TakeOwn"
-                        Image    = "[\uE194,#f00]"
+                        Image    = "\uE194"
                         FilePath = "Tools\Take-Ownership.ps1"
                     }
                     @{
-                        Target  = "file|dir"
+                        Target  = "dir"
                         Title   = "Add To Path"
                         Command = "Add-ToPath.ps1"
                     }
@@ -75,6 +84,11 @@ $Menus = @(
                         Target   = "file"
                         Title    = "Display Hash"
                         FilePath = "$ShellScripsPath\Tools\Hash\Display-Hash.ps1"
+                    }
+                    @{
+                        Target   = "file|dir"
+                        Title    = "Copy Paths"
+                        FilePath = "$ShellScripsPath\Tools\Copy-PathsToClipboard.ps1"
                     }
                     @{
                         Target   = "file|dir"
@@ -111,6 +125,24 @@ $Menus = @(
     }
 );
 
+function BuildSeparator {
+    param (
+        $Item
+    )
+    $hasTop = ($Item.Separators)?.Top
+    $hasBottom = ($Item.Separators)?.Bottom;
+    if ($hasTop -and $hasBottom) {
+        return " sep='both' ";
+    }
+    if ($hasTop) {
+        return " sep=sep.top ";
+    }
+    if ($hasBottom) {
+        return " sep=sep.bottom ";
+    }
+    return "";
+} 
+
 function BuildMenu {
     param (
         [object]$Menu,
@@ -119,7 +151,12 @@ function BuildMenu {
 
     $tab = (New-Object string[] $Depth) -join "  ";
     $Depth++;
-    $global:FinalContent += "$($tab)menu(where=sel.count>0 type='$($Menu.Target)' mode=""$($Menu.Mode)"" title='$($Menu.Title)' image=$($Menu.Image ? $Menu.Image : "inherit"))";
+    $target = $Menu.Target ? " type='$($Menu.Target)' " : "";
+    $filter = $Menu.Filter ? " find='$($Menu.Filter)' " : "";
+    $mode = $Menu.Mode ? " mode='$($Menu.Mode)' " : "";
+    $image = $Menu.Image ? " image=$($Menu.Image) " : "";
+    $separator = BuildSeparator -Item $Menu;
+    $global:FinalContent += "$($tab)menu(where=sel.count>0 title='$($Menu.Title)'$($target)$($filter)$($mode)$($image)$($separator))";
     $global:FinalContent += "$tab{"
     foreach ($child in $Menu.Children) {
         if (-not $child.Children) {
@@ -156,7 +193,8 @@ function BuildItem {
     $mode = $Item.Mode ? " mode='$Item.Mode' " : "";
     $target = $Item.Target ? " type='$($Item.Target)' " : "";
     $filter = $Item.Filter ? " find='$($Item.Filter)' " : "";
-    $global:FinalContent += "$($tab)item(title='$($Item.Title)'$($image)$($mode)$($target)$($filter)$($command))";
+    $separator = BuildSeparator -Item $Item;
+    $global:FinalContent += "$($tab)item(title='$($Item.Title)'$($image)$($mode)$($target)$($filter)$($separator)$($command))";
 }
 
 
