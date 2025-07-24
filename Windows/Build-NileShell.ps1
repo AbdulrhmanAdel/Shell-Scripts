@@ -5,6 +5,7 @@ $Menus = @(
         Title      = "Scripts"
         Mode       = "multiple"
         Target     = "file|dir|drive|RecycleBin"
+        Image      = "\uE231"
         Separators = @{
             Top    = $true
             Bottom = $true
@@ -17,19 +18,17 @@ $Menus = @(
             }
             @{
                 Title    = "Media"
-                Mode     = "multiple"
                 Target   = "file"
                 Filter   = ".mp3|.m4a|.opus|.mp4|.mkv"
                 Children = @(
                     @{
-                        Mode     = "single"
                         Target   = "file"
                         Filter   = ".mp3|.m4a|.opus|.mp4|.mkv"
                         Title    = "Crop"
                         FilePath = "$ShellScripsPath\Media\Crop.ps1"
                     }
                     @{
-                        Mode     = "single"
+
                         Target   = "file"
                         Filter   = ".mkv|.mp4"
                         Title    = "Display Chapters Info"
@@ -39,28 +38,29 @@ $Menus = @(
             }
             @{
                 Title    = "Icons"
-                Mode     = "single"
                 Target   = "dir"
                 Children = @(
                     @{
-                        Title    = "Set Or Refresh Icon"
-                        FilePath = "Icons\Set-Folder-Icon.ps1"
+                        Title          = "Set Or Refresh Icon"
+                        FilePath       = "Icons\Set-Folder-Icon.ps1"
+                        MultiExecution = $true
                     },
                     @{
-                        Title    = "Remove Icon"
-                        FilePath = "Icons\Remove-Icon.ps1"
+                        Title          = "Remove Icon"
+                        FilePath       = "Icons\Remove-Icon.ps1"
+                        MultiExecution = $true
                     }
                 )
             }
             @{
                 Title    = "Icons"
-                Mode     = "single"
                 Filter   = ".png"
                 Target   = "file"
                 Children = @(
                     @{
-                        Title    = "Convert To Icon"
-                        FilePath = "Icons\Utils\Convert-Png-To-Ico.ps1"
+                        Title          = "Convert To Icon"
+                        FilePath       = "Icons\Utils\Convert-Png-To-Ico.ps1"
+                        MultiExecution = $true
                     }
                 )
             }
@@ -99,20 +99,20 @@ $Menus = @(
             }
             @{
                 Title    = "Crawlers"
-                Mode     = "single"
                 Target   = "dir"
                 Children = @(
                     @{
-                        Target   = "dir"
-                        Title    = "Anidl"
-                        FilePath = "Crawlers\Anidl.ps1"
+                        Target         = "dir"
+                        Title          = "Anidl"
+                        FilePath       = "Crawlers\Anidl.ps1"
+                        MultiExecution = $true
                     }
                 )
             }
             @{
                 Target   = "dir"
                 Title    = "Youtube Downloader"
-                Image    = "icon.youtube"
+                Image    = "[\uE248, #f00]"
                 FilePath = "Youtube\Downloader.ps1"
             },
             @{
@@ -173,13 +173,17 @@ function BuildCommand {
     param (
         $Item
     )
+
+    $isMultiExecution = !!$Item.MultiExecution;
+    $selectionPlaceholder = $isMultiExecution ?'@sel.path.quote' : "@sel(true, ' ')";
+    $invoke = $isMultiExecution ? " invoke='multiple' " : " ";
     if ($Item.FilePath) {
         $isAbsolute = [System.IO.Path]::IsPathRooted($Item.FilePath);
         $filePath = $isAbsolute ? $Item.FilePath : "$ShellScripsPath\$($Item.FilePath)";
-        return "cmd='pwsh.exe' args='-File ""$($filePath)"" @sel(true, ' ')'";
+        return "cmd='pwsh.exe'$($invoke)args='-File ""$($filePath)"" $selectionPlaceholder'";
     }
 
-    return "cmd='pwsh.exe' args='-Command $($Item.Command) @sel(true, ' ')'";
+    return "cmd='pwsh.exe' $invoke args='-Command $($Item.Command) $selectionPlaceholder'";
 }
 
 function BuildItem {
