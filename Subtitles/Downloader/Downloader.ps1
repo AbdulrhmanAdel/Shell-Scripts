@@ -92,7 +92,12 @@ $Paths | ForEach-Object {
     }
 
     if ($info -is [System.IO.FileInfo]) {
-        if ($info.Extension -in @(".mkv", ".mp4") -and !(Has-SoftSubbedArabic.ps1 -Path $_)) {
+        if ($info.Extension -in @(".mkv", ".mp4")) {
+            $hasArabicSoftSub = Has-SoftSubbedArabic.ps1 -Path $_;
+            if ($hasArabicSoftSub) {
+                Write-Host "Skipping $($info.Name) as it has arabic soft sub." -ForegroundColor DarkCyan;
+                return;
+            }
             $files += $info;
         }
         return;
@@ -124,12 +129,14 @@ $subs = $files | ForEach-Object {
     return $null -ne $_;
 };
 
-
-$downloadPath = "$($env:TEMP)/MyScripts/Subtitle-Downloader";
-if (!(Test-Path -LiteralPath $downloadPath)) {
-    New-Item -Path $downloadPath -ItemType Directory -Force;
+if ($subs.Length -gt 0) {
+    $downloadPath = "$($env:TEMP)/MyScripts/Subtitle-Downloader";
+    if (!(Test-Path -LiteralPath $downloadPath)) {
+        New-Item -Path $downloadPath -ItemType Directory -Force;
+    }
+    HandleMovies -subs $subs;
+    HandleSeries -subs $subs;
+    Remove-Item  -LiteralPath $downloadPath -Force -Recurse;
 }
-HandleMovies -subs $subs;
-HandleSeries -subs $subs;
-Remove-Item  -LiteralPath $downloadPath -Force -Recurse;
-timeout.exe 30;
+
+timeout.exe 10;
