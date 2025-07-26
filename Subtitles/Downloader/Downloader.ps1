@@ -52,34 +52,34 @@ function HandleSeries {
             Keywords        = $details.Keywords
         };
 
-        $serie = $final[$details.Title];
-        if ($serie) {
-            $season = $serie[$details.Season] ?? @();
-            $serie[$details.Season] = $season + $episodeInfo ;
+        $show = $final[$details.Title];
+        if ($show) {
+            $season = $show[$details.Season] ?? @();
+            $show[$details.Season] = $season + $episodeInfo ;
             return;
         }
 
         $final[$details.Title] = @{
-            $details.Season = @($episodeInfo)
+            $details['Season'] = @($episodeInfo)
             ShowId          = $episode.Imdb.Id
         }
     }
 
     $series | ForEach-Object { GroupSeries -episode $_ };
     $final.Keys | ForEach-Object {
-        $serieName = $_;
-        $serie = $final[$_];
-        $serie.Keys | Where-Object { $_ -ne "ShowId" } | ForEach-Object {
-            $seasonEpisodes = $serie[$_] | Sort-Object -Property Episode;
+        $showName = $_;
+        $show = $final[$_];
+        $show.Keys | Where-Object { $_ -ne "ShowId" } | ForEach-Object {
+            $seasonEpisodes = $show[$_] | Sort-Object -Property Episode;
             $episodeWithYear = $seasonEpisodes | Where-Object { !!$_.Year } | Select-Object -First  1;
             & "$($PSScriptRoot)/Sites/Subsource.ps1" `
                 -DownloadPath $downloadPath `
                 -Type "Series" `
-                -Title $serieName `
+                -Title $showName `
                 -Season $_ `
                 -Year $episodeWithYear.Year `
                 -Episodes $seasonEpisodes `
-                -ShowImdbId $serie.ShowId; 
+                -ShowImdbId $show.ShowId; 
         }
     }
 }

@@ -24,5 +24,17 @@ Extension-Communicator.ps1 -LogPath "$PSScriptRoot\Logs.txt" -MessageHandler {
             )
             break;
         }
+
+        "Subtitle-Download" {
+            $Source = $Data.source;
+            $downloadLink = $Data.downloadLink;
+            $generalInfo = $Data.generalInfo;
+            $savePath = $Data.savePath;
+            $renameTo = $Data.renameTo;
+            Start-Process pwsh.exe -ArgumentList @(
+                "-Command", "Subtitles-Downloader.ps1 -Title '$title' -Season '$season' -Episodes '$episodes' -Year '$year' -SavePath '$savePath' -RenameTo '$renameTo'"
+            )
+            break;
+        }
     }
 }

@@ -14,6 +14,7 @@ param (
     [System.Object[]]$Episodes
 )
 
+$downloaderScriptPath = Resolve-Path "$PSScriptRoot\..\Helpers\Downloader.ps1";
 $subsourceSiteDomain = "https://subsource.net";
 $baseUrl = "https://api.subsource.net/v1";
 $global:subtitlePageLink = "";
@@ -52,7 +53,6 @@ function Invoke-Request {
                 -H "accept: application/json, text/plain, */*"  `
                 -H "accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,ar;q=0.6"  `
                 -H "content-type: application/json"  `
-        
         }
 
         $content = $data | ConvertFrom-Json;
@@ -62,22 +62,22 @@ function Invoke-Request {
         return $content;
     }
     catch {
-        $reponse = $_.Exception.Response;
-        if ($reponse.StatusCode -ne 429) {
-            Write-Host "$($reponse.StatusCode) - $($_.Exception.Message)" -ForegroundColor Red;
+        $response = $_.Exception.Response;
+        if ($response.StatusCode -ne 429) {
+            Write-Host "$($response.StatusCode) - $($_.Exception.Message)" -ForegroundColor Red;
             return;
         }
-        $remainging = $null;
-        if (!$reponse.Headers.TryGetValues("RateLimit-Remaining", [ref]$remainging)) {
+        $rateLimitRemainingTime = $null;
+        if (!$response.Headers.TryGetValues("RateLimit-Remaining", [ref]$rateLimitRemainingTime)) {
             return;
         }
-        $remainging = [Int32]::Parse($remainging) * 2;
-        Write-Host "⚠️ RateLimit Hitted Waiting For $remainging MS ⚠️" -ForegroundColor Black -BackgroundColor Red;
-        Start-Sleep -Milliseconds $remainging;
+        $rateLimitRemainingTime = [Int32]::Parse($rateLimitRemainingTime) * 2;
+        Write-Host "⚠️ [RateLimit] remaining time $rateLimitRemainingTime MS ⚠️" -ForegroundColor Black -BackgroundColor Red;
+        Start-Sleep -Milliseconds $rateLimitRemainingTime;
         return Invoke-Request `
             -path $path `
             -body $body `
-            -propert $property;
+            -property $property;
     }
 }
 
@@ -124,8 +124,12 @@ function GetSubtitles {
     $searchResult ??= GetByTitle
     if ($searchResult.Length -eq 0) {
         Write-Host "No Results Found For $title Or $ShowImdbId" -ForegroundColor Red;
-        Start-Process "$subsourceSiteDomain/search?q=$title"
-        timeout.exe 5;
+        $queryParams = @("auto_download=true");
+        $Season ? ($queryParams += "auto_season=$season") : "";
+        $SavePath ? ($queryParams += "auto_save_path=$SavePath") : "";
+        $renameTo ? ($queryParams += "auto_rename_to=$renameTo") : "";
+        $Episodes ? ($queryParams += "auto_episodes=$(@($Episodes) | ConvertTo-Json -Depth 100 -Compress)") : "";
+        Start-Process "$subsourceSiteDomain/search?q=$title&$($queryParams -join "&")" -Wait;
         EXIT;
     }
 
@@ -141,7 +145,7 @@ function GetSubtitles {
     return Invoke-Request -path $path -property "subtitles";
 }
 
-$downloadSubtitleCache = @{ };
+$downloadSubtitleCache = @{};
 function DownloadSubtitle {
     param (
         $sub
@@ -309,6 +313,19 @@ $Episodes | ForEach-Object {
         return;
     }
 
+    # . $downloaderScriptPath -DownloadPath $DownloadPath `
+    #     -Type "Series" `
+    #     -Title $Title `
+    #     -Quality $episode.Quality `
+    #     -SavePath $episode.SavePath `
+    #     -RenameTo $episode.RenameTo `
+    #     -Year $episode.Year `
+    #     -IgnoredVersions $episode.IgnoredVersions `
+    #     -Keywords $episode.Keywords `
+    #     -Season $season `
+    #     -ShowImdbId $ShowImdbId `
+    #     -Episodes @($matchedSubtitle);
+        
     $subtitlePath = DownloadSubtitle -sub $matchedSubtitle;
     CopySubtitle -subtitlePath  $subtitlePath `
         -savePath $episode.SavePath `

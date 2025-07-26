@@ -94,6 +94,7 @@ if ($DownloadedEpisodes.Length -gt 0) {
 if ($links.Length -eq 0) {
     Write-Host "No New Episode Found. Exiting"
     timeout.exe 5;
+    Exit;
 }
 
 $DownloadLinks = Multi-Options-Selector.ps1 -options $links;
