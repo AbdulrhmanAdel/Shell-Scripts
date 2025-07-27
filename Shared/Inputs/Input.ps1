@@ -4,6 +4,7 @@ param (
     [string]$Message = "Please Enter Value",
     [ArgumentCompletions('Text', 'Number')]
     [string]$Type = "Text",
+    [System.Nullable[int]]$DecimalPlaces,
     [switch]$MultiLine,
     [switch]$Required = $false,
     $DefaultValue,
@@ -39,7 +40,9 @@ switch ($Type) {
         $formInput = New-Object System.Windows.Forms.NumericUpDown;
         $formInput.Minimum = $Min ? $Min : [int]::MinValue
         $formInput.Maximum = $Max ? $Max : [int]::MaxValue;
-        !$NoDecimal -and ($formInput.DecimalPlaces = 3) | Out-Null;
+        if ($DecimalPlaces) {
+            !$NoDecimal -and ($formInput.DecimalPlaces = $DecimalPlaces) | Out-Null;
+        }
         $DefaultValue -and ($formInput.Value = [double]$DefaultValue) | Out-Null;
         break;
     }
