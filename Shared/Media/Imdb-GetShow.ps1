@@ -77,5 +77,5 @@ return @{
     Id    = $show.id
     Year  = $show.y
     Title = $show.l
-    Type  = $show.q -eq 'movie' ? 'Movie' : 'Series'
+    Type  = $show.qid -eq 'movie' ? 'Movie' : 'Series'
 }
