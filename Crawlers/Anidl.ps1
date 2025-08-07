@@ -33,6 +33,7 @@ if (Test-Path -LiteralPath $Title) {
 
 Write-Host "Searching for $Title" -ForegroundColor Green;
 $Title = $Title.Trim() -replace "-", " " -replace " +", " " -replace " ", "+";
+$Title = $Title + "+720P";
 
 $Result = curl 'https://anidl.org/wp-admin/admin-ajax.php' `
     -H 'accept: application/json, text/javascript, */*; q=0.01' `

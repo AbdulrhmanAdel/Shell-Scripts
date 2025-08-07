@@ -31,6 +31,11 @@ $mainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill;
 $form.Controls.Add($mainPanel);
 $currentRow = 0;
 $selectedOptions ??= @();
+$SelectAllCheckBox = New-Object System.Windows.Forms.CheckBox;
+$SelectAllCheckBox.AutoSize = $true;
+$SelectAllCheckBox.Text = 'Select All';
+$mainPanel.Controls.Add($SelectAllCheckBox, 0, $currentRow);
+$currentRow++;
 $checkboxes = $Options | ForEach-Object {
     $item = $_;
     $checkbox = New-Object System.Windows.Forms.CheckBox
@@ -51,6 +56,13 @@ $checkboxes = $Options | ForEach-Object {
     $currentRow++;
     return $checkbox;
 }
+
+$SelectAllCheckBox.Add_Click({
+    $checked = $SelectAllCheckBox.Checked;
+    $checkboxes | ForEach-Object {
+        $_.Checked = $checked;
+    }
+})
 
 # Add a submit button
 $submitButton = New-Object System.Windows.Forms.Button
