@@ -61,7 +61,7 @@ function HandleSeries {
 
         $final[$details.Title] = @{
             $details['Season'] = @($episodeInfo)
-            ShowId          = $episode.Imdb.Id
+            ShowId             = $episode.Imdb.Id
         }
     }
 
@@ -130,7 +130,7 @@ $subs = $files | ForEach-Object {
 };
 
 if ($subs.Length -gt 0) {
-    $downloadPath = "$($env:TEMP)/MyScripts/Subtitle-Downloader";
+    $downloadPath = "$($env:TEMP)/MyScripts/Subtitle-Downloader-$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss')";
     if (!(Test-Path -LiteralPath $downloadPath)) {
         New-Item -Path $downloadPath -ItemType Directory -Force;
     }
