@@ -8,6 +8,7 @@ param (
     $ImageSource = $null
 )
 
+Write-Host "'$ImageSource'"
 function OpenBrowser {
     param (
         [string]$Website,
@@ -98,10 +99,12 @@ $ImageSourceHandlers = [ordered]@{
 };
 
 function GetImagePath {
-    $ImageSource ??= & Single-Options-Selector.ps1 `
-        -Options $ImageSourceHandlers.Keys `
-        -Title "Select Icon Source" `
-        -Required;
+    if (-not $ImageSource) {
+        $ImageSource = & Single-Options-Selector.ps1 `
+            -Options $ImageSourceHandlers.Keys `
+            -Title "Select Icon Source" `
+            -Required;
+    }
 
     $ImageSourceHandlerFn = $ImageSourceHandlers[$ImageSource];
     $Path = $ImageSourceHandlerFn.Invoke()[-1];
