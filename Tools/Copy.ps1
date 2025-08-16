@@ -5,11 +5,28 @@ param (
     [switch]
     $Move,
     [switch]
+    $Verify,
+    [switch]
     $MirrorToDrive,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]
     $Files
 )
+
+if (!$Verify) {
+    $Verify = Prompt.ps1 -Message "Do you want to verify (copied|moved) items"
+}
+
+function Verify {
+    param (
+        $Source,
+        $Target
+    )
+
+    return & "$PSScriptRoot\Check-FolderSync.ps1" -Source $Source `
+        -Target $Target `
+        -CheckHashes;
+}
 
 #Region Helpers 
 function CopyWithShellGUI {
@@ -22,8 +39,15 @@ function CopyWithShellGUI {
     $objFolder = $shell.NameSpace($dest);
     foreach ($source in $sources) {
         $objFolder.CopyHere($source, 88) # 88 => 16, 64, 8
+
+        if ($Verify) {
+            $SourceName = Split-Path -Leaf $source;
+            $target = "$dest\$SourceName";
+            Verify -Source $source -Target $target;
+        }
     }
 
+                
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell) | Out-Null
 }
 
@@ -47,13 +71,13 @@ function CreateSameHierarchyWithDifferentDrive {
 #EndRegion
 
 $global:outputPath = $null;
-
 if ($MirrorToDrive) {
     $global:outputPath = CreateSameHierarchyWithDifferentDrive;
 }
 elseif (!$Destination) {
     $global:outputPath = Folder-Picker.ps1 -InitialDirectory "D:\" -Required
 }
+
 $Handlers = @(
     @{
         Key     = 'Explorer'
@@ -81,12 +105,20 @@ $Handlers = @(
                 ) -Wait -PassThru -NoNewWindow;
 
                 if ($process.ExitCode -eq 1 -and $Move) {
-                    Remove-Item -LiteralPath $file -Recurse -Force;
+                    if (Verify -Source $file -Target $finalOutput) {
+                        Remove-Item -LiteralPath $file -Recurse -Force;
+                    }
+                    return;
+                }
+                if ($Verify) {
+                    Verify -Source $file -Target $finalOutput
                 }
             }
         }
     }
 );
+
+
 
 $mode = Single-Options-Selector.ps1 -Options $Handlers -Title "PLease Select One Copy Mode" -Required;
 $mode.Handler.Invoke();

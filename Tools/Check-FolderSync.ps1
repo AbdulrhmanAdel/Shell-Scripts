@@ -9,9 +9,12 @@ param (
     [bool]
     $CheckHashes,
     [bool]
-    $ReverseCheck
+    $ReverseCheck,
+    [switch]
+    $Timeout
 )
 
+$script:hasMismatch = $false;
 $global:checkedFolder = 0;
 $global:checkedFiles = 0;
 function GetTargetFromSource {
@@ -32,6 +35,7 @@ function CheckFiles {
         $filePath = "$TargetSource\$($_.Name)";
         if (-not (Test-Path -LiteralPath $filePath)) {
             Write-Host "File not found: Source: $($_.FullName) => Target: $filePath" -ForegroundColor Green;
+            $script:hasMismatch = $true;
         }
 
         if ($CheckHashes) {
@@ -39,6 +43,7 @@ function CheckFiles {
             $targetHash = Get-FileHash -LiteralPath $filePath -Algorithm SHA256;
             if ($sourceHash.Hash -ne $targetHash.Hash) {
                 Write-Host "File hash mismatch: $filePath" -ForegroundColor Yellow;
+                $script:hasMismatch = $true;
             }
         }
     }
@@ -55,6 +60,7 @@ function CheckFolders {
         $TargetPath = GetTargetFromSource -SourcePath $_.FullName;
         if (-not (Test-Path -LiteralPath $TargetPath)) {
             Write-Host "Folder not found: Source: $($_.FullName) => Target: $TargetPath" -ForegroundColor Green;
+            $script:hasMismatch = $true;
             return;
         }
         else {
@@ -81,4 +87,8 @@ if ($ReverseCheck) {
     Write-Host "==================" -ForegroundColor Cyan;
 }
 
-timeout.exe 10;
+if ($Timeout) {
+    timeout.exe 10;
+}
+
+return $script:hasMismatch;
