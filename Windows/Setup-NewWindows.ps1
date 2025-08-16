@@ -1,4 +1,3 @@
-
 #region Helpers
 function AppRegexSelector {
     param (
@@ -92,15 +91,15 @@ function RunProgram {
 }
 
 #endregion
-
 # region Setup Personal Projects
-if (!$ShellProjectPath) {
+$ShellProjectPath = (Resolve-Path "$PSScriptRoot/..").ToString();
+if (!$ShellProjectPath -or -not (Test-Path -LiteralPath $ShellProjectPath)) {
     Write-Host "Please Select ShellProjectPath" -ForegroundColor Green
     $ShellProjectPath = Folder-Picker.ps1 -InitialDirectory "D:\" -ShowOnTop;
 }
 
 RunPowershell "$ShellProjectPath\Setup-EnvironmentVariable.ps1" -NoTimeout;
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "User");
+$env:Path += ";" + [System.Environment]::GetEnvironmentVariable("Path", "User");
 RunPowershell -Path "$ShellProjectPath\Setup-ContextMenu.ps1" -AdditionalArgs @("-NoTimeout")
 RunPowershell -Path "$ShellProjectPath\Setup-SendToMenu.ps1" -AdditionalArgs @("-NoTimeout")
 # #endregion
@@ -113,11 +112,11 @@ if (!$ProgrammingPath) {
 Add-ToPath.ps1 -Paths @(
     "$ProgrammingPath\Binaries"
 );
-RunPowershell -Path "$configPath\Dotnet\Register.ps1";
-RunPowershell -Path "$configPath\Git\Register.ps1";
-RunPowershell -Path "$configPath\Node\Register.ps1";
-RunPowershell -Path "$configPath\JetBrains\Register.ps1";
-RunPowershell -Path "$configPath\VsCode\Register.ps1";
+RunPowershell -Path "$ProgrammingPath\Dotnet\Register.ps1";
+RunPowershell -Path "$ProgrammingPath\Git\Register.ps1";
+RunPowershell -Path "$ProgrammingPath\Node\Register.ps1";
+RunPowershell -Path "$ProgrammingPath\JetBrains\Register.ps1";
+RunPowershell -Path "$ProgrammingPath\VsCode\Register.ps1";
 # #endregion
 
 # # region Programs
@@ -126,26 +125,26 @@ if (!$ProgramsPath) {
     $ProgramsPath = Folder-Picker.ps1 -ShowOnTop;
 }
 
-$tweakspath = "$ProgramsPath\Operating System\Windows\Tweaks"
-RunProgram -Path "$tweakspath\Shells\NileSoft\shell.exe" -Arguments @("-register", "-restart");
-RunPowershell -Path "$tweaksPath\Enable-DotNet3.5Framework.ps1";
-RunReg -Path "$tweaksPath\Power Plan\Show-TurboBoost.reg"
-RunReg -Path "$tweaksPath\Set-Powershell7AsDefault.reg"
+$tweaksPath = "$ProgramsPath\Operating System\Windows\Tweaks"
+# RunPowershell -Path "$tweaksPath\Enable-DotNet3.5Framework.ps1";
+# RunReg -Path "$tweaksPath\Power Plan\Show-TurboBoost.reg"
+# RunReg -Path "$tweaksPath\Set-Powershell7AsDefault.reg"
 RunPowershell -Path "$tweaksPath\StartMenu\Sync-StartMenu.ps1" -AdditionalArgs @("-Process", "Restore");
 RunPowershell -Path "$tweaksPath\Hib\Disable-Hib.ps1"
 RunCmd -Path "$tweaksPath\Date And Time\Change-DateFormat.bat"
+RunProgram -Path "$ProgramsPath\Operating System\Windows\Apps\Shells\NileSoft\shell.exe" -Arguments @("-register", "-restart");
 
-RunProgram -Path (AppRegexSelector -ParentPath "$ProgramsPath\Utilities" -Regex "PowerToysUserSet");
+RunProgram -Path (AppRegexSelector -ParentPath "$ProgramsPath\Utilities\PowerToys" -Regex "PowerToysUserSet");
 RunPowershell -Path "$ProgramsPath\Media\Players\K-Lite\Register.ps1";
 RunPowershell -Path "$ProgramsPath\Storage & Data\Compress\7-Zip\Set-AsDefault.ps1";
 
 # IDM
 RunPowershell -Path "$ProgramsPath\Net\Downloaders\IDM\Register.ps1";
-RunPowershell -Path "$ProgramsPath\\Net\Torrent\qBittorrent\Register.ps1";
+RunPowershell -Path "$ProgramsPath\Net\Torrent\qBittorrent\Register.ps1";
 
 #region hardware Monitor
-RunPowershell -Path "$ProgramsPath\Hardware\Monitor\HWiNFO64\HWiNFO64.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
-RunProgram -Path "$ProgramsPath\Hardware\Monitor\HWiNFO64\HWiNFO64.exe" -NoWait;
+RunPowershell -Path "$ProgramsPath\Hardware\Monitor\HWiNFO64\Settings-Sync.ps1" -AdditionalArgs @("-Process", "Restore", "-NoTimeout");
+RunProgram -Path "$ProgramsPath\Hardware\Monitor\HWiNFO64\App\HWiNFO64.exe" -NoWait;
 RunProgram -Path "$ProgramsPath\Hardware\Monitor\RivaTuner Statistics Server\RTSS.exe" -NoWait;
 
 #endregion
@@ -155,7 +154,6 @@ RunPowershell -Path "$ProgramsPath\Tools\MEGAsync\Data\Link.ps1";
 $gamesPath = "$ProgramsPath\Games";
 RunCmd -Path "$gamesPath\C++ Runtimes\install_all.bat"
 RunProgram -Path "$gamesPath\DirectX\DXSETUP.exe" -Arguments @("/silent");
-RunProgram -Path "$gamesPath\Epic Games\Epic Online Services\EpicOnlineServices.exe"
 RunProgram -Path "$gamesPath\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe"
 #endregion
 
