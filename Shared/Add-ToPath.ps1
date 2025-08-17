@@ -24,7 +24,7 @@ Write-Host "Adding New Paths to User Environment Variable" -ForegroundColor Gree
 $newPaths | ForEach-Object { Write-Host $_ };
 $finalPaths = ($savedPaths + $newPaths) -join ";";
 [Environment]::SetEnvironmentVariable('Path', $finalPaths, [EnvironmentVariableTarget]::User);
-if (-not $NoTimeout) {
+if ($NoTimeout) {
     Exit;
 }
 timeout.exe 10;
