@@ -22,7 +22,7 @@ if ($Machine) {
 }
 
 $Extensions | ForEach-Object {
-    $extension = $_;
+    $extension = $_.StartsWith(".") ? $_ : ".$_";
     $base = $classPath;
     reg add "$base\$extension" /d "$global:programName$extension" /f | Out-Null;
     $key = "$base\$global:programName$extension\shell\open\command";
