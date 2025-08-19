@@ -11,8 +11,12 @@ param (
     $KeepFiles,
     [ValidateSet("Normal", "Electron")]
     [string]
-    $ArchiveType = "Normal"
+    $ArchiveType = "Normal",
+    $Cleaner
 )
+$Cleaner ??= {
+    
+}
 
 Stop-Process -Name $ProcessName -Force -ErrorAction SilentlyContinue;   
 $DownloadUrl ??= Input.ps1 -Title "Enter the Download URL" -DefaultValue -Required;
