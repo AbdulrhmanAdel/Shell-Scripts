@@ -43,6 +43,9 @@ switch ($Type) {
         if ($DecimalPlaces) {
             !$NoDecimal -and ($formInput.DecimalPlaces = $DecimalPlaces) | Out-Null;
         }
+        else {
+            $formInput.DecimalPlaces = 1;
+        }
         $DefaultValue -and ($formInput.Value = [double]$DefaultValue) | Out-Null;
         break;
     }
