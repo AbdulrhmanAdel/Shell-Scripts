@@ -100,8 +100,10 @@ $Handlers = @(
                     # "/COPYALL", "/DCOPY:DAT", "/B", 
                     "/XD", '$Recycle.bin', """system volume information"""
                     "/xf", 'thumbs.db',
-                    "/mt:10"
-                    "/np"
+                    "/mt:16"
+                    # "/np"
+                    # "/NFL", "/NDL"
+                    "/V", "/ETA"
                 ) -Wait -PassThru -NoNewWindow;
 
                 if ($process.ExitCode -eq 1 -and $Move) {
