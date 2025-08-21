@@ -81,3 +81,7 @@ foreach ($item in $Paths) {
         RemoveItem -Info $info;
     }
 }
+
+return @{
+    Success = $true
+}

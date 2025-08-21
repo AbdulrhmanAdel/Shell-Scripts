@@ -19,10 +19,10 @@ function ExecuteScript {
 
 $AppInfoDetails = ExecuteScript -Path "Details" -Item $AppInfo  @currentArgs;
 $downloaderArtifacts = ExecuteScript -Path "Downloaders" -Item $Downloader @currentArgs;
-if (!$downloaderArtifacts.HasNewVersion) {
-    Write-Host "No new version found for $($AppInfoDetails.Name). Skipping update.";
-    return;
-}
+# if (!$downloaderArtifacts.HasNewVersion) {
+#     Write-Host "No new version found for $($AppInfoDetails.Name). Skipping update.";
+#     return;
+# }
 
 $cleanerArtifacts = ExecuteScript -Path "Cleaners" -Item $Cleaner  @currentArgs;
 if (!$cleanerArtifacts.Success) {
