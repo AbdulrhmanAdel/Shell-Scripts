@@ -45,8 +45,9 @@ function CheckFiles {
         }
 
         if ($CheckHashes) {
-            $sourceHash = Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256;
-            $targetHash = Get-FileHash -LiteralPath $filePath -Algorithm SHA256;
+            Write-Host "Checking hash for file: $filePath" -NoNewLine -ForegroundColor Cyan;
+            $sourceHash = Get-FileHash -LiteralPath $_.FullName -Algorithm MD5;
+            $targetHash = Get-FileHash -LiteralPath $filePath -Algorithm MD5;
             if ($sourceHash.Hash -ne $targetHash.Hash) {
                 Write-Host "File hash mismatch: $filePath" -ForegroundColor Yellow;
                 $script:hasMismatch = $true;
@@ -59,7 +60,6 @@ function CheckFiles {
         }
     }
 }
-
 
 function CheckFolders {
     param (

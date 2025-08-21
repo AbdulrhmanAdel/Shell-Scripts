@@ -1,21 +1,19 @@
 [CmdletBinding()]
 param (
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]
+    $Files,
     [string]
     $Destination,
     [switch]
     $Move,
     [switch]
-    $Verify,
-    [switch]
     $MirrorToDrive,
-    [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]]
-    $Files
+    [ValidateSet('Explorer', 'FastCopy', 'RoboCopy')]
+    $Handler
 )
 
-if (!$Verify) {
-    $Verify = Prompt.ps1 -Message "Do you want to verify (copied|moved) items"
-}
+Write-Host "Files $Files Destination $Destination Move $Move Verify $Verify MirrorToDrive $MirrorToDrive Handler $Handler";
 
 function Verify {
     param (
@@ -77,12 +75,39 @@ if ($MirrorToDrive) {
 elseif (!$Destination) {
     $global:outputPath = Folder-Picker.ps1 -InitialDirectory "D:\" -Required
 }
+else {
+    $global:outputPath = $Destination;
+}
 
 $Handlers = @(
     @{
         Key     = 'Explorer'
         Handler = {
             CopyWithShellGUI -sources $Files -dest $global:outputPath;
+        }
+    }
+    @{
+        Key     = 'FastCopy'
+        Handler = {
+            $processArguments = @(
+                "/cmd=$($Move ? "move" : "diff")",
+                "/estimate", "/balloon",
+                "/force_close", "/open_window"
+            );
+            if ($Verify) {
+                $processArguments += @("/verify", "/verifyinfo")
+            }
+
+            $ProcessArguments += $Files + @(
+                "/to=`"$global:outputPath`""
+            )
+            $fastCopyProcess = Start-Process fastcopy.exe -ArgumentList $processArguments -Wait -PassThru;
+            if ($fastCopyProcess.ExitCode -eq 0) {
+                Write-Host "FastCopy completed successfully." -ForegroundColor Green;
+            }
+            else {
+                Write-Host "FastCopy failed with exit code $($fastCopyProcess.ExitCode)." -ForegroundColor Red;
+            }
         }
     }
     @{
@@ -121,7 +146,13 @@ $Handlers = @(
     }
 );
 
-$mode = Single-Options-Selector.ps1 -Options $Handlers -Title "PLease Select One Copy Mode" -Required;
+
+$mode = $null
+if ($Handler) {
+    $mode = $Handlers | Where-Object { $_.Key -eq $Handler } | Select-Object -First 1;
+}
+else {
+    $mode = Single-Options-Selector.ps1 -Options $Handlers -Title "PLease Select One Copy Mode" -Required;
+}
 $mode.Handler.Invoke();
-timeout.exe 15;
 Read-Host "Press Any Key To Exit."
