@@ -17,10 +17,13 @@ else {
 }
 
 $sharedPath = "$PSScriptRoot\Shared";
-$SourceFoldersAndFiles = @($sharedPath, @{
+$SourceFoldersAndFiles = @(
+    $sharedPath, 
+    @{
         Path = "$PSScriptRoot\Youtube\Downloader.ps1";
         Name = "Youtube-Downloader.ps1"
-    });
+    }
+);
 
 Get-ChildItem -Path $sharedPath -Directory -Recurse | Where-Object {
     if ($_.FullName -notmatch "Ignore|Modules") {
@@ -49,13 +52,20 @@ $SourceFoldersAndFiles | ForEach-Object {
 
 # Current system path
 $currentPath = [System.Environment]::GetEnvironmentVariable("Path", "User");
+$DirectPaths = @(
+    $TargetFolder,
+    "$PSScriptRoot\Updaters\Apps"
+);
+
 $paths = $currentPath -split ";";
-if ($paths.Contains($TargetFolder)) {
+$newPaths += $DirectPaths;
+$newPaths = $newPaths | Select-Object -Unique
+if ($paths.Length -eq $newPaths.Length) {
     Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;
     Exit;
 }
-$paths += $TargetFolder;
-[System.Environment]::SetEnvironmentVariable("Path", $paths -join ";", "User");
+
+[System.Environment]::SetEnvironmentVariable("Path", $newPaths -join ";", "User");
 Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;
 if ($NoTimeout) {
     Exit;

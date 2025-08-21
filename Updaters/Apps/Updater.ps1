@@ -6,24 +6,31 @@ param (
     $Installer
 )
 
-function Expand {
+function ExecuteScript {
     param (
-        $Dic
+        $Item,
+        $Path,
+        $AdditionalArgs = @{}
     )
 
-    $sb = [System.Text.StringBuilder]::new()
-    foreach ($key in $Dic.Keys) {
-        [void]$sb.Append("-$($key) $($Dic[$key])")
-    }
-    return $sb.ToString()
+    $finalArgs = $AdditionalArgs + $Item.Args;
+    return & "$PSScriptRoot\$Path\$($Item.Name)" @finalArgs;
 }
 
-$currentArgs = $AppInfo.Args;
-$AppInfoDetails = & "$PSScriptRoot\Details\$($AppInfo.Name)"  @currentArgs;
-$currentArgs = $Downloader.Args;
-$downloaderArtifacts = & "$PSScriptRoot\Downloaders\$($Downloader.Name)"  @currentArgs;
-$currentArgs = $Cleaner.Args;
-$downloaderArtifacts = & "$PSScriptRoot\Cleaners\$($Cleaner.Name)"  @currentArgs;
-$currentArgs = $Installer.Args;
-$Installer = & "$PSScriptRoot\Installers\$($Installer.Name)" -Path $downloaderArtifacts.DownloadPath @currentArgs;
+$AppInfoDetails = ExecuteScript -Path "Details" -Item $AppInfo  @currentArgs;
+$downloaderArtifacts = ExecuteScript -Path "Downloaders" -Item $Downloader @currentArgs;
+if (!$downloaderArtifacts.HasNewVersion) {
+    Write-Host "No new version found for $($AppInfoDetails.Name). Skipping update.";
+    return;
+}
+
+$cleanerArtifacts = ExecuteScript -Path "Cleaners" -Item $Cleaner  @currentArgs;
+if (!$cleanerArtifacts.Success) {
+    Write-Host "Failed to clean old files for $($AppInfoDetails.Name). Aborting update.";
+    return;
+}
+
+$Installer = ExecuteScript -Path "Installers" -Item $Installer -AdditionalArgs @{
+    Path = $downloaderArtifacts.DownloadPath
+}
 
