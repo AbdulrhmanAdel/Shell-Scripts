@@ -1,7 +1,0 @@
-[CmdletBinding()]
-param (
-    $CustomCleaner
-)
-
-
-
