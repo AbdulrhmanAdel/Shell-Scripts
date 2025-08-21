@@ -15,6 +15,7 @@ param (
 )
 
 $script:hasMismatch = $false;
+$script:mismatches = @();
 $global:checkedFolder = 0;
 $global:checkedFiles = 0;
 function GetTargetFromSource {
@@ -36,6 +37,11 @@ function CheckFiles {
         if (-not (Test-Path -LiteralPath $filePath)) {
             Write-Host "File not found: Source: $($_.FullName) => Target: $filePath" -ForegroundColor Green;
             $script:hasMismatch = $true;
+            $script:mismatches += @{
+                Source = $_.FullName;
+                Target = $filePath;
+                Reason = "File not found";
+            };
         }
 
         if ($CheckHashes) {
@@ -44,6 +50,11 @@ function CheckFiles {
             if ($sourceHash.Hash -ne $targetHash.Hash) {
                 Write-Host "File hash mismatch: $filePath" -ForegroundColor Yellow;
                 $script:hasMismatch = $true;
+                $global:mismatches += @{
+                    Source = $_.FullName;
+                    Target = $filePath;
+                    Reason = "Hash mismatch";
+                };
             }
         }
     }
@@ -61,6 +72,11 @@ function CheckFolders {
         if (-not (Test-Path -LiteralPath $TargetPath)) {
             Write-Host "Folder not found: Source: $($_.FullName) => Target: $TargetPath" -ForegroundColor Green;
             $script:hasMismatch = $true;
+            $script:mismatches += @{
+                Source = $_.FullName;
+                Target = $TargetPath;
+                Reason = "Folder not found";
+            };
             return;
         }
         else {
@@ -91,4 +107,9 @@ if ($Timeout) {
     timeout.exe 10;
 }
 
-return $script:hasMismatch;
+return @{
+    Success        = !$script:hasMismatch;
+    CheckedFolders = $global:checkedFolder;
+    CheckedFiles   = $global:checkedFiles;
+    Mismatches     = $script:mismatches
+};

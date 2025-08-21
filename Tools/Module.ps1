@@ -38,7 +38,7 @@ $Options = @(
         Key     = "Copy";
         Handler = {
             $path = "$PSScriptRoot/Copy.ps1";
-            & $path $Files;
+            & $path -Files $Files;
         };
     }
     @{

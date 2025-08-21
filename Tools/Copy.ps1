@@ -25,7 +25,7 @@ function Verify {
 
     return & "$PSScriptRoot\Check-FolderSync.ps1" -Source $Source `
         -Target $Target `
-        -CheckHashes;
+        -CheckHashes $true;
 }
 
 #Region Helpers 
@@ -111,14 +111,13 @@ $Handlers = @(
                     return;
                 }
                 if ($Verify) {
-                    Verify -Source $file -Target $finalOutput
+                    $verifyResult = Verify -Source $file -Target $finalOutput;
+                    Write-Host "Verification result for $($file): $($verifyResult.Success)" -ForegroundColor Yellow;
                 }
             }
         }
     }
 );
-
-
 
 $mode = Single-Options-Selector.ps1 -Options $Handlers -Title "PLease Select One Copy Mode" -Required;
 $mode.Handler.Invoke();
