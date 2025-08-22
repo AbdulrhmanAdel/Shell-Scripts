@@ -3,7 +3,8 @@ param (
     [Parameter()]
     [string]
     $Path,
-    $Destination
+    $Destination,
+    $Flatten = $false
 )
 
 $archiveProcess = Start-Process 7z -ArgumentList @(
@@ -12,23 +13,24 @@ $archiveProcess = Start-Process 7z -ArgumentList @(
     "-o$Destination"
 ) -NoNewWindow -PassThru -Wait;
 
-return @{
-    Success = !$archiveProcess -or $archiveProcess.ExitCode -gt 0
+$successArchive = !$archiveProcess -or $archiveProcess.ExitCode -gt 0
+if (!$successArchive) {
+    Write-Host "[ERROR] Archive extraction failed for $Path." -ForegroundColor Red;
+    return @{
+        Success = $false
+    }
 }
 
-
-Updater.ps1 -CurrentVersion @{
-    Name = "Properties"
-    Args = @{}
-} -Downloader @{
-    Name = "Github"
-    Args = @{}
-} -Installer @{
-    Name = "Archive"
-    Args = @{}
-} -Cleaner @{
-    Name = "Normal"
-    Args = @{
-        Paths = @()
+if ($Flatten) {
+    $flattenProcess = & "$PSScriptRoot\_Flatten.ps1" -Path $Destination;
+    if (!$flattenProcess.Success) {
+        Write-Host "[ERROR] Flattening failed for $Destination." -ForegroundColor Red;
+        return @{
+            Success = $false
+        }
     }
+}
+
+return @{
+    Success = $true;
 }
