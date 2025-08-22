@@ -22,7 +22,7 @@ function ExecuteScript {
     return & "$PSScriptRoot\$Path\$($Item.Name)" @finalArgs;
 }
 
-$CurrentVersionDetails = ExecuteScript -Path "Details" -Item $CurrentVersion ;
+$CurrentVersionDetails = $CurrentVersion.Name -eq "Direct" ? $CurrentVersion.Args : (ExecuteScript -Path "Details" -Item $CurrentVersion);
 $downloaderArtifacts = ExecuteScript -Path "Downloaders" -AdditionalArgs @{
     CurrentVersion = $CurrentVersionDetails.Version
 } -Item $Downloader;

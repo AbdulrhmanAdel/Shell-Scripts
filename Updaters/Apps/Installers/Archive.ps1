@@ -15,3 +15,20 @@ $archiveProcess = Start-Process 7z -ArgumentList @(
 return @{
     Success = !$archiveProcess -or $archiveProcess.ExitCode -gt 0
 }
+
+
+Updater.ps1 -CurrentVersion @{
+    Name = "Properties"
+    Args = @{}
+} -Downloader @{
+    Name = "Github"
+    Args = @{}
+} -Installer @{
+    Name = "Archive"
+    Args = @{}
+} -Cleaner @{
+    Name = "Normal"
+    Args = @{
+        Paths = @()
+    }
+}

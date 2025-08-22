@@ -61,6 +61,10 @@ function HandleDirectory {
         $RemoveItem.Invoke($_);
     }
 
+    if (Get-ChildItem -LiteralPath $DirectoryInfo.FullName -ErrorAction SilentlyContinue) {
+        return;
+    }
+
     Remove-Item -LiteralPath $DirectoryInfo.FullName -Force
 }
 
