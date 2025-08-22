@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param (
-    $AppInfo,
+    $CurrentVersion,
     $Downloader,
     $Cleaner,
     $Installer
@@ -13,24 +13,39 @@ function ExecuteScript {
         $AdditionalArgs = @{}
     )
 
+    if (!$Item -or !$Item.Name) {
+        Write-Host "[WARN] No $Item for $Path specified. Skipping." -ForegroundColor DarkGray
+        return $null;
+    }
+
     $finalArgs = $AdditionalArgs + $Item.Args;
     return & "$PSScriptRoot\$Path\$($Item.Name)" @finalArgs;
 }
 
-$AppInfoDetails = ExecuteScript -Path "Details" -Item $AppInfo  @currentArgs;
-$downloaderArtifacts = ExecuteScript -Path "Downloaders" -Item $Downloader @currentArgs;
-# if (!$downloaderArtifacts.HasNewVersion) {
-#     Write-Host "No new version found for $($AppInfoDetails.Name). Skipping update.";
-#     return;
-# }
+$CurrentVersionDetails = ExecuteScript -Path "Details" -Item $CurrentVersion ;
+$downloaderArtifacts = ExecuteScript -Path "Downloaders" -AdditionalArgs @{
+    CurrentVersion = $CurrentVersionDetails.Version
+} -Item $Downloader;
 
-$cleanerArtifacts = ExecuteScript -Path "Cleaners" -Item $Cleaner  @currentArgs;
+if (!$downloaderArtifacts.HasNewVersion) {
+    Write-Host "No new version found for $($CurrentVersionDetails.Name). Skipping update.";
+    return @{
+        Success = $false
+    }
+}
+
+$cleanerArtifacts = ExecuteScript -Path "Cleaners" -Item $Cleaner ;
 if (!$cleanerArtifacts.Success) {
-    Write-Host "Failed to clean old files for $($AppInfoDetails.Name). Aborting update.";
-    return;
+    Write-Host "Failed to clean old files for $($CurrentVersionDetails.Name). Aborting update.";
+    return @{
+        Success = $false
+    }
 }
 
 $Installer = ExecuteScript -Path "Installers" -Item $Installer -AdditionalArgs @{
     Path = $downloaderArtifacts.DownloadPath
 }
 
+return @{
+    Success = $true
+}

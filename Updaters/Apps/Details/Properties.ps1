@@ -5,4 +5,7 @@ param (
     $Path
 )
 
-return Get-ItemProperty -LiteralPath $Path;
+$itemInfo = Get-ItemProperty -LiteralPath $Path;
+return @{
+    Version     = $itemInfo.VersionInfo.FileVersion
+}

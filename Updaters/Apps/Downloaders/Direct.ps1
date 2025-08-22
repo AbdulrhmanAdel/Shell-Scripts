@@ -1,23 +1,24 @@
 [CmdletBinding()]
 param (
-    [Parameter()]
+    $CurrentVersion,
     [string]
     $Url,
-    [Parameter()]
     [object]
-    $OutPath,
-    [object]
-    $AppName,
-    $ArchiveType = "zip"
+    $FileName
 )
-$AppName ??= Random-FileName.ps1;
-$parentPath = "$($env:TEMP)\App_Updaters"
-$OutPath ??= "$parentPath\$($AppName).$ArchiveType"
-if (-not (Test-Path $OutPath)) {
-    New-Item -Path $parentPath -ItemType Directory -Force | Out-Null;
-    Invoke-WebRequest -Uri $Url -OutFile $OutPath;
+
+$HasNewVersion = & "$PSScriptRoot\_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $releaseVersion;
+if (!$HasNewVersion) {
+    Write-Host "No new version found. Current version ($CurrentVersion) is up to date.";
+    return @{
+        HasNewVersion = $false
+        DownloadPath  = $null
+    }
 }
 
+$downloadPath = & "$PSScriptRoot\_DOwnloader.ps1" -Url $Url  -FileName $FileName;
+
 return @{
-    DownloadPath = $OutPath;
+    HasNewVersion = $HasNewVersion
+    DownloadPath  = $downloadPath
 }

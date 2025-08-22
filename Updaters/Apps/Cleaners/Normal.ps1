@@ -54,18 +54,15 @@ function HandleDirectory {
 
     Get-ChildItem -Path $DirectoryInfo.FullName | ForEach-Object {
         if ($_ -is [System.IO.DirectoryInfo]) { 
-            HandleDirectory -DirectoryInfo $_ -RemoveRoot $true;
+            HandleDirectory -DirectoryInfo $_;
             return;
         }
 
         $RemoveItem.Invoke($_);
     }
 
-    if ($RemoveRoot) {
-        Remove-Item -LiteralPath $DirectoryInfo.FullName -Force
-    }
+    Remove-Item -LiteralPath $DirectoryInfo.FullName -Force
 }
-
 
 foreach ($item in $Paths) {
     $info = Get-Item -LiteralPath $item -ErrorAction SilentlyContinue
@@ -75,10 +72,10 @@ foreach ($item in $Paths) {
     }
 
     if ($info.PSIsContainer) {
-        HandleDirectory -DirectoryInfo $info -RemoveRoot $false;
+        HandleDirectory -DirectoryInfo $info;
     }
     elseif ($info -is [System.IO.FileInfo]) {
-        RemoveItem -Info $info;
+        $RemoveItem.Invoke($info);
     }
 }
 
