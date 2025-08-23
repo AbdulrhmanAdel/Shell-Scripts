@@ -24,7 +24,7 @@ function ExecuteScript {
 
 $CurrentVersionDetails = $CurrentVersion.Name -eq "Direct" ? $CurrentVersion.Args : (ExecuteScript -Path "Details" -Item $CurrentVersion);
 $downloaderArtifacts = ExecuteScript -Path "Downloaders" -AdditionalArgs @{
-    CurrentVersion = $CurrentVersionDetails?.Version
+    CurrentVersion = ($CurrentVersionDetails)?.Version
 } -Item $Downloader;
 
 if (!$downloaderArtifacts.HasNewVersion) {

@@ -2,8 +2,10 @@
 param (
     $RepoOwner,
     $RepoName,
+    [Alias("VersionPattern")]
     $VersionExtractPattern = "v",
-    $releaseAssetSearchPattern = ".*\.zip$",
+    [Alias("ReleasePattern")]
+    $ReleaseAssetSearchPattern = ".*\.zip$",
     $CurrentVersion
 )
 

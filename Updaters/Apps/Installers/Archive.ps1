@@ -1,19 +1,23 @@
 [CmdletBinding()]
 param (
-    [Parameter()]
-    [string]
-    $Path,
-    $Destination,
-    $Flatten = $false
+    [Parameter(Mandatory)]
+    [string]$Path,
+    [Parameter(Mandatory)]
+    [string]$Destination,
+    [string[]]$Include,
+    [string[]]$Exclude,
+    [bool]$Flatten = $false
 )
 
+$fileName = Split-Path -Leaf $Path;
+$extractPath = "$env:TEMP\App_Updaters\Archive\$fileName"
 $archiveProcess = Start-Process 7z -ArgumentList @(
     "x", 
     """$Path""",
-    "-o$Destination"
+    "-o$extractPath"
 ) -NoNewWindow -PassThru -Wait;
 
-$successArchive = !$archiveProcess -or $archiveProcess.ExitCode -gt 0
+$successArchive = $archiveProcess -or $archiveProcess.ExitCode -eq 0
 if (!$successArchive) {
     Write-Host "[ERROR] Archive extraction failed for $Path." -ForegroundColor Red;
     return @{
@@ -21,16 +25,8 @@ if (!$successArchive) {
     }
 }
 
-if ($Flatten) {
-    $flattenProcess = & "$PSScriptRoot\_Flatten.ps1" -Path $Destination;
-    if (!$flattenProcess.Success) {
-        Write-Host "[ERROR] Flattening failed for $Destination." -ForegroundColor Red;
-        return @{
-            Success = $false
-        }
-    }
-}
-
-return @{
-    Success = $true;
-}
+return & "$PSScriptRoot\_Copy.ps1" -Source $extractPath `
+    -Destination $Destination `
+    -Include $Include `
+    -Exclude $Exclude `
+    -Flatten:$Flatten;

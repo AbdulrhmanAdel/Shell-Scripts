@@ -1,16 +1,14 @@
-# Delete all files and subdirectories in $Paths except those matching any regex in $Excludes.
-# $Excludes is an array of regex patterns. Do not delete the top-level directories themselves.
-
 param(
     [string[]]$Paths,
-    [string[]]$Excludes
+    [Alias("Excludes")]
+    [string[]]$Exclude
 )
 
 function IsExcluded {
     param(
         [string]$Name
     )
-    foreach ($pattern in $Patterns) {
+    foreach ($pattern in $Exclude) {
         if ($Name -match $pattern) {
             return $true
         }
@@ -19,7 +17,7 @@ function IsExcluded {
 }
 
 
-$RemoveItem = $Excludes.Length ? {
+$RemoveItem = $Exclude.Length ? {
     param (
         $Info
     )
