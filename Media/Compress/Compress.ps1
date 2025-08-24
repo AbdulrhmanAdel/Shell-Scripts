@@ -9,7 +9,7 @@ $source = & Single-Options-Selector.ps1 -options @("All", "Videos", "Images", "C
 $modulesPath = "$($PSScriptRoot)\Modules";
 if ($source -eq "Course" ) {
     $scriptPath = "$modulesPath/Course/Course-Compressor.ps1";
-    & $scriptPath $args[0];
+    & $scriptPath -Paths $Files;
     EXIT;
 }
 
