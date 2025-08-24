@@ -119,7 +119,7 @@ function HandleCourse {
 
 #endregion
 
-$CoursePaths | ForEach-Object {
+$Paths | ForEach-Object {
     HandleCourse -CoursePath $_;
 }
 
