@@ -11,7 +11,6 @@ param (
     $NoReplace = $false
 )
 
-Write-Host 
 if ($null -eq $SymbolLinkPath -or $SymbolLinkPath -eq "") {
     $SymbolLinkPath = Folder-Picker.ps1 -InitialDirectory ([System.IO.Path]::GetDirectoryName($LinkToPath)) -Required;
 }
@@ -24,14 +23,18 @@ if ($LinkToPath.StartsWith("c") -or $SymbolLinkPath.StartsWith("c")) {
     );
 }
 
-$isSourceFile = (Test-Path -LiteralPath $LinkToPath) `
-    -and (Get-Item -LiteralPath $LinkToPath) -is [System.IO.FileInfo];
-$isTargetExits = Test-Path -LiteralPath $SymbolLinkPath;
-$isTargetFile = $isTargetExits `
-    -and (Get-Item -LiteralPath $SymbolLinkPath) -is [System.IO.FileInfo];
-if ($isSourceFile -and $isTargetExits -and !$isTargetFile) {
-    $LinkToPathName = Split-Path -Path $LinkToPath -Leaf
-    $SymbolLinkPath = "$SymbolLinkPath\$LinkToPathName";
+$targetPathInfo = Get-Item -LiteralPath $LinkToPath -ErrorAction SilentlyContinue;
+if (!$targetPathInfo) {
+    Write-Error "Can't Link to invalid path."
+    Exit;
+}
+
+$symbolLinkPathInfo = Get-Item -LiteralPath $SymbolLinkPath -ErrorAction SilentlyContinue;
+if (
+    $SymbolLinkPathInfo `
+        -and $symbolLinkPathInfo -is [System.IO.DirectoryInfo] `
+        -and $targetPathInfo -is [System.IO.FileInfo]) {
+    $SymbolLinkPath = "$SymbolLinkPath\$($targetPathInfo.Name)";                                           
 }
 
 if (!$NoReplace -and (Test-Path -LiteralPath $SymbolLinkPath)) {
