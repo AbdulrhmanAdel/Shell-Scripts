@@ -5,7 +5,8 @@ param (
     $DirectoryPath,
     $ImagePath,
     [switch]$SkipTimeOut,
-    $ImageSource = $null
+    $ImageSource = $null,
+    $Website = $null
 )
 
 Write-Host "'$ImageSource'"
@@ -117,7 +118,7 @@ function GetImagePath {
     if ($Width -ne $Hight) {
         $PathInfo = Get-Item -LiteralPath $Path;
         $NewImagePath = "$($PathInfo.Directory.FullName)\$($PathInfo.BaseName)-resized$($PathInfo.Extension)";
-        & magick convert "$Path" -resize 512x512 -gravity center -background none -extent 512x512 "$NewImagePath";
+        & magick convert "$Path" -resize 512x512 -gravity center -background none -extent 512x512 "$NewImagePath" | Out-Null;
         $Path = $NewImagePath;
     }
 
