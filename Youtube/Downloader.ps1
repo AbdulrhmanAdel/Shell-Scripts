@@ -1,12 +1,8 @@
 [CmdletBinding()]
 param (
-    [string]
     $DestinationPath,
-    [string]
     $Link,
-    [string]
     $Format,
-    [switch]
     $NoExit
 )
 
