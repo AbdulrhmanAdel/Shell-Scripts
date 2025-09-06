@@ -7,9 +7,16 @@ Extension-Communicator.ps1 -LogPath "$PSScriptRoot\Logs.txt" -MessageHandler {
         "Save-Torrent" {
             $link = $Data.link;
             $title = $Data.title -replace '[<>:"/\\|?*]', '';
-            $command = "& { 
+            $command = "& {
+                    `$fileName = '$title.url';
                     `$saveLocation = Folder-Picker.ps1 -Retry 1 -ShowOnTop;
-                    Create-Shortcut.ps1 -Target (`$saveLocation + '\$title.url') -Source '$link';
+                    `$userFolderNameAsTitle=Prompt.ps1 -Message 'Do you want to use folder name as File name';
+                    if (`$userFolderNameAsTitle) {
+                        `$fileName = Split-Path -Leaf `$saveLocation;
+                        `$fileName = `$fileName + '.url'
+                    }
+                    Create-Shortcut.ps1 -Target (`$saveLocation + '\' + `$fileName) -Source '$link';
+                    timeout 5;
             }"
             Start-Process pwsh.exe -ArgumentList @(
                 "-Command", $command
@@ -31,9 +38,12 @@ Extension-Communicator.ps1 -LogPath "$PSScriptRoot\Logs.txt" -MessageHandler {
             $generalInfo = $Data.generalInfo;
             $savePath = $Data.savePath;
             $renameTo = $Data.renameTo;
+            $command = "& {
+                Subtitles-Downloader.ps1 -Title '$title' -Season '$season' -Episodes '$episodes' -Year '$year' -SavePath '$savePath' -RenameTo '$renameTo'
+            }"
             Start-Process pwsh.exe -ArgumentList @(
-                "-Command", "Subtitles-Downloader.ps1 -Title '$title' -Season '$season' -Episodes '$episodes' -Year '$year' -SavePath '$savePath' -RenameTo '$renameTo'"
-            )
+                "-Command", $command
+            );
             break;
         }
     }
