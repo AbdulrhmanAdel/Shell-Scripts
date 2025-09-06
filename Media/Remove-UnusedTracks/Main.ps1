@@ -20,7 +20,7 @@ function RemoveUnusedTracks(
         return $false;
     }
 
-    & Remove-ToRecycleBin.ps1 $inputPath;
+    & Remove-ToRecycleBin.ps1 $inputPath -Color ([System.ConsoleColor]::Green);
     Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
     Write-Host "==========================" -ForegroundColor DarkBlue;
     return $true;

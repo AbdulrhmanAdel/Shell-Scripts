@@ -39,8 +39,7 @@ $streams = (
 ).streams;
 
 $arguments = @(
-    "-v", "error",
-    "-stats",
+    "-v", "error", #log level
     "-i", """$inputPath""", 
     "-map", "0:0"
 );

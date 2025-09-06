@@ -2,7 +2,8 @@
 param (
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]
-    $Paths
+    $Paths,
+    $Color = [System.ConsoleColor]::Red
 )
 
 Add-Type -AssemblyName Microsoft.VisualBasic
@@ -10,7 +11,7 @@ Add-Type -AssemblyName Microsoft.VisualBasic
 $Paths | ForEach-Object {
     # [System.IO.Path]::
     $info = Get-Item -LiteralPath $_;
-    Write-Host "Moving $_ TO RycleBin" -ForegroundColor Red;
+    Write-Host "Moving $_ TO RycleBin" -ForegroundColor $Color;
     if ($info -is [System.IO.FileInfo]) { 
         [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile($_, 'OnlyErrorDialogs', 'SendToRecycleBin')
     }
