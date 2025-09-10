@@ -20,7 +20,7 @@ function RemoveUnusedTracks(
         return $false;
     }
 
-    & Remove-ToRecycleBin.ps1 $inputPath -Color ([System.ConsoleColor]::Green);
+    & Remove-ToRecycleBin.ps1 -Paths $inputPath -Color ([System.ConsoleColor]::Green);
     Write-Host "Handling File COMPLETED SUCCESSFULLY " -ForegroundColor Green;
     Write-Host "==========================" -ForegroundColor DarkBlue;
     return $true;
@@ -34,7 +34,7 @@ function GetMediaFilesFromArchive {
     # $folderName = $archiveFileInfo.Name -replace $archiveFileInfo.Extension, '';
     $outputPath = "$temp/RUT-$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss')";
     if (Test-Path -LiteralPath $outputPath) {
-        & Remove-ToRecycleBin.ps1 $outputPath;
+        & Remove-ToRecycleBin.ps1 $outputPath -Color ([System.ConsoleColor]::Green); ;
     }
 
     $archiveProcess = Start-Process 7z -ArgumentList @(
@@ -132,13 +132,13 @@ $Files | Where-Object {
         Get-ChildItem -LiteralPath $pathAsAFile.Directory.FullName | Where-Object {
             $_.Name.StartsWith($Matches["Name"]);
         } | ForEach-Object {
-            & Remove-ToRecycleBin.ps1 $_.FullName;
+            & Remove-ToRecycleBin.ps1 $_.FullName -Color ([System.ConsoleColor]::Green); ;
         }
 
         return;
     }
 
-    & Remove-ToRecycleBin.ps1 $_;
+    & Remove-ToRecycleBin.ps1 $_ -Color ([System.ConsoleColor]::Green); ;
 }
 
 timeout.exe 5;
