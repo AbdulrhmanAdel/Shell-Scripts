@@ -12,7 +12,7 @@ if (-not (Test-Path -LiteralPath $Destination)) {
 }
 
 if (!$Flatten -and !$Include.Length -and !$Exclude.Length) {
-    Copy-Item -Path "$extractPath\*" -Destination $Destination -Force;
+    Copy-Item -Path "$Source\*" -Destination $Destination -Force -Recurse;
     return @{
         Success = $true;
     }
@@ -32,7 +32,7 @@ try {
         return $true
     } | ForEach-Object {
         if ($_ -is [System.IO.DirectoryInfo]) {
-            Copy-Item -Path "$($_.FullName)\*" -Recurse -Destination $Destination -Force;
+            Copy-Item -Path "$($_.FullName)\*"  -Destination $Destination -Force -Recurse;
             return;
         }
         Copy-Item -Path $_.FullName -Destination $Destination -Force;
