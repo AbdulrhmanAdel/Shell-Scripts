@@ -41,7 +41,7 @@ $Files | ForEach-Object {
     if ($_ -match "\.(mkv|mp4|avi|webm)$") {
         $videos += $_;   
     }
-    elseif ($_ -match "\.(jpg|jpeg|png|gif|bmp|heic)$") {
+    elseif ($_ -match "\.(jpg|jpeg|png|gif|bmp|heic|dng)$") {
         $images += $_;   
     }
     elseif ($_ -match "\.(mp3|opus|m4a)$") {
