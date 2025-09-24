@@ -116,7 +116,7 @@ $subs = $files | ForEach-Object {
     }
     if (!$details) { return $null; }
     $imdb = $imdbCache[$details.Title];
-    $details.Type = $imdb.type;
+    $details.Type = $imdb.type ? $imdb.type : $details.Type;
     $info = $details.Info;
     $name = $info.Name -replace $info.Extension, "";
     return @{
