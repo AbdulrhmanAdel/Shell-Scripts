@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param (
     [string]
-    [Alias("Target")]
+    [Alias("Target", "Path")]
     $SymbolLinkPath,
     [Parameter(Mandatory)]
     [string]
