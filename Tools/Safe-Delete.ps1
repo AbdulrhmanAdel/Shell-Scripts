@@ -17,7 +17,7 @@ param (
     $Files
 )
 
-if ($RunAsAdmin -or (Prompt.ps1 -Message "Run As Admin?")) {
+if ($RunAsAdmin) {
     Run-AsAdmin.ps1 -Arguments (@(
         "-Prompt", $Prompt,
         "-PromptPasses", $PromptPasses
