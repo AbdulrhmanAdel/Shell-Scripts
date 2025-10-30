@@ -28,7 +28,8 @@ $downloaderArtifacts = ExecuteScript -Path "Downloaders" -AdditionalArgs @{
 } -Item $Downloader;
 
 if (!$downloaderArtifacts.HasNewVersion) {
-    Write-Host "No new version found for $($CurrentVersionDetails.Name). Skipping update.";
+    Write-Host "No new version found for $($CurrentVersionDetails.Name) Latest Version $($downloaderArtifacts.LatestVersion). Skipping update.";
+    timeout.exe 10;
     return @{
         Success = $false
     }

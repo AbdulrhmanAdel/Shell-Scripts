@@ -20,7 +20,8 @@ $releaseAsset = $latestReleasesData.assets | Where-Object { $_.name -match $rele
 
 $HasNewVersion = & "$PSScriptRoot\_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $releaseVersion;
 if (!$HasNewVersion) {
-    Write-Host "No new version found. Current version ($CurrentVersion) is up to date.";
+    Write-Host "No new version found. Current version ($CurrentVersion); Latest Version $releaseVersion";
+    Write-Host "Github Url `"https://github.com/$RepoOwner/$RepoName/releases/latest`"";
     return @{
         HasNewVersion = $false
         DownloadPath  = $null
