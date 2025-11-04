@@ -31,6 +31,7 @@ Get-ChildItem -Path $sharedPath -Directory -Recurse | Where-Object {
     }
 } 
 
+Write-Host $SourceFoldersAndFiles;
 $SourceFoldersAndFiles | ForEach-Object {
     $itemInfo = Get-Item -LiteralPath ($_.Path ?? $_);
     if ($itemInfo -is [System.IO.DirectoryInfo]) {
@@ -38,7 +39,7 @@ $SourceFoldersAndFiles | ForEach-Object {
             New-Item `
                 -Path "$TargetFolder\$($_.Name)" `
                 -Target $_.FullName `
-                -ItemType SymbolicLink -ErrorAction SilentlyContinue;
+                -ItemType SymbolicLink ;
         }
         return;
     }
@@ -47,7 +48,7 @@ $SourceFoldersAndFiles | ForEach-Object {
     New-Item `
         -Path "$TargetFolder\$targetName" `
         -Target $itemInfo.FullName `
-        -ItemType SymbolicLink -ErrorAction SilentlyContinue;
+        -ItemType SymbolicLink;
 }
 
 # Current system path
@@ -62,6 +63,9 @@ $newPaths += $DirectPaths;
 $newPaths = $newPaths | Select-Object -Unique
 if ($paths.Length -eq $newPaths.Length) {
     Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;
+	
+timeout 5;
+
     Exit;
 }
 
