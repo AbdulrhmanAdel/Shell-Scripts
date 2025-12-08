@@ -6,7 +6,7 @@ param (
 )
 
 
-function HandleMovies {
+function HandleMovies { 
     param($subs)
     $movies = $subs | Where-Object { $_.Details.Type -eq "Movie" };
     $movies | Where-Object {
@@ -14,17 +14,21 @@ function HandleMovies {
         $details = $_.Details;
         $imdb = $imdbCache[$details.Title];
         Write-Host $details;    
+        $Show = @{
+            Title    = $details.Title
+            Type     = $details.Type
+            Year     = $details.Year
+            Season   = $_ 
+            Episodes = $seasonEpisodes
+            ImdbId   = $imdb.Id
+        }
         & "$($PSScriptRoot)/Sites/Subsource.ps1" `
-            -DownloadPath $downloadPath `
-            -Type $details.Type `
-            -Title $details.Title `
+            -Show $Show `
             -Quality $details.Quality `
             -SavePath $info.Directory.FullName `
             -RenameTo $_.Name `
-            -Year $details.Year `
             -IgnoredVersions $details.IgnoredVersions `
-            -Keywords $details.Keywords `
-            -ShowImdbId $imdb.Id;
+            -Keywords $details.Keywords;
     }
 }
 
@@ -72,14 +76,15 @@ function HandleSeries {
         $show.Keys | Where-Object { $_ -ne "ShowId" } | ForEach-Object {
             $seasonEpisodes = $show[$_] | Sort-Object -Property Episode;
             $episodeWithYear = $seasonEpisodes | Where-Object { !!$_.Year } | Select-Object -First  1;
-            & "$($PSScriptRoot)/Sites/Subsource.ps1" `
-                -DownloadPath $downloadPath `
-                -Type "Series" `
-                -Title $showName `
-                -Season $_ `
-                -Year $episodeWithYear.Year `
-                -Episodes $seasonEpisodes `
-                -ShowImdbId $show.ShowId; 
+            $Show = @{
+                Title    = $showName
+                Type     = "Series"
+                Year     = $episodeWithYear.Year
+                Season   = $_ 
+                Episodes = $seasonEpisodes
+                ImdbId   = $show.ShowId
+            }
+            & "$($PSScriptRoot)/Sites/Subsource.ps1" -Show $Show;
         }
     }
 }
@@ -112,7 +117,7 @@ $imdbCache = @{};
 $subs = $files | ForEach-Object {
     $details = & Get-ShowDetails.ps1 -Path $_.FullName;
     if (!$imdbCache.Contains($details.Title)) {
-        $imdbCache[$details.Title] = Imdb-GetShow.ps1 -name $details.Title;
+        $imdbCache[$details.Title] = Imdb-GetShow.ps1 -name $details.Title -FileInfo $_;
     }
     if (!$details) { return $null; }
     $imdb = $imdbCache[$details.Title];
@@ -129,14 +134,9 @@ $subs = $files | ForEach-Object {
     return $null -ne $_;
 };
 
-if ($subs.Length -gt 0) {
-    $downloadPath = "$($env:TEMP)/MyScripts/Subtitle-Downloader-$(Get-Date -Format 'yyyy-MM-dd-HH-mm-ss')";
-    if (!(Test-Path -LiteralPath $downloadPath)) {
-        New-Item -Path $downloadPath -ItemType Directory -Force;
-    }
+if ($subs.Length -gt 0) { 
     HandleMovies -subs $subs;
     HandleSeries -subs $subs;
-    Remove-Item  -LiteralPath $downloadPath -Force -Recurse;
 }
 
 timeout.exe 10;
