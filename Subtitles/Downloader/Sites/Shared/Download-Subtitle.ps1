@@ -5,17 +5,11 @@ param (
 )
 
 if (!(Test-Path -LiteralPath $DownloadPath)) {
-    New-Item -Path $DownloadPath -ItemType Directory -Force;
+    New-Item -Path $DownloadPath -ItemType Directory -Force | Out-Null;
 }
 
+$DownloadFileName = ($Subtitle)?.FileName ?? (Get-Date -Format "yyyy-MM-dd-HH-mm-ss");
 $DownloadFilePath = "$DownloadPath\$DownloadFileName"
-$DownloadFileName = $Subtitle.FileName ?? (Get-Date -UFormat "%Y%m%d%H%M%S");
 $DownloadPath = Invoke-WebRequest @DownloadRequestArgs -OutFile $DownloadFilePath;
-if (-not (Test-Path -LiteralPath $DownloadPath)) {
-    Write-Error "Failed to download subtitle to path: $DownloadPath"
-    exit 1
-}
-
-
-
+return $DownloadFilePath;
 

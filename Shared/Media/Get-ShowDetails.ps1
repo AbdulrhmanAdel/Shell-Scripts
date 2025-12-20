@@ -13,8 +13,9 @@ if (!$canHandle) {
 }
 
 $seriesRegex = "(?<Title>.*) *(S|Season) *(?<SeasonNumber>\d{1,2}) *( |Episode|Ep|E|-|\d+X) *(?<EpisodeNumber>\d+) *(?<Rest>.*)";
-$seriesRegexV2 = "(?<Title>.*)(?<EpisodeNumber>\d{1,3}) (720|480|1080)P?.*";
-$moviesRegex = "(?<Title>.*)(?<Rest>(720|480|1080)P?.*)";
+$seriesRegexV2 = "(?<Title>.*?)(?<EpisodeNumber>(?!(?:720|480|1080)\b)\d{1,3})(?:\s*(?<Rest>.*))?";
+# Ensure we don't accidentally treat quality numbers as episode numbers. Capture movie quality into Rest when present.
+$moviesRegex = "(?<Title>.*?)(?:\s+(?<Rest>(?:720|480|1080)P?.*))?";
 $yearRegex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
 function GetYear {
     param (
@@ -109,8 +110,6 @@ function GetSeriesOrMovieDetails {
         IgnoredVersions = $ignoredVersions
         Keywords        = $matchedKeywords
     };
-
-
 
     $showName = $null;
     if ($name -match $seriesRegex -or $name -match $seriesRegexV2) {

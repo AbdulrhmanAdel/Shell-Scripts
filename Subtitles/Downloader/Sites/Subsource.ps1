@@ -33,8 +33,8 @@ Write-Host ""
 
 # Subsource Urls
 # https://subsource.net/api-docs
-# $baseUrl = "https://api.subsource.net/v1";
-$subsourceSiteDomain = "https://subsource.net";
+# # $baseUrl = "https://api.subsource.net/v1";
+# $subsourceSiteDomain = "https://subsource.net";
 # Please Don't Steal this, it won't Help you at all. I'm lazy to secure it :)
 $Blah = 'sk_e1003cb739a8154811b28d42ff6247ad76701cdedeaa87adf1a6dffe5639080c';
 $BlahHeaders = @{ "X-API-Key" = $Blah }
@@ -91,10 +91,11 @@ $subs = GetSubtitles -MovieOrShow $movieOrShow | ForEach-Object {
     }
 };
 
-$allSeasonSubs = $subs;
+# TODO: Handle All Season Subtitles 
+# $allSeasonSubs = $subs;
 $availableSubs = $subs;
 if ($type -eq "Movie") {
-    $matchResult = & "$PSScriptRoot\Shared\MatchRelease.ps1" -Subtitles $availableSubs `
+    $matchResult = & "$PSScriptRoot\Shared\Match-Release.ps1" -Subtitles $availableSubs `
         -IgnoredVersions $IgnoredVersions `
         -Keywords $Keywords;
     
@@ -103,13 +104,11 @@ if ($type -eq "Movie") {
         return;       
     }
 
-    # HandleSubitle -Subtitle $matchResult.FirstMatch;
-    $downloadPath = & "$PSScriptRoot\Shared\DownloadSubtitle.ps1" `
-        -Subtitle (PrepareSubtitleObject -Subtitle $matchResult.FirstMatch) `
-        -DownloadSubtitleRequest (GetSubtitleDownloadArgs -Subtitle $matchResult.FirstMatch);
+    $downloadPath = & "$PSScriptRoot\Shared\Download-Subtitle.ps1" `
+        -DownloadRequestArgs (GetSubtitleDownloadArgs -Subtitle $matchResult.FirstMatch.Data);
 
-    $copied = & "$PSScriptRoot\Shared\CopySubtitle.ps1" `
-        -SubtitlePath $subtitlePath `
+    & "$PSScriptRoot\Shared\Copy-Subtitle.ps1" `
+        -SubtitlePath $downloadPath `
         -SavePath $SavePath `
         -RenameTo $RenameTo `
         -QualityRegex $Quality;
@@ -149,29 +148,11 @@ $Episodes | ForEach-Object {
         $qualityRegex
     );
 
-    $matchResult = & "$PSScriptRoot\Shared\MatchRelease.ps1" -Subtitles $availableSubs `
+    $matchResult = & "$PSScriptRoot\Shared\Match-Release.ps1" -Subtitles $availableSubs `
         -IgnoredVersions $IgnoredVersions `
         -Keywords $keyWords;
 
-
-    if ($matchResult.hasMatch) {
-        $matchedSubtitle = $matchResult.FirstMatch;
-    }
-
-    if (!$matchedSubtitle) {
-        $matchResult = & "$PSScriptRoot\Shared\MatchRelease.ps1" -Subtitles $wholeSeasonSubtitles `
-            -IgnoredVersions $IgnoredVersions `
-            -Keywords @(
-            $episode.Keywords
-            $qualityRegex
-            $episodeRegex
-        );
-        if ($matchResult.hasMatch) {
-            $matchedSubtitle = $matchResult.FirstMatch;
-        }
-    }
-
-    if (!$matchedSubtitle) {
+    if (!$matchResult.hasMatch) {
         Write-Host "CAN'T FIND Subtitle FOR $title => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
         Write-Host "$global:subtitlePageLink" -ForegroundColor Blue;
         $link = $movieOrShow.subsourceLink;
@@ -182,15 +163,11 @@ $Episodes | ForEach-Object {
         [Console]::Beep(1000, 500);
         return;
     }
+    
+    $subtitlePath = & "$PSScriptRoot\Shared\Download-Subtitle.ps1" `
+        -DownloadRequestArgs (GetSubtitleDownloadArgs -Subtitle $matchResult.FirstMatch.Data);
 
-    $subtitlePath = & "$PSScriptRoot\Shared\DownloadSubtitle.ps1" `
-        -sub $matchedSubtitle `
-        -downloadPath $DownloadPath `
-        -baseApiURL $baseApiURL `
-        -headers $BlahHeaders `
-        -siteDomain $subsourceSiteDomain `
-        -DownloaderPath "$PSScriptRoot\Subsource.Downloader.ps1"
-    & "$PSScriptRoot\Shared\CopySubtitle.ps1" `
+    & "$PSScriptRoot\Shared\Copy-Subtitle.ps1" `
         -SubtitlePath $subtitlePath `
         -SavePath $episode.SavePath `
         -RenameTo $episode.RenameTo `

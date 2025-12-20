@@ -7,16 +7,28 @@ param (
 )
 
 function GetIdUsingAI {
-    $fileName = $FileInfo ? $FileInfo.Name : $Name;
-    $apiKey = "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"
+    param (
+        [string]$Name
+    )
+
+    $fileName = $Name;
+    # $apiKey = "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"
+    $apiKey = "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"
     $headers = @{
         "Authorization" = "Bearer $apiKey"
         "Content-Type"  = "application/json"
     }
 
+    $model = "deepseek/deepseek-chat-v3-0324:free";
+    $model = "qwen/qwen3-235b-a22b:free";
+    $model = "kwaipilot/kat-coder-pro:free";
+    $model = "nvidia/nemotron-nano-12b-v2-vl:free";
+    $model = "amazon/nova-2-lite-v1:free";
+    # $model = "";
+    # "deepseek/deepseek-chat-v3-0324:free"
     $body = @{
         "input"       = "Only output single word Taking this file name \'$fileName\' Output imdb id "
-        "model"       = "tngtech/deepseek-r1t2-chimera:free"
+        "model"       = $model
         "temperature" = 0.7
         "top_p"       = 0.9
     } | ConvertTo-Json -Depth 10
@@ -28,9 +40,8 @@ function GetIdUsingAI {
         -Body $body
 
     $content = $response.output | Where-Object { $_.role -eq "assistant" } | Select-Object -First 1;
-    return $content.content[0].text    
+    return $content.content[0].text
 }
-
 
 function InvokeImdb {
     param (
@@ -100,11 +111,11 @@ function GetShow {
         $Type
     )
     try {
-        $showId = GetIdUsingAI -fileName $Name
-        if ($showId) {
-            $result = InvokeImdb -searchQuery $showId
-            return $result[0];
-        }
+        # $showId = GetIdUsingAI -Name ($FileInfo.Name ?? $Name)
+        # if ($showId) {
+        #     $result = InvokeImdb -searchQuery $showId
+        #     return $result[0];
+        # }
         
         return GetShowByQueryImdb;
     }

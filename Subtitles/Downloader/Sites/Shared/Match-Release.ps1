@@ -40,14 +40,14 @@ $matched = $Subtitles | Where-Object {
 
 if ($matched.Count -gt 0) {
     return @{
-        $hasMatch = $true,
-        $FirstMatch = $matched[0],
-        $Others = $matched[1..($matched.Count - 1)]
+        HasMatch   = $true;
+        FirstMatch = $matched[0];
+        Others     = $matched[1..($matched.Count - 1)]
     }
 }
 
 return @{
-    $hasMatch = $false,
-    $FirstMatch = $null,
-    $Others = @()
+    HasMatch   = $false;
+    FirstMatch = $null;
+    Others     = @()
 }
