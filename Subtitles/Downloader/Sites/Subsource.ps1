@@ -72,7 +72,15 @@ function GetSubtitleDownloadArgs {
 
 function SearchMovie() {
     $result = InvokeAPIRequest -Path "movies/search?searchType=imdb&imdb=$ShowImdbId"
-    return $result.data[0];
+
+    $data = $result.data;
+    if ($Season) {
+        return $data | Where-Object {
+            return $_.season -eq $Season
+        }  | Select-Object -First 1;
+    }
+
+    return $data[0]
 }
 
 function GetSubtitles {
@@ -84,6 +92,17 @@ function GetSubtitles {
 }
 
 $movieOrShow = SearchMovie;
+Write-Host "[INFO]: Found Movie/Show:" -ForegroundColor Cyan;
+Write-Host "[INFO]: ID: $($movieOrShow.movieId)" -ForegroundColor Cyan;
+Write-Host "[INFO]: Title: $($movieOrShow.title)" -ForegroundColor Cyan;
+if ($movieOrShow.season) {
+    Write-Host "[INFO]: Season: $($movieOrShow.season)" -ForegroundColor Cyan;
+}
+
+$url = $($movieOrShow.subsourceLink)
+$name = $($movieOrShow.subsourceLink)
+Write-Host "`e]8;;$url`e\\$name`e]8;;`e\\"
+Write-Host "[INFO]: Link `e]8;;$url`e\\$name`e]8;;`e\\" -ForegroundColor Cyan;
 $subs = GetSubtitles -MovieOrShow $movieOrShow | ForEach-Object {
     return @{
         Data     = $_
