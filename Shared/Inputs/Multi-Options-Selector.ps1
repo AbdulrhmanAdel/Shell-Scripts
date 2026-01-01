@@ -58,11 +58,11 @@ $checkboxes = $Options | ForEach-Object {
 }
 
 $SelectAllCheckBox.Add_Click({
-    $checked = $SelectAllCheckBox.Checked;
-    $checkboxes | ForEach-Object {
-        $_.Checked = $checked;
-    }
-})
+        $checked = $SelectAllCheckBox.Checked;
+        $checkboxes | ForEach-Object {
+            $_.Checked = $checked;
+        }
+    })
 
 # Add a submit button
 $submitButton = New-Object System.Windows.Forms.Button
@@ -79,8 +79,16 @@ $width = ($checkboxes | Select-Object -ExpandProperty Width | Measure-Object -Ma
 $checkboxHeight = ($checkboxes | Select-Object -ExpandProperty Height | Measure-Object -Maximum).Maximum;
 $height = $checkboxHeight * $checkboxes.Count + $submitButton.Height;
 $width += 100;
+if ($width -lt 500) {
+    $width = 500
+}
+
 $height += 100;
+if ($height -lt 500) {
+    $height = 500
+}
 $form.Size = New-Object System.Drawing.Size($width, $height)
+$mainPanel.Size = New-Object System.Drawing.Size($width, $height)
 $submitButton.Width = $width;
 # Show the form
 $result = $form.ShowDialog();

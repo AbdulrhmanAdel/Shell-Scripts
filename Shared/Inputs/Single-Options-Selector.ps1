@@ -9,17 +9,19 @@ param (
     [string]$Title = "Select an Option",
     [System.Object]$DefaultValue
 )
-
+$defaultDimension = 500;
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles();
 $form = New-Object System.Windows.Forms.Form
 $form.Text = $Title;
 $form.StartPosition = 'CenterScreen'
 $form.Font = New-Object System.Drawing.Font("Segoe UI", 10)
-$form.Width = 500;
+$form.Width = $defaultDimension;
+$form.Height = $defaultDimension;
 
 $flowLayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
-$flowLayoutPanel.Width = 500;
+$flowLayoutPanel.Width = $defaultDimension;
+$flowLayoutPanel.Height = $defaultDimension;
 $flowLayoutPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
 $flowLayoutPanel.AutoScroll = $true
 $flowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding(10)  # Add padding
