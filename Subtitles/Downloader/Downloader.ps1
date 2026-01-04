@@ -1,5 +1,8 @@
 [CmdletBinding()]
 param (
+    [Parameter(HelpMessage = "Force download even if subtitle exists (Soft or Separate File)")]
+    [switch]
+    $Force,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]
     $Paths
@@ -99,7 +102,7 @@ $Paths | ForEach-Object {
     if ($info -is [System.IO.FileInfo]) {
         if ($info.Extension -in @(".mkv", ".mp4")) {
             $hasArabicSoftSub = Has-SoftSubbedArabic.ps1 -Path $_;
-            if ($hasArabicSoftSub) {
+            if ($hasArabicSoftSub -and !$Force) {
                 Write-Host "Skipping $($info.Name) as it has arabic soft sub." -ForegroundColor DarkCyan;
                 return;
             }
