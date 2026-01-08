@@ -26,7 +26,7 @@ function Compress {
         }
     }
     $arguments = @($sharedArgs) + @("-i", """$file""", "-o", """$newFilePath""");
-    Start-Process handbrake -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
+    Start-Process handbrake.exe -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
     Write-Host "Finished Compressing $file" -ForegroundColor Green;
     Write-Host "======================" -ForegroundColor Green;
 }
