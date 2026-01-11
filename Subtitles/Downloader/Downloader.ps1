@@ -9,6 +9,8 @@ param (
 )
 
 
+$handler = "Subdl"
+
 function HandleMovies { 
     param($subs)
     $movies = $subs | Where-Object { $_.Details.Type -eq "Movie" };
@@ -25,7 +27,7 @@ function HandleMovies {
             Episodes = $seasonEpisodes
             ImdbId   = $imdb.Id
         }
-        & "$($PSScriptRoot)/Sites/Subsource.ps1" `
+        & "$($PSScriptRoot)/Sites/$handler.ps1" `
             -Show $Show `
             -Quality $details.Quality `
             -SavePath $info.Directory.FullName `
@@ -87,7 +89,7 @@ function HandleSeries {
                 Episodes = $seasonEpisodes
                 ImdbId   = $show.ShowId
             }
-            & "$($PSScriptRoot)/Sites/Subsource.ps1" -Show $Show;
+            & "$($PSScriptRoot)/Sites/$handler.ps1" -Show $Show;
         }
     }
 }
