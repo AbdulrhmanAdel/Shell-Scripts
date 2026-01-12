@@ -2,8 +2,7 @@ param (
     [Parameter(Mandatory)] [string]$SubtitlePath,
     [Parameter(Mandatory)] [string]$SavePath,
     [string]$RenameTo,
-    [string]$EpisodeRegex,
-    [string]$QualityRegex
+    $Filter
 )
 
 $subtitlePathInfo = Get-Item -LiteralPath $SubtitlePath -ErrorAction SilentlyContinue;
@@ -55,6 +54,10 @@ if ($files.Count -eq 1) {
         Success = $true;
         Data    = $files
     }
+}
+
+if ($Filter) {
+    $files = @($files | Where-Object { $Filter.Invoke($_.Name) })
 }
 
 if ($EpisodeRegex) {

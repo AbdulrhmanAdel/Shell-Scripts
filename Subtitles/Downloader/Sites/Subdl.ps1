@@ -21,8 +21,8 @@ $ShowImdbId = $Show.ImdbId;
 $Episodes = $Show.Episodes;
 
 function GetInfo {
-    # Please Don't Steal this, it won't Help you at all. I'm lazy to secure it :)$QueryString = "api_key
-    =$NotWhatYouThink&imdb_id=$ShowImdbId&languages=AR&subs_per_page=30"
+    # Please Don't Steal this, it won't Help you at all. I'm lazy to secure it :)
+    $QueryString = "api_key=$NotWhatYouThink&imdb_id=$ShowImdbId&languages=AR&subs_per_page=30"
 
     if ($Season) {
         $QueryString += "&season_number=$Season"; 
@@ -44,27 +44,40 @@ function GetInfo {
 $Info = GetInfo;
 $Subtitles = $Info.subtitles
 if ($Type -eq "Movie") {
-    return @{}
+    $sub = $Subtitles | Select-Object -First 1
+
+    $downloadRequestArgs = @{
+        Uri = "https://dl.subdl.com$($sub.url)"
+    };
+    $subtitlePath = & "$PSScriptRoot\Shared\Download-Subtitle.ps1" `
+        -DownloadRequestArgs $downloadRequestArgs;
+
+    return;
 }
 
 $Episodes | ForEach-Object {
     $episode = $_;
+    $episodeNumber = $_.Episode;
     $sub = $Subtitles | Where-Object { 
-        $_.Episode -ge $_.episode_from -and `
-            $_.Episode -le $_.episode_end
+        $episodeNumber -ge $_.episode_from -and `
+            $episodeNumber -le $_.episode_end
     } | Select-Object -First 1
 
+    $downloadRequestArgs = @{
+        Uri = "https://dl.subdl.com$($sub.url)"
+    };
+
     $subtitlePath = & "$PSScriptRoot\Shared\Download-Subtitle.ps1" `
-        -DownloadRequestArgs (@{
-            Uri = "https://dl.subdl.com$($sub.url)"
-        });
+        -DownloadRequestArgs $downloadRequestArgs;
+
+    $FilterFn = {
+        param ($Name) 
+        return $Name -match "E$($episodeNumber -le 9 ? $episodeNumber : "0$episodeNumber")"
+    }
 
     & "$PSScriptRoot\Shared\Copy-Subtitle.ps1" `
         -SubtitlePath $subtitlePath `
         -SavePath $episode.SavePath `
-        -RenameTo $episode.RenameTo `
-        -EpisodeRegex $episodeRegex `
-        -QualityRegex $qualityRegex
+        -Filter $FilterFn `
+        -RenameTo $episode.RenameTo;
 }
-
-
