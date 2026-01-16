@@ -6,14 +6,14 @@ param (
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]
     $Paths
+    # [object]
+    # $Handler
 )
 
-
-$handler = & Single-Options-Selector.ps1 `
+Write-Host "Using $Handler"
+$Handler ??= & Single-Options-Selector.ps1 `
     -Options @("Subdl", "Subsource") `
     -Required;
-
-# $handler = "Subsource"
 
 function HandleMovies { 
     param($subs)
@@ -31,7 +31,7 @@ function HandleMovies {
             Episodes = $seasonEpisodes
             ImdbId   = $imdb.Id
         }
-        & "$($PSScriptRoot)/Sites/$handler.ps1" `
+        & "$($PSScriptRoot)/Sites/$Handler.ps1" `
             -Show $Show `
             -Quality $details.Quality `
             -SavePath $info.Directory.FullName `
@@ -93,7 +93,7 @@ function HandleSeries {
                 Episodes = $seasonEpisodes
                 ImdbId   = $show.ShowId
             }
-            & "$($PSScriptRoot)/Sites/$handler.ps1" -Show $Show;
+            & "$($PSScriptRoot)/Sites/$Handler.ps1" -Show $Show;
         }
     }
 }

@@ -187,7 +187,6 @@ $Episodes | ForEach-Object {
         -DownloadRequestArgs (GetSubtitleDownloadArgs -Subtitle $matchResult.FirstMatch.Data);
 
 
-
     $filterFn = {
         param (
             $Name
