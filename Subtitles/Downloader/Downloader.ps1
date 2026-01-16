@@ -9,7 +9,11 @@ param (
 )
 
 
-$handler = "Subdl"
+$handler = & Single-Options-Selector.ps1 `
+    -Options @("Subdl", "Subsource") `
+    -Required;
+
+# $handler = "Subsource"
 
 function HandleMovies { 
     param($subs)

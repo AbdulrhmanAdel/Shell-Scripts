@@ -186,12 +186,21 @@ $Episodes | ForEach-Object {
     $subtitlePath = & "$PSScriptRoot\Shared\Download-Subtitle.ps1" `
         -DownloadRequestArgs (GetSubtitleDownloadArgs -Subtitle $matchResult.FirstMatch.Data);
 
+
+
+    $filterFn = {
+        param (
+            $Name
+        )
+
+        return $Name -match $episodeRegex
+    }
+    
     & "$PSScriptRoot\Shared\Copy-Subtitle.ps1" `
         -SubtitlePath $subtitlePath `
         -SavePath $episode.SavePath `
         -RenameTo $episode.RenameTo `
-        -EpisodeRegex $episodeRegex `
-        -QualityRegex $qualityRegex
+        -Filter $filterFn
 }
 
 Write-Host "==============================" -ForegroundColor Red;
