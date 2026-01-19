@@ -5,6 +5,7 @@ param (
     [switch]$Required,
     [switch]$ShowHiddenFiles,
     [switch]$ShowOnTop,
+    [Switch]$Multiple,
     $Filter,
     [int]$Retry
 )
@@ -14,6 +15,7 @@ $openFileDialog = New-Object System.Windows.Forms.OpenFileDialog;
 $openFileDialog.InitialDirectory = $InitialDirectory;
 $openFileDialog.Title = $Title;
 $openFileDialog.ShowHiddenFiles = $ShowHiddenFiles
+$openFileDialog.Multiselect = $Multiple;
 if ($Filter) {
     $openFileDialog.Filter = $Filter;
 }
@@ -24,8 +26,9 @@ if ($ShowOnTop) {
     $dialogOption.TopMost = $true;
     $dialogOption.TopLevel = $true;
 }
+
 if ($openFileDialog.ShowDialog($dialogOption) -eq "OK") {
-    return "$($openFileDialog.FileName)";
+    return $Multiple ? $openFileDialog.FileNames : "$($openFileDialog.FileName)";
 }
 
 if ($ExitIfNotSelected) {
