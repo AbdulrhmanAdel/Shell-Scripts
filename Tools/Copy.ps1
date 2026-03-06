@@ -123,7 +123,7 @@ $Handlers = @(
                     """$file""", """$finalOutput"""
                     "/MIR", "/R:0", 
                     # "/COPYALL", "/DCOPY:DAT", "/B", 
-                    "/XD", '$Recycle.bin', """system volume information"""
+                    "/XD", '$Recycle.bin', """system volume information""", "node_modules"
                     "/xf", 'thumbs.db',
                     "/mt:16"
                     # "/np"

@@ -47,6 +47,13 @@ $Options = @(
             $path = "$PSScriptRoot/Copy.ps1";
             & $path -Files $Files -Move;
         };
+    },
+    @{
+        Key     = "Package";
+        Handler = {
+            $path = "$PSScriptRoot/Package.ps1";
+            & $path -Files $Files;
+        };
     }
     @{
         Key     = "Create SymbolicLink";
