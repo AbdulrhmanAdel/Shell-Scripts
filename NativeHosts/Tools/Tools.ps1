@@ -1,4 +1,5 @@
-Extension-Communicator.ps1 -LogPath "$PSScriptRoot\Logs.txt" -MessageHandler {
+$logPath = "$PSScriptRoot\Logs.txt";
+Extension-Communicator.ps1 -LogPath $logPath -MessageHandler {
     param(
         $Data
     )
@@ -6,7 +7,7 @@ Extension-Communicator.ps1 -LogPath "$PSScriptRoot\Logs.txt" -MessageHandler {
     switch ($action) {
         "Save-Torrent" {
             $link = $Data.link;
-            $title = $Data.title -replace '[<>:"/\\|?*]', '';
+            $title = $Data.title -replace '[<>:''"/\\|?*]', '';
             $command = "& {
                     `$fileName = '$title.url';
                     `$saveLocation = Folder-Picker.ps1 -Retry 1 -ShowOnTop;
