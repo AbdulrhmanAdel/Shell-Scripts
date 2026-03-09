@@ -23,7 +23,7 @@ if (-not $latest) {
 
 $fullName = $latest.title.InnerText;
 $fileName = ($fullName -split '/')[-1];
-$downloadLink = "https://netcologne.dl.sourceforge.net/project/$($Project)$($fullName)?viasf=1"
+$downloadLink = "https://sf-eu-introserv-1.dl.sourceforge.net/project/$($Project)$($fullName)?viasf=1"
 $downloadPath = & "$PSScriptRoot\_Downloader.ps1" `
     -Url $downloadLink `
     -FileName $fileName;
