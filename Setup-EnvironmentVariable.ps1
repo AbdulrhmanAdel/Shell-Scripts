@@ -59,16 +59,15 @@ $DirectPaths = @(
 );
 
 $paths = $currentPath -split ";";
-$newPaths += $DirectPaths;
+$newPaths += $DirectPaths + $paths;
 $newPaths = $newPaths | Select-Object -Unique
 if ($paths.Length -eq $newPaths.Length) {
     Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;
 	
 timeout 5;
-
     Exit;
 }
-
+$newPaths += $paths;
 [System.Environment]::SetEnvironmentVariable("Path", $newPaths -join ";", "User");
 Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;
 if ($NoTimeout) {
