@@ -9,3 +9,4 @@ Icons.txt
 *.txt
 
 .path
+.claude/settings.local.json
