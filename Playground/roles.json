@@ -1,0 +1,156 @@
+[
+  {
+    "displayText": "Call Center / Front Desk",
+    "permissions": [
+      "service-requests:create",
+      "service-requests:list",
+      "service-requests:details",
+      "service-requests:cancel"
+    ]
+  },
+  {
+    "displayText": "Contract Manager",
+    "permissions": [
+      "service-requests:list",
+      "service-requests:details",
+      "service-requests:cancel",
+      "work-orders:list",
+      "vehicles:create",
+      "vehicles:update",
+      "vehicles:list",
+      "vehicles:details",
+      "vehicles:activate",
+      "vehicles:deactivate",
+      "users:create",
+      "users:update",
+      "users:list",
+      "users:details",
+      "users:activate",
+      "users:deactivate"
+    ]
+  },
+  {
+    "displayText": "Team Leader",
+    "permissions": [
+      "work-orders:update",
+      "work-orders:list",
+      "work-orders:details",
+      "work-orders:re-schedule"
+    ]
+  },
+  {
+    "displayText": "Area Supervisor",
+    "permissions": [
+      "areas:create",
+      "areas:update",
+      "areas:list",
+      "areas:details",
+      "areas:activate",
+      "areas:deactivate"
+    ]
+  },
+  {
+    "displayText": "Quality Manager",
+    "permissions": []
+  },
+  {
+    "displayText": "IT Supervisor",
+    "permissions": []
+  },
+  {
+    "displayText": "Operation Manager",
+    "permissions": []
+  },
+  {
+    "displayText": "ESH",
+    "permissions": []
+  },
+  {
+    "displayText": "QHSE",
+    "permissions": []
+  },
+  {
+    "displayText": "Section Head / Contract Visor",
+    "permissions": []
+  },
+  {
+    "displayText": "DOH Manager",
+    "permissions": []
+  },
+  {
+    "displayText": "Director",
+    "permissions": []
+  },
+  {
+    "displayText": "Inspector",
+    "permissions": []
+  },
+  {
+    "displayText": "Inspection Manager",
+    "permissions": []
+  },
+  {
+    "displayText": "QHSE Officer",
+    "permissions": []
+  },
+  {
+    "displayText": "EHS Manager",
+    "permissions": []
+  },
+  {
+    "displayText": "Admin",
+    "permissions": [
+      "users:create",
+      "users:update",
+      "users:list",
+      "users:details",
+      "users:activate",
+      "users:deactivate",
+      "accounts:list",
+      "programs:create",
+      "programs:update",
+      "programs:list",
+      "programs:details",
+      "programs:activate",
+      "programs:deactivate",
+      "program-events:create",
+      "program-events:update",
+      "program-events:list",
+      "program-events:details",
+      "program-events:activate",
+      "program-events:deactivate",
+      "roles:create",
+      "roles:update",
+      "roles:list",
+      "roles:details",
+      "roles:activate",
+      "roles:deactivate"
+    ]
+  },
+  {
+    "displayText": "HR",
+    "permissions": [
+      "users:create",
+      "users:update",
+      "users:list",
+      "users:details",
+      "users:activate",
+      "users:deactivate"
+    ]
+  },
+  {
+    "displayText": "Permitting Officer",
+    "permissions": []
+  },
+  {
+    "displayText": "Contract Supervisor",
+    "permissions": [
+      "programs:update",
+      "programs:list",
+      "programs:details",
+      "program-events:update",
+      "program-events:list",
+      "program-events:details"
+    ]
+  }
+]

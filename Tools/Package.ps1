@@ -16,7 +16,7 @@ $arguments = @(
     "-mx=0"
     "-mmt=20"
     "-mmemuse=p80"
-    "-xr!node_modules"
+    # "-xr!node_modules"
 )
 
 $arguments += $Files | ForEach-Object { """$_""" }
