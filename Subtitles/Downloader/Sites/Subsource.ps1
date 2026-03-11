@@ -126,11 +126,18 @@ if ($type -eq "Movie") {
     $downloadPath = & "$PSScriptRoot\Shared\Download-Subtitle.ps1" `
         -DownloadRequestArgs (GetSubtitleDownloadArgs -Subtitle $matchResult.FirstMatch.Data);
 
+    $filterFn = {
+        param (
+            $Name
+        )
+
+        return $Name -match $Quality
+    }
     & "$PSScriptRoot\Shared\Copy-Subtitle.ps1" `
         -SubtitlePath $downloadPath `
         -SavePath $SavePath `
         -RenameTo $RenameTo `
-        -QualityRegex $Quality;
+        -Filter $filterFn;
     return
 }
 

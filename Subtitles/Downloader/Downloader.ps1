@@ -1,19 +1,27 @@
-[CmdletBinding()]
+[CmdletBinding(PositionalBinding = $false)]
 param (
     [Parameter(HelpMessage = "Force download even if subtitle exists (Soft or Separate File)")]
     [switch]
     $Force,
+    [Parameter()]
+    [string]
+    $Website,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]
     $Paths
-    # [object]
-    # $Handler
 )
 
-Write-Host "Using $Handler"
-$Handler ??= & Single-Options-Selector.ps1 `
-    -Options @("Subdl", "Subsource") `
-    -Required;
+$supportedWebsites = @("Subdl", "Subsource")
+
+if ($supportedWebsites -contains $Website) {
+    Write-Host "Using $Website Website" -ForegroundColor Green;
+}
+else {
+    Write-Host "Invalid or No Website Specified. Please Select One:" -ForegroundColor Red;
+    $Website = & Single-Options-Selector.ps1 `
+        -Options $supportedWebsites  `
+        -Required;
+}
 
 function HandleMovies { 
     param($subs)
@@ -27,11 +35,10 @@ function HandleMovies {
             Title    = $details.Title
             Type     = $details.Type
             Year     = $details.Year
-            Season   = $_ 
             Episodes = $seasonEpisodes
             ImdbId   = $imdb.Id
         }
-        & "$($PSScriptRoot)/Sites/$Handler.ps1" `
+        & "$($PSScriptRoot)/Sites/$Website.ps1" `
             -Show $Show `
             -Quality $details.Quality `
             -SavePath $info.Directory.FullName `
@@ -93,7 +100,7 @@ function HandleSeries {
                 Episodes = $seasonEpisodes
                 ImdbId   = $show.ShowId
             }
-            & "$($PSScriptRoot)/Sites/$Handler.ps1" -Show $Show;
+            & "$($PSScriptRoot)/Sites/$Website.ps1" -Show $Show;
         }
     }
 }

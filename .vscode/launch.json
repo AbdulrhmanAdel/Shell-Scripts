@@ -16,15 +16,7 @@
       "type": "PowerShell",
       "request": "launch",
       "script": "${file}",
-      "args": [
-        "-Handler",
-        "RoboCopy",
-        "-Destination", "F:\\Program",
-        "\"D:\\Programming\\Programs\\VsCode\"",
-        "\"D:\\Programming\\Programs\\Postman\"",
-        "\"D:\\Programming\\Programs\\Python\"",
-        "\"D:\\Programming\\Programs\\Reverse Engineering\""
-      ]
+      "args": []
     }
   ]
 }
