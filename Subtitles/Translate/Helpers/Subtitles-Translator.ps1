@@ -1,3 +1,11 @@
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory = $true)]
+    [string[]]
+    $Sentences
+)
+
+
 # Source https://subtitlestranslator.com/
 function Translate {
     param (
@@ -37,12 +45,27 @@ function Translate {
     return ConvertFrom-Json -InputObject ([System.Text.Encoding]::UTF8.GetString($res.Content));
 }
 
-$translation = Translate -sentences $args[0];
+$batchSize = 100;
+$translation = [System.Collections.Generic.List[string]]::new();
 
-if (!$translation -or $translation.Length -eq 0) {
+for ($i = 0; $i -lt $Sentences.Length; $i += $batchSize) {
+    if ($i -gt 0) {
+        # Start-Sleep -Milliseconds 500;
+    }
+
+    $end = [Math]::Min($i + $batchSize, $Sentences.Length) - 1;
+    $batch = $Sentences[$i..$end];
+    $result = Translate -Sentences $batch;
+
+    if ($result -and $result.Length -gt 0) {
+        $translation.AddRange([string[]]$result[0]);
+    }
+}
+
+if ($translation.Count -eq 0) {
     return @();
 }
 
-return $translation[0] |  ForEach-Object {
+return $translation | ForEach-Object {
     return $_ -replace "&quot;", ""
 };

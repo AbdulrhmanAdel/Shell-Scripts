@@ -7,7 +7,7 @@ $content = $parsedResult | ForEach-Object {
     return $_.Content[0..($_.Content.Length - 2)]
 }
 
-$translations = & $Translator $content;
+$translations = & $Translator -Sentences $content;
 if ($translations.Length -eq 0) {
     Write-Host "No Translation Found." -ForegroundColor Red;
     return;
