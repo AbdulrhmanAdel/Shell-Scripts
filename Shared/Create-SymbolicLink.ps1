@@ -46,3 +46,14 @@ New-Item `
     -Target $LinkToPath `
     -ItemType SymbolicLink;
     
+$errors = $Error;
+if ($errors.Count -gt 0 -and $errors[0].Exception.Message -eq "Administrator privilege required for this operation." -and (Prompt.ps1 -Message "Grant Admin Permissins?")) {
+    Write-Host "Missing Admin Priv"
+    Run-AsAdmin.ps1 -Arguments @(
+        "-SymbolLinkPath"
+        """$SymbolLinkPath"""
+        "-LinkToPath"
+        """$LinkToPath"""
+    );
+    EXIT;
+}
