@@ -22,6 +22,13 @@ $Options = @(
         };
     }
     @{
+        Key     = "Tracks Extractor (Subtitles Only)";
+        Handler = {
+            $path = "$PSScriptRoot/Extract-Track.ps1";
+            & $path -FirstSubtitle $Files;
+        };
+    }
+    @{
         Key     = "Compress";
         Handler = {
             $path = "$PSScriptRoot/Compress/Compress.ps1";
