@@ -171,14 +171,16 @@ if ($DownloadLinks.Count -eq 0) {
 
 $DownloadLinks | ForEach-Object {
     $link = $null;
-    while (-not $link) {
+    $tries = 10;
+    while (-not $link -or $tries -eq 0) {
         $temp = GetLink -Id $_.Id;
         if ($temp -match "https://ouo.io/") {
             $link = $temp;
         }
         else {
-            Write-Host "Generated shorten is not supported retring..." -ForegroundColor Yellow;
-            timeout.exe 2;
+            $tries--;
+            Write-Host "Generated shorten ($temp) is not supported retrying... left tries ($tries)" -ForegroundColor Red;
+            Start-Sleep -Seconds 2;
         }
     }
     $_.Link = $link;
