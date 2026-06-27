@@ -4,6 +4,8 @@ param (
     $RepoName,
     [Alias("VersionPattern")]
     $VersionExtractPattern = "v",
+    [ValidateSet("name", "tag_name", "body")]
+    $VersionSearchLocation = "tag_name",
     [Alias("ReleasePattern")]
     $ReleaseAssetSearchPattern = ".*\.zip$",
     $CurrentVersion
@@ -16,7 +18,7 @@ $releaseResponse = curl -L `
     "https://api.github.com/repos/$RepoOwner/$RepoName/releases/latest";
 
 $latestReleasesData = $releaseResponse | ConvertFrom-Json;
-$releaseVersion = $latestReleasesData.tag_name;
+$releaseVersion = $latestReleasesData.$VersionSearchLocation;
 if ($VersionExtractPattern -is [array]) {
     $VersionExtractPattern | ForEach-Object {
         $releaseVersion = $releaseVersion -replace $_, '';
