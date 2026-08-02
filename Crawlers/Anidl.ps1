@@ -169,13 +169,19 @@ if ($DownloadLinks.Count -eq 0) {
     return;
 }
 
+$supportedShortens = @(
+    "https://ouo.io/"
+    "tpi.li"
+)
 $DownloadLinks | ForEach-Object {
     $link = $null;
     $tries = 10;
-    while (-not $link -or $tries -eq 0) {
+    while ($tries -ge 0) {
         $temp = GetLink -Id $_.Id;
-        if ($temp -match "https://ouo.io/") {
+        $isSupportedShorten = @($supportedShortens | Where-Object {$temp -match  $_}).Count -ge 1;
+        if ($isSupportedShorten -or $tries -eq 0) {
             $link = $temp;
+            break;
         }
         else {
             $tries--;
