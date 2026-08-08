@@ -1,6 +1,7 @@
 # .vscode
 .idea
 # Local Testing file
+Playground/*
 playground.*
 log.txt
 Icon-Communicator.Json

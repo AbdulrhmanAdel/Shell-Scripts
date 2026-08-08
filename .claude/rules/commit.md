@@ -1,0 +1,4 @@
+- Use conventional commit messages
+- Try to be contexual and descriptive in your commit messages, but also concise
+- Write A Comprehensive Commit Message
+- When committing, never add a Co-Authored-By line or any other self-attribution to the commit message
