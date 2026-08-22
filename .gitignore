@@ -11,3 +11,5 @@ Icons.txt
 
 .path
 .claude/settings.local.json
+
+Set-ShellApiKeys.ps1

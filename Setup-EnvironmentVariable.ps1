@@ -22,6 +22,14 @@ $SourceFoldersAndFiles = @(
     @{
         Path = "$PSScriptRoot\Youtube\Downloader.ps1";
         Name = "Youtube-Downloader.ps1"
+    },
+    @{
+        Path = "$PSScriptRoot\Windows\Secrets\Get-Secret.ps1";
+        Name = "Get-ShellSecret.ps1"
+    },
+    @{
+        Path = "$PSScriptRoot\Windows\Secrets\Set-Secret.ps1";
+        Name = "Set-ShellSecret.ps1"
     }
 );
 
@@ -62,9 +70,8 @@ $paths = $currentPath -split ";";
 $newPaths += $DirectPaths + $paths;
 $newPaths = $newPaths | Select-Object -Unique
 if ($paths.Length -eq $newPaths.Length) {
-    Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;
-	
-timeout 5;
+    Write-Host "Finished adding shared paths to the user environment variable." -ForegroundColor Green;	
+    timeout 5;
     Exit;
 }
 $newPaths += $paths;

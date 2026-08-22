@@ -16,7 +16,7 @@
       "type": "PowerShell",
       "request": "launch",
       "script": "${file}",
-      "args": ["\"E:\\Watch\\Anime\\Golden Kamuy Saishuushou\""]
+      "args": []
     }
   ]
 }
