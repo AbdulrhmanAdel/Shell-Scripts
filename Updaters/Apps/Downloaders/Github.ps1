@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param (
+    $Repo,
     $RepoOwner,
     $RepoName,
     [Alias("VersionPattern")]
@@ -10,6 +11,11 @@ param (
     $ReleaseAssetSearchPattern = ".*\.zip$",
     $CurrentVersion
 )
+
+if ($Repo -and $Repo -ne "") {
+    $Repo = $Repo -replace "https://github.com/", "";
+    $RepoOwner, $RepoName = $Repo -split "/";
+}
 
 Write-Host "INFO: " -ForegroundColor Blue -NoNewline; Write-Host "Using Github Downloader";
 $releaseResponse = curl -L `
