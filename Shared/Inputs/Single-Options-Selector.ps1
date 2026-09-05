@@ -1,67 +1,109 @@
+<#
+.SYNOPSIS
+    Shows one button per option and returns the one that was clicked.
+.DESCRIPTION
+    Buttons are laid out in a multi column grid (filled top to bottom, column by column) with a
+    sticky footer, matching the other dialogs in this folder.
+.PARAMETER Options
+    Items to show, either plain values or objects/hashtables with a Key (label) and Value (returned).
+.PARAMETER DefaultValue
+    Returned when nothing is picked, and its button is the one focused and triggered by Enter.
+.PARAMETER Columns
+    Force the column count, otherwise it is derived from the item count and the screen size.
+#>
 [CmdletBinding()]
 param (
     [Parameter(Mandatory)]
-    [System.Object[]]    
+    [System.Object[]]
     $Options,
     [switch]
     [Alias("MustSelectOne")]
     $Required = $false,
     [string]$Title = "Select an Option",
-    [System.Object]$DefaultValue
+    [string]$Message,
+    [System.Object]$DefaultValue,
+    [int]$Columns = 0
 )
-$defaultDimension = 500;
-Add-Type -AssemblyName System.Windows.Forms
-[System.Windows.Forms.Application]::EnableVisualStyles();
-$form = New-Object System.Windows.Forms.Form
-$form.Text = $Title;
-$form.StartPosition = 'CenterScreen'
-$form.Font = New-Object System.Drawing.Font("Segoe UI", 10)
-$form.Width = $defaultDimension;
-$form.Height = $defaultDimension;
 
-$flowLayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
-$flowLayoutPanel.Width = $defaultDimension;
-$flowLayoutPanel.Height = $defaultDimension;
-$flowLayoutPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$flowLayoutPanel.AutoScroll = $true
-$flowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding(10)  # Add padding
-$form.Controls.Add($flowLayoutPanel)
+. "$PSScriptRoot\Form-Style.ps1";
 
-function CreateButton($option) {
-    $button = New-Object System.Windows.Forms.Button
-    if ($option.Key) {
-        $button.Text = $option.Key
-    }
-    else {
-        $button.Text = $option
-    }
-    $button.Tag = $option.Value ?? $option;
-    $button.AutoSize = $true
-    $button.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
-    $button.Padding = New-Object System.Windows.Forms.Padding(5)  # Add button padding 
-    $button.Add_Click(
-        {
-            param ($button)
-            $form.Tag = $button.Tag;
-            $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
-        }
-    )
-    $flowLayoutPanel.Controls.Add($button)
+$layout = New-InputForm -Title $Title -Message $Message;
+$form = $layout.Form;
+
+$optionsGrid = New-Object System.Windows.Forms.TableLayoutPanel;
+$optionsGrid.Dock = [System.Windows.Forms.DockStyle]::Top;
+$optionsGrid.AutoSize = $true;
+$optionsGrid.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink;
+$layout.Body.Controls.Add($optionsGrid);
+
+$buttons = @($Options | ForEach-Object {
+        $option = $_;
+        $button = New-Object System.Windows.Forms.Button;
+        # Fonts are only inherited once parented, set it now so PreferredSize can be measured below.
+        $button.Font = $form.Font;
+        # Labels are data, '&' in them should not turn into a keyboard accelerator.
+        $button.UseMnemonic = $false;
+        $button.Text = $option.Key ?? $option;
+        $button.Tag = $option.Value ?? $option;
+        $button.AutoSize = $true;
+        $button.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink;
+        $button.Dock = [System.Windows.Forms.DockStyle]::Fill;
+        $button.MinimumSize = New-Object System.Drawing.Size(0, 34);
+        $button.Margin = New-Object System.Windows.Forms.Padding(3, 3, 3, 3);
+        $button.Padding = New-Object System.Windows.Forms.Padding(10, 0, 10, 0);
+        $button.Add_Click({
+                param ($clicked)
+                $form.Tag = $clicked.Tag;
+                $form.DialogResult = [System.Windows.Forms.DialogResult]::OK;
+            });
+
+        return $button;
+    });
+
+$optionWidth = [Math]::Max(160, ($buttons | ForEach-Object { $_.PreferredSize.Width + $_.Margin.Horizontal } | Measure-Object -Maximum).Maximum);
+$optionHeight = [Math]::Max(34, ($buttons | ForEach-Object { $_.PreferredSize.Height + $_.Margin.Vertical } | Measure-Object -Maximum).Maximum);
+$bounds = Get-InputFormBounds;
+$columnCount = Get-InputGridColumnCount `
+    -ItemCount $buttons.Count `
+    -ItemWidth $optionWidth `
+    -ItemHeight $optionHeight `
+    -Bounds $bounds `
+    -Requested $Columns;
+$rowCount = [int][Math]::Ceiling($buttons.Count / $columnCount);
+
+$optionsGrid.ColumnCount = $columnCount;
+$optionsGrid.RowCount = $rowCount;
+1..$columnCount | ForEach-Object {
+    $optionsGrid.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, (100 / $columnCount)))) | Out-Null;
 }
 
-$options | ForEach-Object {
-    CreateButton $_;
+$optionsGrid.SuspendLayout();
+for ($index = 0; $index -lt $buttons.Count; $index++) {
+    # Column major, so the original order is read down each column instead of across the rows.
+    $optionsGrid.Controls.Add($buttons[$index], [int][Math]::Floor($index / $rowCount), [int]($index % $rowCount));
 }
 
+$optionsGrid.ResumeLayout();
+
+Add-InputFormButton -Layout $layout -Text 'Cancel' -DialogResult Cancel -Cancel | Out-Null;
+
+# Enter picks the default, so the common case is one key away.
+$defaultButton = $DefaultValue ? ($buttons | Where-Object { $_.Tag -eq $DefaultValue } | Select-Object -First 1) : $null;
+if ($defaultButton) {
+    $form.AcceptButton = $defaultButton;
+    $form.Add_Shown({ $defaultButton.Focus() | Out-Null; }.GetNewClosure());
+}
+
+Set-InputFormSize -Layout $layout -Bounds $bounds -Content $optionsGrid;
 $result = $form.ShowDialog();
 if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
     $form.Dispose();
     return $form.Tag;
 }
 
-if ($defaultValue) {
+if ($DefaultValue) {
     $form.Dispose();
-    return $defaultValue;
+    return $DefaultValue;
 }
 
 while ($Required -and $result -ne [System.Windows.Forms.DialogResult]::OK) {

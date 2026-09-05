@@ -1,3 +1,11 @@
+<#
+.SYNOPSIS
+    Asks for a single text or number value.
+.PARAMETER Type
+    Text (default) or Number, which swaps the text box for a numeric spinner.
+.PARAMETER Required
+    Keeps reopening the dialog until it is submitted.
+#>
 [CmdletBinding()]
 param (
     [string]$Title = "Please Enter Value",
@@ -14,26 +22,11 @@ param (
     [switch]$NoDecimal
 )
 
-Add-Type -AssemblyName System.Windows.Forms
-[System.Windows.Forms.Application]::EnableVisualStyles()
-$width = 200 + ($Title.Length -gt 50 ? 50 : $Title.Length) * 5;
-$formHeight = 100;
-# Create a form
-$form = New-Object System.Windows.Forms.Form
-$form.Text = $Title;
-$form.StartPosition = "CenterScreen"
-$form.AutoSize = $false; # Changed to false to manually control size
+. "$PSScriptRoot\Form-Style.ps1";
 
-# Message Label
-if ($Message) {
-    $messageLabel = New-Object System.Windows.Forms.Label
-    $messageLabel.Text = $Message
-    $messageLabel.Location = New-Object System.Drawing.Point(10, 10)
-    $messageLabel.AutoSize = $true
-    $form.Controls.Add($messageLabel)
-}
+$layout = New-InputForm -Title $Title -Message $Message;
+$form = $layout.Form;
 
-# Text Box
 $formInput = $null;
 switch ($Type) {
     "Number" {
@@ -57,31 +50,45 @@ switch ($Type) {
     }
 }
 
-$formInputHeight = 20;
+$formInput.Font = $form.Font;
+$formInput.Width = 460;
+$formInput.Margin = New-Object System.Windows.Forms.Padding(3, 3, 3, 3);
+$formInput.Anchor = [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right;
 if ($MultiLine) {
-    $formInput.ScrollBars = "Vertical"
-    $formInputHeight = 150;
+    $formInput.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical;
+    # Enter has to type a newline in a multiline box, so Ctrl+Enter is what submits.
+    $formInput.AcceptsReturn = $true;
+    $formInput.Height = 180;
+    $formInput.Add_KeyDown({
+            param ($textBox, $keyEvent)
+            if ($keyEvent.Control -and $keyEvent.KeyCode -eq [System.Windows.Forms.Keys]::Enter) {
+                # Swallow the key, otherwise the newline it would have typed ends up in the value.
+                $keyEvent.SuppressKeyPress = $true;
+                $keyEvent.Handled = $true;
+                $form.DialogResult = [System.Windows.Forms.DialogResult]::OK;
+            }
+        });
 }
 
-$formHeight += $formInputHeight;
-$formInput.Location = New-Object System.Drawing.Point(10, 40)  # Adjusted position
-$formInput.Size = New-Object System.Drawing.Size(($width - 20), $formInputHeight)  # Set size
-$form.Controls.Add($formInput)
+# An auto sizing host, so the dialog can measure the input whatever type it ended up being.
+$inputHost = New-Object System.Windows.Forms.TableLayoutPanel;
+$inputHost.Dock = [System.Windows.Forms.DockStyle]::Top;
+$inputHost.AutoSize = $true;
+$inputHost.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink;
+$inputHost.ColumnCount = 1;
+$inputHost.RowCount = 1;
+$inputHost.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, 100))) | Out-Null;
+$inputHost.Controls.Add($formInput, 0, 0);
+$layout.Body.Controls.Add($inputHost);
 
-# OK Button
-$button = New-Object System.Windows.Forms.Button
-$button.Text = "Ok"
-$button.Location = New-Object System.Drawing.Point(10, (50 + $formInputHeight))  # Adjusted position
-$button.Size = New-Object System.Drawing.Size(($width - 20), 30)  # Set size
-$button.Add_Click(
-    {
-        $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
-    }
-);
-$form.Controls.Add($button)
-$form.ClientSize = New-Object System.Drawing.Size($width, $formHeight)  # Set fixed size
+$okButton = Add-InputFormButton -Layout $layout -Text 'Ok' -DialogResult OK;
+if (!$MultiLine) {
+    $form.AcceptButton = $okButton;
+}
 
-# Show the form
+$form.Add_Shown({ $formInput.Focus() | Out-Null; }.GetNewClosure());
+
+Set-InputFormSize -Layout $layout -Bounds (Get-InputFormBounds) -Content $inputHost -MinWidth 420 -MinHeight 170;
 $result = $form.ShowDialog();
 while ($Required -and $result -ne [System.Windows.Forms.DialogResult]::OK) {
     $result = $form.ShowDialog();

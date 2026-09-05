@@ -1,3 +1,9 @@
+<#
+.SYNOPSIS
+    Asks a yes/no question and returns the answer as a boolean.
+.PARAMETER DefaultValue
+    Returned when the dialog is closed instead of answered.
+#>
 [CmdletBinding()]
 param (
     [Parameter(Mandatory)]
@@ -6,63 +12,19 @@ param (
     $DefaultValue
 )
 
-# Load necessary assemblies
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-[System.Windows.Forms.Application]::EnableVisualStyles()
-# Form Configuration
-$form = New-Object System.Windows.Forms.Form
-$form.Text = $Title;
-$form.StartPosition = 'CenterScreen'
-$form.Font = New-Object System.Drawing.Font("Segoe UI", 12)
-$form.MinimizeBox = $false;
-$form.MaximizeBox = $false;
-$form.AutoSize = $true
-$form.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+. "$PSScriptRoot\Form-Style.ps1";
 
-# Main FlowLayoutPanel Configuration
-$flowLayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
-$flowLayoutPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$flowLayoutPanel.AutoSize = $true
-$flowLayoutPanel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
-$flowLayoutPanel.FlowDirection = [System.Windows.Forms.FlowDirection]::TopDown
-$flowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding(10)
-$form.Controls.Add($flowLayoutPanel)
+$layout = New-InputForm -Title ($Title ?? $Message) -Message $Message;
+$form = $layout.Form;
 
-# Label Configuration
-$label = New-Object System.Windows.Forms.Label
-$label.Text = $Message;
-$label.AutoSize = $true
-$label.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 10)
-$flowLayoutPanel.Controls.Add($label)
+Add-InputFormButton -Layout $layout -Text 'Yes' -DialogResult OK -Accept | Out-Null;
+Add-InputFormButton -Layout $layout -Text 'No' -DialogResult No -Cancel | Out-Null;
 
-# Buttons FlowLayoutPanel Configuration
-$buttonsFlowLayoutPanel = New-Object System.Windows.Forms.FlowLayoutPanel
-$buttonsFlowLayoutPanel.FlowDirection = [System.Windows.Forms.FlowDirection]::LeftToRight
-$buttonsFlowLayoutPanel.AutoSize = $true
-$buttonsFlowLayoutPanel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
-$flowLayoutPanel.Controls.Add($buttonsFlowLayoutPanel)
-
-# Create Buttons
-$form.AcceptButton = $buttonYes = New-Object System.Windows.Forms.Button
-$form.CancelButton = $buttonNo = New-Object System.Windows.Forms.Button
-$buttonYes.Text = "Yes"
-$buttonNo.Text = "No"
-$btnWidth = $form.Width / 2;
-$buttonYes.Size = $buttonNo.Size = New-Object System.Drawing.Size($btnWidth, 40)
-$buttonYes.DialogResult = [System.Windows.Forms.DialogResult]::OK;
-$buttonNo.DialogResult = [System.Windows.Forms.DialogResult]::No;
-$buttonsFlowLayoutPanel.Controls.Add($buttonYes)
-$buttonsFlowLayoutPanel.Controls.Add($buttonNo)
-# $padding = $form.Width - $buttonYes.Width - $buttonNo.Width;
-# $buttonsFlowLayoutPanel.Padding = New-Object System.Windows.Forms.Padding($padding, 0, 0, 0)
-
-# Show the form
+Set-InputFormSize -Layout $layout -Bounds (Get-InputFormBounds) -MinWidth 340 -MinHeight 150;
 $result = $form.ShowDialog();
-$form.Dispose()
+$form.Dispose();
 if ($result -eq [System.Windows.Forms.DialogResult]::Cancel) {
-    return  $defaultValue ?? $false;
+    return $DefaultValue ?? $false;
 }
 
 return $result -eq [System.Windows.Forms.DialogResult]::OK;
-

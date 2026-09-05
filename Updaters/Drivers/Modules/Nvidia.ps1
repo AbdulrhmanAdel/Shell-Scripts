@@ -266,10 +266,10 @@ if (!$installedHardwareInfo.Version -or $installedVersionDetails.Version -lt $ve
 }
 
 $url = $downloadInfo.DownloadURL;
-# if (Prompt.ps1 -Message "Do you want manually download and update the driver?") {
-#     Start-Process $url;
-#     Exit;
-# }
+if (Prompt.ps1 -Message "Do you want manually download and update the driver?") {
+    Start-Process $url;
+    Exit;
+}
 
 $DriverName = Split-Path $url -Leaf
 $DriverPath = "$($env:USERPROFILE)\Downloads\$DriverName";
