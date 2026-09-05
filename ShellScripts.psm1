@@ -1,3 +1,6 @@
+$script:ModuleGuid = '8f3a6d21-4c7b-4f5e-9a02-6d1b8e4c7a93';
+$script:ManifestPath = "$PSScriptRoot\ShellScripts.psd1";
+
 $script:DotSourcedCommands = @(
     'Create-Module.ps1'
 )
@@ -20,8 +23,26 @@ function Get-ShellScriptCommandSource {
     return @($shared) + @($tools);
 }
 
+function Update-ShellScriptsManifest {
+    [CmdletBinding()]
+    param()
+
+    New-ModuleManifest -Path $script:ManifestPath `
+        -RootModule 'ShellScripts.psm1' `
+        -ModuleVersion '1.0.0' `
+        -Guid $script:ModuleGuid `
+        -Description 'Shared commands for the Shell-Scripts repository.' `
+        -PowerShellVersion '7.0' `
+        -FunctionsToExport $script:ShellScriptCommands `
+        -CmdletsToExport @() `
+        -VariablesToExport @() `
+        -AliasesToExport @();
+
+    return $script:ShellScriptCommands;
+}
+
 $seen = @{};
-$exported = @();
+$discovered = @();
 foreach ($source in (Get-ShellScriptCommandSource)) {
     if ($seen.ContainsKey($source.Name)) {
         Write-Warning "Duplicate shell script command name: $($source.Name)";
@@ -31,9 +52,30 @@ foreach ($source in (Get-ShellScriptCommandSource)) {
     $seen[$source.Name] = $true;
     $operator = $source.Name -in $script:DotSourcedCommands ? '.' : '&';
     $literal = $source.Path -replace "'", "''";
-    $body = "$operator '$literal' @args";
-    New-Item -Path 'function:' -Name "script:$($source.Name)" -Value ([scriptblock]::Create($body)) | Out-Null;
-    $exported += $source.Name;
+    New-Item -Path 'function:' -Name "script:$($source.Name)" -Value ([scriptblock]::Create("$operator '$literal' @args")) | Out-Null;
+    $discovered += $source.Name;
 }
 
-Export-ModuleMember -Function $exported;
+$script:ShellScriptCommands = @(@($discovered) + 'Update-ShellScriptsManifest' | Sort-Object);
+
+$published = @();
+if (Test-Path -LiteralPath $script:ManifestPath) {
+    try {
+        $published = @((Import-PowerShellDataFile -LiteralPath $script:ManifestPath).FunctionsToExport);
+    }
+    catch {
+        $published = @();
+    }
+}
+
+if (Compare-Object -ReferenceObject $published -DifferenceObject $script:ShellScriptCommands) {
+    try {
+        Update-ShellScriptsManifest | Out-Null;
+        Write-Warning "ShellScripts manifest refreshed, new commands are available in the next session.";
+    }
+    catch {
+        Write-Warning "Could not refresh the ShellScripts manifest: $($_.Exception.Message)";
+    }
+}
+
+Export-ModuleMember -Function $script:ShellScriptCommands;

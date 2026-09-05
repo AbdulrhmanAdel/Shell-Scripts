@@ -6,29 +6,17 @@ param (
 )
 
 $ModuleName = "ShellScripts";
-$ModuleGuid = "8f3a6d21-4c7b-4f5e-9a02-6d1b8e4c7a93";
 
 [System.Environment]::SetEnvironmentVariable("Shell-Scripts", $PSScriptRoot, "User");
 
-Import-Module "$PSScriptRoot\$ModuleName.psm1" -Force;
-$commands = @((Get-Module $ModuleName).ExportedFunctions.Keys | Sort-Object);
+Import-Module "$PSScriptRoot\$ModuleName.psm1" -Force -DisableNameChecking;
+$commands = @(Update-ShellScriptsManifest);
 Remove-Module $ModuleName -Force;
 
 if ($commands.Count -eq 0) {
     Write-Host "No commands discovered, aborting." -ForegroundColor Red;
     Exit;
 }
-
-New-ModuleManifest -Path "$PSScriptRoot\$ModuleName.psd1" `
-    -RootModule "$ModuleName.psm1" `
-    -ModuleVersion "1.0.0" `
-    -Guid $ModuleGuid `
-    -Description "Shared commands for the Shell-Scripts repository." `
-    -PowerShellVersion "7.0" `
-    -FunctionsToExport $commands `
-    -CmdletsToExport @() `
-    -VariablesToExport @() `
-    -AliasesToExport @();
 
 Write-Host "Generated manifest with $($commands.Count) commands." -ForegroundColor Green;
 
