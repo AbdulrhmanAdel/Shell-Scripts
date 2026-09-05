@@ -7,8 +7,7 @@ param (
 )
 
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    $callStack = Get-PSCallStack
-    $path = $callStack[1].ScriptName
+    $path = (Get-PSCallStack | Select-Object -Skip 1 | Where-Object { $_.ScriptName } | Select-Object -First 1).ScriptName;
     $processArguments = @(
         "-File", """$path"""
     ) + @($Arguments | Where-Object { $_ -ne $null });

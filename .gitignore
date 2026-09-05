@@ -10,6 +10,7 @@ Icons.txt
 *.txt
 
 .path
+ShellScripts.psd1
 .claude/settings.local.json
 
 Set-ShellApiKeys.ps1
