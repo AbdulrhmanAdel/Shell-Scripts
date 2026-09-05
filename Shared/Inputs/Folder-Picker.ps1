@@ -14,7 +14,6 @@ $foldername = New-Object System.Windows.Forms.FolderBrowserDialog;
 $foldername.InitialDirectory = $InitialDirectory;
 $foldername.Description = $Title;
 $foldername.UseDescriptionForTitle = $true;
-$foldername.Dispose();
 $foldername.ShowHiddenFiles = $ShowHiddenFiles;
 $dialogOption = New-Object System.Windows.Forms.Form;
 if ($ShowOnTop) {
@@ -34,4 +33,9 @@ $WithRetry = $Retry -gt 0;
 while (($Required -or ($WithRetry -and $Retry -gt 0)) -and $foldername.ShowDialog($dialogOption) -ne 'OK') {
     $Retry--;
 }
+
+if ($foldername.SelectedPath) {
+    return "$($foldername.SelectedPath)";
+}
+
 return $null;

@@ -5,12 +5,12 @@ param (
     $UniqueKey
 )
 
-$MutexName = "$([System.DateTime]::UtcNow.ToString(''))-$UniqueKey"
+$MutexName = $UniqueKey;
 $isNewInstance = $false;
 $mutex = New-Object System.Threading.Mutex($true , $MutexName, [ref] $isNewInstance);
 $pipeName = $MutexName;
 if (!$isNewInstance) {
-    $serverName = "."  # Use '.' for the local machine
+    $serverName = "."
     $pipeClient = New-Object System.IO.Pipes.NamedPipeClientStream $serverName, $pipeName
     $pipeClient.Connect()
     $writer = New-Object System.IO.StreamWriter $pipeClient
@@ -30,6 +30,4 @@ Write-Host "Received from client: $message"
 
 $reader.Close()
 $pipeServer.Close()
-Write-Host $isNewInstance;
-Read-Host "Test";
 $mutex.Close()

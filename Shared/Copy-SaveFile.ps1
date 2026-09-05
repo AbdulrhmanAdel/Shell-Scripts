@@ -51,10 +51,9 @@ $files | ForEach-Object {
     New-Item `
         -Path $targetPath `
         -Target $fileInfo.FullName `
-        -ItemType SymbolicLink;
-        
-    $errors = $Error;
-    if ($errors.Count -gt 0 -and $errors[0].Exception.Message -eq "Administrator privilege required for this operation.") {
+        -ItemType SymbolicLink -ErrorVariable linkError;
+
+    if ($linkError -and $linkError[0].Exception.Message -eq "Administrator privilege required for this operation.") {
         Write-Host "Missing Admin Priv"
         Run-AsAdmin.ps1 -Arguments @(
             "-SaveCheckPath"

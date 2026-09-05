@@ -12,8 +12,7 @@ function GetIdUsingAI {
     )
 
     $fileName = $Name;
-    # $apiKey = "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"
-    $apiKey = "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"
+    $apiKey = Get-ShellSecret.ps1 -Name "OpenRouter:ApiKey";
     $headers = @{
         "Authorization" = "Bearer $apiKey"
         "Content-Type"  = "application/json"

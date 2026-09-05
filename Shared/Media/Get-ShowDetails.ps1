@@ -150,7 +150,7 @@ function GetSeriesOrMovieDetails {
 
 if (Test-Path -LiteralPath $path) {
     $info = Get-Item -LiteralPath $path -ErrorAction Ignore;
-    $name = $info.Name -replace $info.Extension, "";
+    $name = [System.IO.Path]::GetFileNameWithoutExtension($info.Name);
     $details = GetSeriesOrMovieDetails -name $name;
     $details["Info"] = $info;
     $details["FileName"] = $name;

@@ -19,7 +19,8 @@ function ForceRename {
         return
     }
 
-    Read-Host $RenameError -ForegroundColor Red;
+    Write-Host $RenameError -ForegroundColor Red;
+    Read-Host;
     ForceRename -path $path -newName $newName
 }
 

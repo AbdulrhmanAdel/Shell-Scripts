@@ -6,6 +6,7 @@ param (
     [switch]$ShowHiddenFiles,
     [switch]$ShowOnTop,
     [Switch]$Multiple,
+    [string]$Title = "Select File",
     $Filter,
     [int]$Retry
 )
@@ -20,7 +21,6 @@ if ($Filter) {
     $openFileDialog.Filter = $Filter;
 }
 
-$openFileDialog.Dispose();
 $dialogOption = New-Object System.Windows.Forms.Form;
 if ($ShowOnTop) {
     $dialogOption.TopMost = $true;
@@ -39,4 +39,9 @@ $WithRetry = $Retry -gt 0;
 while (($Required -or ($WithRetry -and $Retry -gt 0)) -and $openFileDialog.ShowDialog($dialogOption) -ne 'OK') {
     $Retry--;
 }
+
+if ($openFileDialog.FileName) {
+    return $Multiple ? $openFileDialog.FileNames : "$($openFileDialog.FileName)";
+}
+
 return $null;
