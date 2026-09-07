@@ -14,3 +14,7 @@ ShellScripts.psd1
 .claude/settings.local.json
 
 Set-ShellApiKeys.ps1
+
+Shared/Modules/Shim/bin
+Shared/Modules/Shim/obj
+Shared/Modules/Shim/hubs.local.json
