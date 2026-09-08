@@ -7,24 +7,24 @@ param (
 
 $Options = @(
     @{
-        Key        = "Remove Unused Tracks";
+        Key        = "Auto Select Tracks";
         Extensions = @("mkv", "mp4", "zip", "rar");
         Handler    = {
-            $path = "$PSScriptRoot/Remove-UnusedTracks/Main.ps1";
+            $path = "$PSScriptRoot/Auto-Select-PreferredTracks/Main.ps1";
             &  $path -Files $Files;
         };
     }
     @{
         Key     = "Tracks Extractor";
         Handler = {
-            $path = "$PSScriptRoot/Extract-Track.ps1";
+            $path = "$PSScriptRoot/Extract-Track/Extract-Track.ps1";
             &  $path $Files;
         };
     }
     @{
         Key     = "Tracks Extractor (Subtitles Only)";
         Handler = {
-            $path = "$PSScriptRoot/Extract-Track.ps1";
+            $path = "$PSScriptRoot/Extract-Track/Extract-Track.ps1";
             & $path -FirstSubtitle $Files;
         };
     }
@@ -38,28 +38,28 @@ $Options = @(
     @{
         Key     = "Display Chapter Info";
         Handler = {
-            $path = "$PSScriptRoot/Display-ChaptersInfo.ps1";
+            $path = "$PSScriptRoot/Display-ChaptersInfo/Display-ChaptersInfo.ps1";
             &  $path $Files;
         };
     }
     @{
         Key     = "Remove Segment Link";
         Handler = {
-            $path = "$PSScriptRoot/Remove-Segment-Link.ps1";
+            $path = "$PSScriptRoot/Remove-Segment-Link/Remove-Segment-Link.ps1";
             &  $path $Files;
         };
     }
     @{
         Key     = "Display Videos with Non-Arabic Subtitle";
         Handler = {
-            $path = "$PSScriptRoot/Display-NonArabicSubtitled.ps1";
+            $path = "$PSScriptRoot/Display-NonArabicSubtitled/Display-NonArabicSubtitled.ps1";
             &  $path $Files;
         };
     }
     @{
         Key     = "Fix Names";
         Handler = {
-            $path = "$PSScriptRoot/FIx-SeriesNames.ps1";
+            $path = "$PSScriptRoot/Fix-SeriesNames/Fix-SeriesNames.ps1";
             &  $path $Files;
         };
     }

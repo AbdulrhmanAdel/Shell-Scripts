@@ -32,8 +32,7 @@ function Compress {
         "--arate", 24
     );
 
-    $info = & MediaInfo --Output=JSON $inputPath | ConvertFrom-Json;
-    $videoTrack = $info.media.track[1];
+    $videoTrack = (Get-MediaInfoTracks.ps1 -Path $inputPath -Type Video)[0];
     $frameRate = [double]$videoTrack.FrameRate;
     if ($frameRate -gt 30) {
         $arguments += @("--rate", 30, "--cfr");

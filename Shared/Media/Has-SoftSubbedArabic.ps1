@@ -10,10 +10,7 @@ if (!(Test-Path -LiteralPath $Path)) {
     return $false;
 }
 
-$streamsInfo = & ffprobe -v error -print_format json -show_entries `
-    "stream=index,codec_name,codec_type,codec_long_name:stream_tags=language" `
-    "$Path" | ConvertFrom-Json;
-
-return @($streamsInfo.streams | Where-Object { $_.codec_name -match "srt|ass" }) | Where-Object {
+$streams = Get-StreamsInfo.ps1 -Path $Path;
+return @($streams | Where-Object { $_.codec_name -match "srt|ass" }) | Where-Object {
     $_.tags.language -in @("ara", "ar")
 };

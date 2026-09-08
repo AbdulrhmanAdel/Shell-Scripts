@@ -41,13 +41,7 @@ function FfmpegExtract {
     $fileDirectoryName = $FileInfo.DirectoryName;
     $fileName = $FileInfo.Name.replace($FileInfo.Extension, "$extension");
     $output = "$fileDirectoryName\$fileName";
-    & ffmpeg "-y" "-v" "error" `
-        "-stats" `
-        "-i" "$($FileInfo.FullName)" `
-        "-map" "0:$index" `
-        "-c" "copy" `
-        "$output";
-    return $output;
+    return Export-Track.ps1 -FileInfo $FileInfo -Index $index -OutputPath $output;
 }
 
 function HandleTrack {
@@ -86,10 +80,8 @@ function HandleTrack {
 }
 
 function GetTracksInfo($inputPath) {
-    $streamsInfo = & ffprobe -v error -print_format json -show_entries `
-        "stream=index,codec_name,codec_type,codec_long_name:stream_tags=language" `
-        "$inputPath" | ConvertFrom-Json;
-    $tracks = @($streamsInfo.streams | Where-Object { $codecSettings.ContainsKey($_.codec_name) })
+    $streams = Get-StreamsInfo.ps1 -Path $inputPath;
+    $tracks = @($streams | Where-Object { $codecSettings.ContainsKey($_.codec_name) })
     if ($FirstSubtitle) {
         $tracks = @($tracks | Where-Object { $_.codec_type -eq "subtitle" } | Select-Object -First 1);
     }

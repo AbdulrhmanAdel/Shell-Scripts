@@ -10,9 +10,8 @@ function GetDuration {
         Write-Output "FILE $videoPath DOESN'T EXITS";
     }
     
-    $info = & mediaInfo --Output=JSON $videoPath | ConvertFrom-Json;
-    $videoTrack = @($info.media.track | Where-Object { $_.'@type' -eq 'Video' })[0]
-    $audioTrack = @($info.media.track | Where-Object { $_.'@type' -eq 'Audio' })[0]
+    $videoTrack = (Get-MediaInfoTracks.ps1 -Path $videoPath -Type Video)[0]
+    $audioTrack = (Get-MediaInfoTracks.ps1 -Path $videoPath -Type Audio)[0]
     return @{
         VideoDuration = [double]($videoTrack.Duration)
         AudioDuration = [double]($audioTrack.Duration)
@@ -38,17 +37,6 @@ function CalculateFileCount {
 
     return $count;
 }
-
-$videoExtensions = @(".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".m4v", ".webm");
-function IsVideo {
-    param (
-        $videoPath
-    )
-    
-    $videoInfo = Get-Item -LiteralPath $videoPath;
-    return $videoInfo.Extension.ToLower() -in $videoExtensions
-}
-
 
 function Check {
     param (

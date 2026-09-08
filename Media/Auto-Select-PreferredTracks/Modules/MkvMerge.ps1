@@ -33,7 +33,8 @@ function GetAudioId {
 
 $inputPath = $args[0];
 $outputPath = $args[1];
-$tracks = (& mediaInfo --Output=JSON "$inputPath" | ConvertFrom-Json).media.track;
+$languageCodes = Language-Codes.ps1;
+$tracks = Get-MediaInfoTracks.ps1 -Path $inputPath;
 $videoTrack = $tracks | Where-Object { $_.'@type' -eq 'Video' }
 $tracksOrder = @([int]$videoTrack.StreamOrder);
 $arguments = @(
@@ -53,7 +54,7 @@ $tracksOrder += $audioId;
 #region Subtitles
 $global:subAdded = $false;
 $subtitleTracks = @($tracks | Where-Object { $_.'@type' -eq 'Text' });
-$subtitleTracks | Where-Object { $_.Language -match "ara|ar|Arabic" }  | ForEach-Object {
+$subtitleTracks | Where-Object { $_.Language -match ($languageCodes.Arabic -join "|") }  | ForEach-Object {
     $global:subAdded = $true;
     $subIndex = $_.StreamOrder;
     $arguments += @("--default-track-flag", "$($subIndex):0");
@@ -61,7 +62,7 @@ $subtitleTracks | Where-Object { $_.Language -match "ara|ar|Arabic" }  | ForEach
     $tracksOrder += $subIndex;
 }
 
-$subtitleTracks | Where-Object { $_.Language -match "en|eng|English" }  | ForEach-Object {
+$subtitleTracks | Where-Object { $_.Language -match ($languageCodes.English -join "|") }  | ForEach-Object {
     $global:subAdded = $true;
     $subIndex = $_.StreamOrder;
     $arguments += @("--default-track-flag", $subIndex);

@@ -5,7 +5,7 @@ param (
     $Files
 )
 
-$ExtractScriptPath = Resolve-Path -Path "$PSScriptRoot/../Media/Extract-Track.ps1";
+$ExtractScriptPath = Resolve-Path -Path "$PSScriptRoot/../Media/Extract-Track/Extract-Track.ps1";
 $Subs = $Files  | ForEach-Object {
     return & $ExtractScriptPath -FirstSubtitle -Files $_;
 }

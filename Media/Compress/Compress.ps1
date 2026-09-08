@@ -39,13 +39,13 @@ $Files | ForEach-Object {
         return $false; 
     }
     if ($_ -match "\.(mkv|mp4|avi|webm)$") {
-        $videos += $_;   
+        $videos += $_;
     }
-    elseif ($_ -match "\.(jpg|jpeg|png|gif|bmp|heic|dng)$") {
-        $images += $_;   
+    elseif (Is-Image.ps1 $_) {
+        $images += $_;
     }
-    elseif ($_ -match "\.(mp3|opus|m4a)$") {
-        $audio += $_;   
+    elseif (Is-Audio.ps1 $_) {
+        $audio += $_;
     }
     elseif (Test-Path -LiteralPath $_ -PathType Container) {
         $audio += $_; 

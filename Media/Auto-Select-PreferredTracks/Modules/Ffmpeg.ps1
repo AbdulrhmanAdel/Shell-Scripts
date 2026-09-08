@@ -7,8 +7,9 @@ $inputPath ??= $args[0]
 $outputPath ??= $args[1];
 
 
-$english = @("en", "eng", "english");
-$arabic = @("ara", "ar", "Arabic");
+$languageCodes = Language-Codes.ps1;
+$english = $languageCodes.English;
+$arabic = $languageCodes.Arabic;
 $notPreferedLanguages = @("hin");
 function GetAudioIds {
     param (
@@ -32,11 +33,7 @@ function GetAudioIds {
     return @($accpetedAudio[0] ?? $AudioStreams[0]);
 }
 
-$streams = (
-    & ffprobe -v error -print_format json -show_entries `
-        "stream=index,codec_type:stream_tags=language" `
-        "$inputPath" | ConvertFrom-Json
-).streams;
+$streams = Get-StreamsInfo.ps1 -Path $inputPath -Entries "stream=index,codec_type:stream_tags=language";
 
 $arguments = @(
     "-v", "error", #log level
