@@ -20,6 +20,7 @@ function GetLink {
     # }
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $session.UserAgent = "Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36"
+    $session.Cookies.Add((New-Object System.Net.Cookie("alphx_view_visitor", [guid]::NewGuid().ToString(), "/", "anidl.org")))
     $Result = Invoke-WebRequest -UseBasicParsing -Uri "https://anidl.org/api/secure-shorten" `
         -Method "POST" `
         -WebSession $session `
@@ -159,7 +160,7 @@ $links = $links | Where-Object {
     return $_.Audio.Count -eq 1
 } | ForEach-Object {
     return @{
-        Key   = $_.FileName;
+        Key   = "$($_.FileName) [$($_.Size)] $($_.HasArabicSub ? '[Ar]' : '')";
         Value = $_
     }
 }
@@ -171,11 +172,13 @@ if ($DownloadLinks.Count -eq 0) {
 
 $supportedShortens = @(
     "https://ouo.io/"
-    "tpi.li"
-)
+    # "tpi.li"
+);
+
 $DownloadLinks | ForEach-Object {
     $link = $null;
     $tries = 10;
+    $sleepInSeconds = 1;
     while ($tries -ge 0) {
         $temp = GetLink -Id $_.Id;
         $isSupportedShorten = @($supportedShortens | Where-Object {$temp -match  $_}).Count -ge 1;
@@ -186,7 +189,7 @@ $DownloadLinks | ForEach-Object {
         else {
             $tries--;
             Write-Host "Generated shorten ($temp) is not supported retrying... left tries ($tries)" -ForegroundColor Red;
-            Start-Sleep -Seconds 2;
+            Start-Sleep -Seconds $sleepInSeconds;
         }
     }
     $_.Link = $link;
