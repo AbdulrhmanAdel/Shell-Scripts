@@ -63,27 +63,51 @@ $buttons = @($Options | ForEach-Object {
 $optionWidth = [Math]::Max(160, ($buttons | ForEach-Object { $_.PreferredSize.Width + $_.Margin.Horizontal } | Measure-Object -Maximum).Maximum);
 $optionHeight = [Math]::Max(34, ($buttons | ForEach-Object { $_.PreferredSize.Height + $_.Margin.Vertical } | Measure-Object -Maximum).Maximum);
 $bounds = Get-InputFormBounds;
-$columnCount = Get-InputGridColumnCount `
-    -ItemCount $buttons.Count `
-    -ItemWidth $optionWidth `
-    -ItemHeight $optionHeight `
-    -Bounds $bounds `
-    -Requested $Columns;
-$rowCount = [int][Math]::Ceiling($buttons.Count / $columnCount);
 
-$optionsGrid.ColumnCount = $columnCount;
-$optionsGrid.RowCount = $rowCount;
-1..$columnCount | ForEach-Object {
-    $optionsGrid.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, (100 / $columnCount)))) | Out-Null;
+function Set-OptionsGridItems {
+    param([System.Object[]]$Items)
+
+    $columnCount = Get-InputGridColumnCount `
+        -ItemCount $Items.Count `
+        -ItemWidth $optionWidth `
+        -ItemHeight $optionHeight `
+        -Bounds $bounds `
+        -Requested $Columns;
+    $rowCount = [int][Math]::Max(1, [Math]::Ceiling($Items.Count / $columnCount));
+
+    $optionsGrid.SuspendLayout();
+    $optionsGrid.Controls.Clear();
+    $optionsGrid.ColumnStyles.Clear();
+    $optionsGrid.ColumnCount = $columnCount;
+    $optionsGrid.RowCount = $rowCount;
+    1..$columnCount | ForEach-Object {
+        $optionsGrid.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle([System.Windows.Forms.SizeType]::Percent, (100 / $columnCount)))) | Out-Null;
+    }
+
+    for ($index = 0; $index -lt $Items.Count; $index++) {
+        # Column major, so the original order is read down each column instead of across the rows.
+        $optionsGrid.Controls.Add($Items[$index], [int][Math]::Floor($index / $rowCount), [int]($index % $rowCount));
+    }
+
+    $optionsGrid.ResumeLayout();
 }
 
-$optionsGrid.SuspendLayout();
-for ($index = 0; $index -lt $buttons.Count; $index++) {
-    # Column major, so the original order is read down each column instead of across the rows.
-    $optionsGrid.Controls.Add($buttons[$index], [int][Math]::Floor($index / $rowCount), [int]($index % $rowCount));
-}
+Set-OptionsGridItems -Items $buttons;
 
-$optionsGrid.ResumeLayout();
+if ($buttons.Count -gt 1) {
+    $layout.Header.RowCount = 2;
+    $searchBox = New-Object System.Windows.Forms.TextBox;
+    $searchBox.Dock = [System.Windows.Forms.DockStyle]::Top;
+    $searchBox.Add_TextChanged({
+            $term = $searchBox.Text;
+            $filtered = [string]::IsNullOrWhiteSpace($term) `
+                ? $buttons `
+                : @($buttons | Where-Object { $_.Text.IndexOf($term, [System.StringComparison]::OrdinalIgnoreCase) -ge 0 });
+            Set-OptionsGridItems -Items $filtered;
+        }.GetNewClosure());
+    $layout.Header.Controls.Add($searchBox, 0, 1);
+    $layout.Header.SetColumnSpan($searchBox, 2);
+}
 
 Add-InputFormButton -Layout $layout -Text 'Cancel' -DialogResult Cancel -Cancel | Out-Null;
 
