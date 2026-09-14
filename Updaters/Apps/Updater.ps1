@@ -47,8 +47,14 @@ if (!$cleanerArtifacts.Success) {
 }
 Write-Host "===================== End Clean Old Version =====================" -ForegroundColor Gray;
 
-$Installer = ExecuteScript -Path "Installers" -Item $Installer -AdditionalArgs @{
+$installerArtifacts = ExecuteScript -Path "Installers" -Item $Installer -AdditionalArgs @{
     Path = $downloaderArtifacts.DownloadPath
+}
+if (!$installerArtifacts.Success) {
+    Write-Host "Failed to install new version for $($CurrentVersionDetails.Name)." -ForegroundColor Red;
+    return @{
+        Success = $false
+    }
 }
 
 return @{

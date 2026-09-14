@@ -23,14 +23,17 @@ else {
         -Required;
 }
 
-function HandleMovies { 
+. "$PSScriptRoot/Sites/$Website.ps1"
+. "$PSScriptRoot/Sites/Shared/Invoke-SubtitleProvider.ps1"
+
+function HandleMovies {
     param($subs)
     $movies = $subs | Where-Object { $_.Details.Type -eq "Movie" };
     $movies | Where-Object {
         $info = $_.Info;
         $details = $_.Details;
         $imdb = $imdbCache[$details.Title];
-        Write-Host $details;    
+        Write-Host $details;
         $Show = @{
             Title    = $details.Title
             Type     = $details.Type
@@ -38,7 +41,7 @@ function HandleMovies {
             Episodes = $seasonEpisodes
             ImdbId   = $imdb.Id
         }
-        & "$($PSScriptRoot)/Sites/$Website.ps1" `
+        Invoke-SubtitleProvider `
             -Show $Show `
             -Quality $details.Quality `
             -SavePath $info.Directory.FullName `
@@ -100,7 +103,7 @@ function HandleSeries {
                 Episodes = $seasonEpisodes
                 ImdbId   = $show.ShowId
             }
-            & "$($PSScriptRoot)/Sites/$Website.ps1" -Show $Show;
+            Invoke-SubtitleProvider -Show $Show;
         }
     }
 }

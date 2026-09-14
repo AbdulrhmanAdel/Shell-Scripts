@@ -1,48 +1,40 @@
 param (
     [PsObject[]]$Subtitles = @(),
-    [string[]]$keywords = @(),
+    [string[]]$SearchKeywords = @(),
     [string[]]$IgnoredVersions = @()
 )
 
-$matched = $Subtitles | Where-Object {
+$matched = @($Subtitles | Where-Object {
     $sub = $_;
     $hasMatch = $sub.KeyWords | Where-Object {
-        $keywords = $_;
-        # If no keywords supplied -> match
-        if (-not $keywords -or $keywords.Length -eq 0) {
-            return $false 
-        }
-
-        return $keywords | Where-Object {
-            $kw = $_;
-            # Ignore if in ignored versions
-            if ($IgnoredVersions -and $IgnoredVersions.Length -gt 0) {
-                foreach ($ignored in $IgnoredVersions) {
-                    if ($kw -match $ignored) {
-                        return $false
-                    }
-                }
-            }
-
-            # Check for match
-            foreach ($keyword in $keywords) {
-                if ($kw -match [regex]::Escape($keyword)) {
-                    return $true
-                }
-            }
-
+        $releaseToken = $_;
+        if (-not $releaseToken) {
             return $false
         }
+
+        foreach ($ignored in $IgnoredVersions) {
+            if ($ignored -and $releaseToken -match $ignored) {
+                return $false
+            }
+        }
+
+        foreach ($searchKeyword in $SearchKeywords) {
+            if ($searchKeyword -and $releaseToken -match $searchKeyword) {
+                return $true
+            }
+        }
+
+        return $false
     }
 
-    return $hasMatch -ne $null
-}
+    return $null -ne $hasMatch
+})
 
 if ($matched.Count -gt 0) {
     return @{
         HasMatch   = $true;
         FirstMatch = $matched[0];
-        Others     = $matched[1..($matched.Count - 1)]
+        Others     = @($matched | Select-Object -Skip 1)
     }
 }
 

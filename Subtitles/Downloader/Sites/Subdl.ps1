@@ -1,83 +1,57 @@
-[CmdletBinding()]
-param (
-    [PsObject]$Show,
-    [string]$Quality,
-    [string]$SavePath,
-    [string]$RenameTo,
-    [string[]]$IgnoredVersions,
-    [string[]]$Keywords
-)
-
 # Docs: https://subdl.com/api-doc
-$BaseApi = "https://api.subdl.com/api/v1/subtitles";
-# Please Don't Steal this, it won't Help you at all. I'm lazy to secure it :)
-$NotWhatYouThink = "eKncI_x3dQ7edsGA6GvEKJ3mgyXEGe9u"
+$SubdlApiKey = Get-ShellSecret.ps1 -Name "Subdl:ApiKey";
+$SubdlBaseUrl = 'https://api.subdl.com/api/v1/subtitles'
 
-$Type = $Show.Type;
-$Title = $Show.Title;
-# $Year = $Show.Year;
-$Season = $Show.Season;
-$ShowImdbId = $Show.ImdbId;
-$Episodes = $Show.Episodes;
+function Find-Show {
+    param (
+        $Show
+    )
 
-function GetInfo {
-    # Please Don't Steal this, it won't Help you at all. I'm lazy to secure it :)
-    $QueryString = "api_key=$NotWhatYouThink&imdb_id=$ShowImdbId&languages=AR&subs_per_page=30"
-
-    if ($Season) {
-        $QueryString += "&season_number=$Season"; 
+    $query = "api_key=$SubdlApiKey&imdb_id=$($Show.ImdbId)&languages=AR&subs_per_page=30";
+    if ($Show.Season) {
+        $query += "&season_number=$($Show.Season)";
     }
 
+    return @{
+        Query = $query
+    }
+}
+
+function Get-SubtitleCandidates {
+    param (
+        $ShowHandle
+    )
+
     try {
-        $Response = Invoke-WebRequest `
-            -Method Get `
-            -Uri "$($BaseApi)?$($QueryString)"    
-        return $Response.Content | ConvertFrom-Json;
+        $response = Invoke-WebRequest -Method Get -Uri "${SubdlBaseUrl}?$($ShowHandle.Query)" -UseBasicParsing;
+        $result = $response.Content | ConvertFrom-Json;
     }
     catch {
         $response = $_.Exception.Response;
         Write-Host "Error: $($response.StatusCode) - $($_.Exception.Message)" -ForegroundColor Red;
-    }
-    
-}
-
-$Info = GetInfo;
-$Subtitles = $Info.subtitles
-if ($Type -eq "Movie") {
-    $sub = $Subtitles | Select-Object -First 1
-
-    $downloadRequestArgs = @{
-        Uri = "https://dl.subdl.com$($sub.url)"
-    };
-    $subtitlePath = & "$PSScriptRoot\Shared\Download-Subtitle.ps1" `
-        -DownloadRequestArgs $downloadRequestArgs;
-
-    return;
-}
-
-$Episodes | ForEach-Object {
-    $episode = $_;
-    $episodeNumber = $_.Episode;
-    $sub = $Subtitles | Where-Object { 
-        $episodeNumber -ge $_.episode_from -and `
-            $episodeNumber -le $_.episode_end
-    } | Select-Object -First 1
-
-    $downloadRequestArgs = @{
-        Uri = "https://dl.subdl.com$($sub.url)"
-    };
-
-    $subtitlePath = & "$PSScriptRoot\Shared\Download-Subtitle.ps1" `
-        -DownloadRequestArgs $downloadRequestArgs;
-
-    $FilterFn = {
-        param ($Name) 
-        return $Name -match "E$($episodeNumber -le 9 ? $episodeNumber : "0$episodeNumber")"
+        return @()
     }
 
-    & "$PSScriptRoot\Shared\Copy-Subtitle.ps1" `
-        -SubtitlePath $subtitlePath `
-        -SavePath $episode.SavePath `
-        -Filter $FilterFn `
-        -RenameTo $episode.RenameTo;
+    return $result.subtitles | ForEach-Object {
+        $sub = $_;
+        $episodeTokens = @();
+        if ($sub.episode_from -and $sub.episode_end) {
+            $episodeTokens = $sub.episode_from..$sub.episode_end | ForEach-Object { "-E$('{0:D2}' -f $_)." }
+        }
+
+        @{
+            Data     = $sub
+            KeyWords = @($sub.release_name) + $episodeTokens
+        }
+    }
+}
+
+function Get-SubtitleDownloadArgs {
+    param (
+        $Subtitle
+    )
+
+    return @{
+        Uri = "https://dl.subdl.com$($Subtitle.url)"
+    }
 }

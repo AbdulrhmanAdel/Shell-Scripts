@@ -20,7 +20,7 @@ if (!$Flatten -and !$Include.Length -and !$Exclude.Length) {
 
 
 try {
-    Get-ChildItem -Path $extractPath | Where-Object {
+    Get-ChildItem -Path $Source | Where-Object {
         if ($Include.Length) {
             return $_.Name -in $Include
         }

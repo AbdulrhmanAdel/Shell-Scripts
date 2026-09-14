@@ -7,6 +7,8 @@ param (
 
 
 # Source https://subtitlestranslator.com/
+$SubtitlesTranslatorApiKey = Get-ShellSecret.ps1 -Name "SubtitlesTranslator:ApiKey";
+
 function Translate {
     param (
         [string[]]$sentences
@@ -37,7 +39,7 @@ function Translate {
         "sec-fetch-dest"     = "empty"
         "sec-fetch-mode"     = "cors"
         "sec-fetch-site"     = "cross-site"
-        "x-goog-api-key"     = "AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520"
+        "x-goog-api-key"     = $SubtitlesTranslatorApiKey
     } `
         -ContentType "application/json+protobuf" `
         -Body $body;

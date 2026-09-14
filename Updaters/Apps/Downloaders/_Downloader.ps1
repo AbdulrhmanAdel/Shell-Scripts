@@ -8,7 +8,7 @@ param (
 )
 
 $FileName ??= Random-FileName.ps1;
-$parentPath = "$(Get-TempScriptPath)\App_Updaters"
+$parentPath = "$(Get-TempScriptPath.ps1)\App_Updaters"
 $OutPath = "$parentPath\$FileName";
 if (-not (Test-Path $OutPath)) {
     New-Item -Path $parentPath -ItemType Directory -Force | Out-Null;

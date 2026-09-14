@@ -8,7 +8,10 @@ param (
 $subtitlePathInfo = Get-Item -LiteralPath $SubtitlePath -ErrorAction SilentlyContinue;
 if (-not $subtitlePathInfo) {
     Write-Error "SubtitlePath '$SubtitlePath' does not exist."
-    exit 1
+    return @{
+        Success = $false
+        Message = "SubtitlePath '$SubtitlePath' does not exist."
+    }
 }
 
 $files = @($subtitlePathInfo);
@@ -30,7 +33,7 @@ function CopyFile {
         [string]$Suffix
     )
 
-    $finalName = $SubtitleFileInfo.BaseName
+    $finalName = $File.BaseName
     if ($RenameTo) { $finalName = $RenameTo }
     if ($Suffix) {
         $finalName += $Suffix;
@@ -52,21 +55,12 @@ if ($files.Count -eq 1) {
     CopyFile -File $files[0];
     return @{
         Success = $true;
-        Data    = $files
+        Files   = $files
     }
 }
 
 if ($Filter) {
     $files = @($files | Where-Object { $Filter.Invoke($_.Name) })
-}
-
-if ($EpisodeRegex) {
-    $files = @($files | Where-Object { $_.Name -match $EpisodeRegex })
-}
-
-if ($QualityRegex) {
-    $primaryFile = $files | Where-Object { $_.Name -match $QualityRegex } | Select-Object -First 1
-    if ($primaryFile) { $files = @($primaryFile) }
 }
 
 $index = 0
