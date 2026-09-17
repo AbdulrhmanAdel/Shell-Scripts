@@ -11,7 +11,7 @@ param (
     $Paths
 )
 
-$supportedWebsites = @("Subdl", "Subsource")
+$supportedWebsites = @("Subdl", "Subsource", "OpenSubtitle.com")
 
 if ($supportedWebsites -contains $Website) {
     Write-Host "Using $Website Website" -ForegroundColor Green;
