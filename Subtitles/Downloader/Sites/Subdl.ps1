@@ -1,6 +1,30 @@
 # Docs: https://subdl.com/api-doc
 $SubdlApiKey = Get-ShellSecret.ps1 -Name "Subdl:ApiKey";
 $SubdlBaseUrl = 'https://api.subdl.com/api/v1/subtitles'
+$SubdlOrdinals = @(
+    "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth",
+    "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth"
+)
+
+function Get-SubdlSeasonSlug {
+    param (
+        $Season
+    )
+
+    if ($Season -ge 1 -and $Season -le $SubdlOrdinals.Length) {
+        return "$($SubdlOrdinals[$Season - 1])-season"
+    }
+
+    return "season-$Season"
+}
+
+function Get-SubdlSlug {
+    param (
+        [string]$Name
+    )
+
+    return ($Name.ToLower() -replace '[^a-z0-9]+', '-').Trim('-')
+}
 
 function Find-Show {
     param (
@@ -12,8 +36,28 @@ function Find-Show {
         $query += "&season_number=$($Show.Season)";
     }
 
+    try {
+        $response = Invoke-WebRequest -Method Get -Uri "${SubdlBaseUrl}?$query" -UseBasicParsing;
+        $result = $response.Content | ConvertFrom-Json;
+    }
+    catch {
+        $response = $_.Exception.Response;
+        Write-Host "Error: $($response.StatusCode) - $($_.Exception.Message)" -ForegroundColor Red;
+        return @{ RawSubtitles = @() }
+    }
+
+    $showResult = $result.results | Select-Object -First 1;
+    $pageUrl = $null;
+    if ($showResult.sd_id -and $showResult.name) {
+        $pageUrl = "https://subdl.com/subtitle/sd$($showResult.sd_id)/$(Get-SubdlSlug -Name $showResult.name)";
+        if ($Show.Season) {
+            $pageUrl += "/$(Get-SubdlSeasonSlug -Season $Show.Season)";
+        }
+    }
+
     return @{
-        Query = $query
+        RawSubtitles = $result.subtitles
+        PageUrl      = $pageUrl
     }
 }
 
@@ -22,17 +66,7 @@ function Get-SubtitleCandidates {
         $ShowHandle
     )
 
-    try {
-        $response = Invoke-WebRequest -Method Get -Uri "${SubdlBaseUrl}?$($ShowHandle.Query)" -UseBasicParsing;
-        $result = $response.Content | ConvertFrom-Json;
-    }
-    catch {
-        $response = $_.Exception.Response;
-        Write-Host "Error: $($response.StatusCode) - $($_.Exception.Message)" -ForegroundColor Red;
-        return @()
-    }
-
-    return $result.subtitles | ForEach-Object {
+    return $ShowHandle.RawSubtitles | ForEach-Object {
         $sub = $_;
         $episodeTokens = @();
         if ($sub.episode_from -and $sub.episode_end) {
