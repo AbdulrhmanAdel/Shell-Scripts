@@ -9,7 +9,13 @@ param (
     $VersionSearchLocation = "tag_name",
     [Alias("ReleasePattern")]
     $ReleaseAssetSearchPattern = ".*\.zip$",
-    $CurrentVersion
+    # Pick the newest release whose name matches instead of GitHub's "latest" flag, which some
+    # projects set on older builds (e.g. Brave: '^Release v' = stable channel only)
+    [string]
+    $ReleaseNamePattern,
+    $CurrentVersion,
+    [switch]
+    $CheckOnly
 )
 
 if ($Repo -and $Repo -ne "") {
@@ -17,36 +23,87 @@ if ($Repo -and $Repo -ne "") {
     $RepoOwner, $RepoName = $Repo -split "/";
 }
 
-Write-Host "INFO: " -ForegroundColor Blue -NoNewline; Write-Host "Using Github Downloader";
-$releaseResponse = curl -L `
-    -H "Accept: application/vnd.github+json" `
-    -H "X-GitHub-Api-Version: 2022-11-28" `
-    "https://api.github.com/repos/$RepoOwner/$RepoName/releases/latest";
+function Get-ReleaseVersion {
+    param ($Release)
 
-$latestReleasesData = $releaseResponse | ConvertFrom-Json;
-$releaseVersion = $latestReleasesData.$VersionSearchLocation;
-if ($VersionExtractPattern -is [array]) {
-    $VersionExtractPattern | ForEach-Object {
-        $releaseVersion = $releaseVersion -replace $_, '';
+    $version = $Release.$VersionSearchLocation;
+    foreach ($pattern in @($VersionExtractPattern)) {
+        $version = $version -replace $pattern, '';
+    }
+    return "$version".Trim();
+}
+
+Write-Host "INFO: " -ForegroundColor Blue -NoNewline; Write-Host "Using Github Downloader";
+$headers = @{
+    "Accept"               = "application/vnd.github+json"
+    "X-GitHub-Api-Version" = "2022-11-28"
+};
+# Without a token GitHub allows 60 requests an hour
+if ($env:GITHUB_TOKEN) {
+    $headers.Authorization = "Bearer $env:GITHUB_TOKEN";
+}
+
+$baseUrl = "https://api.github.com/repos/$RepoOwner/$RepoName/releases";
+try {
+    if ($ReleaseNamePattern) {
+        $release = Invoke-RestMethod -Uri "$($baseUrl)?per_page=50" -Headers $headers -ErrorAction Stop |
+            ForEach-Object { $_ } |
+            Where-Object { $_.name -match $ReleaseNamePattern -and ($_.assets.name -match $ReleaseAssetSearchPattern) } |
+            Sort-Object { $v = Get-ReleaseVersion $_; ($v -match '\d+(\.\d+){1,3}') ? [version]$Matches[0] : [version]'0.0' } -Descending |
+            Select-Object -First 1;
+    }
+    else {
+        $release = Invoke-RestMethod -Uri "$baseUrl/latest" -Headers $headers -ErrorAction Stop;
     }
 }
-else {
-    $releaseVersion = $releaseVersion -replace $VersionExtractPattern, '';
+catch {
+    return @{
+        HasNewVersion = $false
+        Message       = "GitHub request failed for $RepoOwner/$RepoName`: $($_.Exception.Message)"
+    }
 }
 
-$releaseAsset = $latestReleasesData.assets | Where-Object { $_.name -match $releaseAssetSearchPattern } | Select-Object -First 1;
+if (!$release) {
+    return @{
+        HasNewVersion = $false
+        Message       = "No release of $RepoOwner/$RepoName matches '$ReleaseNamePattern' with an asset matching '$ReleaseAssetSearchPattern'."
+    }
+}
+
+$releaseVersion = Get-ReleaseVersion $release;
 Write-Host "Latest Release Version: $releaseVersion";
 $HasNewVersion = & "$PSScriptRoot\_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $releaseVersion;
 if (!$HasNewVersion) {
     Write-Host "No new version found. Current version ($CurrentVersion); Latest Version $releaseVersion";
-    Write-Host "Github Url `"https://github.com/$RepoOwner/$RepoName/releases/latest`"";
     return @{
         HasNewVersion = $false
-        DownloadPath  = $null
+        LatestVersion = $releaseVersion
     }
 }
-$downloadPath = & "$PSScriptRoot\_DOwnloader.ps1" -Url $releaseAsset.browser_download_url -FileName $releaseAsset.name;
+
+$releaseAsset = $release.assets | Where-Object { $_.name -match $ReleaseAssetSearchPattern } | Select-Object -First 1;
+if (!$releaseAsset) {
+    return @{
+        HasNewVersion = $true
+        LatestVersion = $releaseVersion
+        Message       = "No asset matches '$ReleaseAssetSearchPattern'. Assets: $($release.assets.name -join ', ')"
+    }
+}
+
+if ($CheckOnly) {
+    return @{
+        HasNewVersion = $true
+        LatestVersion = $releaseVersion
+    }
+}
+
+$downloadPath = & "$PSScriptRoot\_Downloader.ps1" `
+    -Url $releaseAsset.browser_download_url `
+    -FileName $releaseAsset.name `
+    -Version $releaseVersion `
+    -ExpectedSize $releaseAsset.size;
 return @{
-    HasNewVersion = $HasNewVersion
+    HasNewVersion = $true
+    LatestVersion = $releaseVersion
     DownloadPath  = $downloadPath
 }

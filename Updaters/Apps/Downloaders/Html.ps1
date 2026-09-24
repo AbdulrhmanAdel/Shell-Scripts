@@ -5,10 +5,20 @@ param (
     [Parameter(Mandatory)]
     [string]$QueryString,
     [string]$Attribute = 'href',
-    $CurrentVersion
+    $CurrentVersion,
+    [switch]
+    $CheckOnly
 )
 
 Write-Host "INFO: " -ForegroundColor Blue -NoNewline; Write-Host "Using Html Downloader";
+
+# No version on the page, so all it can say is "maybe"
+if ($CheckOnly) {
+    return @{
+        HasNewVersion = $true
+        LatestVersion = $null
+    }
+}
 
 # Try fetching HTML directly first; fall back to browser for Cloudflare / 403
 $htmlContent = $null

@@ -4,14 +4,17 @@ param (
     $Url,
     $VersionPattern = "v",
     $VersionPatternName = "Version",
-    $CurrentVersion
+    $CurrentVersion,
+    [switch]
+    $CheckOnly
 )
 
+# Only detects the version for now, it has no way to find the download link yet
 $html = Invoke-WebRequest -Uri $Url;
 if (-not ($html.Content -match $VersionPattern)) {
     return @{
-        Success = $false
-        Message = "Can't Extract the version from the provide URL"
+        HasNewVersion = $false
+        Message       = "Can't extract the version from $Url"
     }
 }
 
@@ -21,8 +24,12 @@ if (!$HasNewVersion) {
     Write-Host "No new version found. Current version ($CurrentVersion) is up to date.";
     return @{
         HasNewVersion = $false
-        DownloadPath  = $null
+        LatestVersion = $newVersion
     }
 }
 
-
+return @{
+    HasNewVersion = $true
+    LatestVersion = $newVersion
+    Message       = $CheckOnly ? $null : "The Website downloader can only detect versions, download $newVersion manually from $Url"
+}

@@ -11,14 +11,18 @@ param (
 
 $fileName = Split-Path -Leaf $Path;
 $extractPath = "$env:TEMP\App_Updaters\Archive\$fileName"
+# A leftover extract from an earlier run would mix old files in (and make 7z ask to overwrite)
+if (Test-Path -LiteralPath $extractPath) {
+    Remove-Item -LiteralPath $extractPath -Recurse -Force;
+}
 $archiveProcess = Start-Process 7z -ArgumentList @(
-    "x", 
+    "x",
     """$Path""",
-    "-o$extractPath"
+    "-o""$extractPath""",
+    "-y"
 ) -NoNewWindow -PassThru -Wait;
 
-$successArchive = $archiveProcess -or $archiveProcess.ExitCode -eq 0
-if (!$successArchive) {
+if ($archiveProcess.ExitCode -ne 0) {
     Write-Host "[ERROR] Archive extraction failed for $Path." -ForegroundColor Red;
     return @{
         Success = $false

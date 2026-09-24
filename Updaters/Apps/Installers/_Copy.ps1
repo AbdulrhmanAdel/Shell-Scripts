@@ -11,6 +11,14 @@ if (-not (Test-Path -LiteralPath $Destination)) {
     New-Item -Path $Destination -ItemType Directory -Force | Out-Null;
 }
 
+# A single downloaded file (e.g. yt-dlp.exe), "$Source\*" would match nothing
+if (Test-Path -LiteralPath $Source -PathType Leaf) {
+    Copy-Item -LiteralPath $Source -Destination $Destination -Force;
+    return @{
+        Success = $?;
+    }
+}
+
 if (!$Flatten -and !$Include.Length -and !$Exclude.Length) {
     Copy-Item -Path "$Source\*" -Destination $Destination -Force -Recurse;
     return @{
