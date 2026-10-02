@@ -104,19 +104,14 @@ RunPowershell -Path "$ShellProjectPath\Setup-ContextMenu.ps1" -AdditionalArgs @(
 RunPowershell -Path "$ShellProjectPath\Setup-SendToMenu.ps1" -AdditionalArgs @("-NoTimeout")
 # #endregion
 
-# # region Programming
-if (!$ProgrammingPath) {
-    Write-Host "Please Select ProgrammingPath" -ForegroundColor Green
-    $ProgrammingPath = Folder-Picker.ps1 -ShowOnTop;
+# region Programs: each programs folder has a " Maintenance\Setup.ps1" for its own apps
+foreach ($setupPath in @("D:\Programs\ Maintenance\Setup.ps1", "D:\Programming\Programs\ Maintenance\Setup.ps1")) {
+    if (!(Test-Path -LiteralPath $setupPath)) {
+        Write-Host "Please select the programs folder for $setupPath" -ForegroundColor Green
+        $setupPath = Join-Path (Folder-Picker.ps1 -ShowOnTop) " Maintenance\Setup.ps1";
+    }
+    RunPowershell -Path $setupPath;
 }
-Add-ToPath.ps1 -Paths @(
-    "$ProgrammingPath\Binaries"
-);
-RunPowershell -Path "$ProgrammingPath\Dotnet\Register.ps1";
-RunPowershell -Path "$ProgrammingPath\Git\Register.ps1";
-RunPowershell -Path "$ProgrammingPath\Node\Register.ps1";
-RunPowershell -Path "$ProgrammingPath\JetBrains\Register.ps1";
-RunPowershell -Path "$ProgrammingPath\VsCode\Register.ps1";
 # #endregion
 
 timeout.exe 10;
