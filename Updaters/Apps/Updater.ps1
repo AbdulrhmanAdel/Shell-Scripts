@@ -363,6 +363,8 @@ if (!$installed -or ($exePath -and !(Test-Path -LiteralPath $exePath))) {
 }
 
 foreach ($file in $preserved) {
+    # The new version may not ship the file's folder at all (e.g. Node's etc\npmrc)
+    New-Item -ItemType Directory -Force (Split-Path $file.Path) | Out-Null;
     [IO.File]::WriteAllBytes($file.Path, $file.Content);
     Write-Host "[INFO] Kept $(Split-Path $file.Path -Leaf)" -ForegroundColor DarkGray;
 }
