@@ -69,7 +69,7 @@ function HandleDirectory {
 foreach ($item in $Paths) {
     $info = Get-Item -LiteralPath $item -ErrorAction SilentlyContinue
     if (-not $info) {
-        Write-Host "[WARN] Could not get item info: $fullPath" -ForegroundColor Red
+        Write-Host "[WARN] Could not get item info: $item" -ForegroundColor Red
         continue
     }
 
