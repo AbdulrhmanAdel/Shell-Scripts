@@ -17,7 +17,9 @@ function Get-ShellScriptCommandSource {
     | ForEach-Object { @{ Name = $_.Name; Path = $_.FullName } };
 
     $tools = @(
-        @{ Name = 'Youtube-Downloader.ps1'; Path = "$PSScriptRoot\Youtube\Downloader.ps1" }
+        @{ Name = 'Youtube-Downloader.ps1'; Path = "$PSScriptRoot\Youtube\Downloader.ps1" },
+        @{ Name = 'Downloader.ps1'; Path = "$PSScriptRoot\Downloaders\Downloader.ps1" },
+        @{ Name = 'Aria2-UI.ps1'; Path = "$PSScriptRoot\Downloaders\Managers\Aria2\Aria2-UI.ps1" }
     ) | Where-Object { Test-Path -LiteralPath $_.Path };
 
     return @($shared) + @($tools);
