@@ -37,14 +37,14 @@ $Options = @(
     @{
         Key     = "Copy";
         Handler = {
-            $path = "$PSScriptRoot/Copy.ps1";
+            $path = "$PSScriptRoot/Copy/Copy.ps1";
             & $path -Files $Files;
         };
     }
     @{
         Key     = "Move";
         Handler = {
-            $path = "$PSScriptRoot/Copy.ps1";
+            $path = "$PSScriptRoot/Copy/Copy.ps1";
             & $path -Files $Files -Move;
         };
     },
