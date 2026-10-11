@@ -75,15 +75,21 @@ if (!$Files) {
 }
 
 $errors = @();
+$converted = @();
 foreach ($file in $Files) {
     try {
         $magnet = Get-MagnetLink $file;
         $urlPath = [IO.Path]::ChangeExtension($file, '.url');
         Set-Content -LiteralPath $urlPath -Value "[InternetShortcut]`nURL=$magnet";
+        $converted += $file;
     }
     catch {
         $errors += "Failed to convert:`n$file`n$($_.Exception.Message)";
     }
+}
+
+if ($converted -and (Prompt.ps1 -Message "Remove the $($converted.Count) converted torrent file(s)?")) {
+    $converted | ForEach-Object { Remove-Item -LiteralPath $_ };
 }
 
 if ($errors) {
