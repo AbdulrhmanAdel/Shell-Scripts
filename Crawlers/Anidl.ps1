@@ -19,8 +19,8 @@ function GetLink {
     #     "cached": false
     # }
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-    $session.UserAgent = "Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36"
-    $session.Cookies.Add((New-Object System.Net.Cookie("alphx_view_visitor", [guid]::NewGuid().ToString(), "/", "anidl.org")))
+    $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+    $session.Cookies.Add((New-Object System.Net.Cookie("cf_clearance", "RDkCEtI9HyNTuG.H2w9IVizygGsW3Q5_V7oOiS37LSU-1791878899-1.2.1.1-hfAyN1on.1aXCzh4UFxrDeqZHf7frlvyLZLS7nwXk9c4WKOyjFm1Qz5YvBFeBFj6P6_rgyE2KuKw5Cxjgw2pry8yt49TwxWMKWTWFk36bmMz6owheyj9cmJbnRdM63hFBKxGdyS0nF8zI.RbCthW2wo8WYoKPnxq26cSTNY_Ng3AgWl6WK2KDOLJRj1auIJ2kMpVGGI_.AQQFtNh8jMNLnWb0kIHK8eP.5FNvluDBrZj3S7uAdTgbtzQz8iJeg26BualB0Rj22a2uyZYsIQdM6FWVPMYm2PR60H2If3PIKnywjmxYlQJRP7OCUuv.TGikHlyrGDgKCiQUFtDbUB9sMRDgRhBv7ogmZTj86A6dgk", "/", ".anidl.org")))
     $Result = Invoke-WebRequest -UseBasicParsing -Uri "https://anidl.org/api/secure-shorten" `
         -Method "POST" `
         -WebSession $session `
@@ -32,23 +32,25 @@ function GetLink {
         "accept"                      = "*/*"
         "accept-encoding"             = "gzip, deflate, br, zstd"
         "accept-language"             = "en-US,en;q=0.9"
+        "dnt"                         = "1"
         "origin"                      = "https://anidl.org"
         "priority"                    = "u=1, i"
         "referer"                     = "https://anidl.org/on-going"
-        "sec-ch-ua"                   = "`"Brave`";v=`"147`", `"Not.A/Brand`";v=`"8`", `"Chromium`";v=`"147`""
-        "sec-ch-ua-arch"              = "`"`""
+        "sec-ch-ua"                   = "`"Brave`";v=`"155`", `"Chromium`";v=`"155`", `"Not(A:Brand`";v=`"24`""
+        "sec-ch-ua-arch"              = "`"x86`""
         "sec-ch-ua-bitness"           = "`"64`""
-        "sec-ch-ua-full-version-list" = "`"Brave`";v=`"147.0.0.0`", `"Not.A/Brand`";v=`"8.0.0.0`", `"Chromium`";v=`"147.0.0.0`""
-        "sec-ch-ua-mobile"            = "?1"
-        "sec-ch-ua-model"             = "`"SM-G981B`""
-        "sec-ch-ua-platform"          = "`"Android`""
-        "sec-ch-ua-platform-version"  = "`"13`""
+        "sec-ch-ua-full-version-list" = "`"Brave`";v=`"155.0.0.0`", `"Chromium`";v=`"155.0.0.0`", `"Not(A:Brand`";v=`"24.0.0.0`""
+        "sec-ch-ua-mobile"            = "?0"
+        "sec-ch-ua-model"             = "`"`""
+        "sec-ch-ua-platform"          = "`"Windows`""
+        "sec-ch-ua-platform-version"  = "`"19.0.0`""
         "sec-fetch-dest"              = "empty"
         "sec-fetch-mode"              = "cors"
         "sec-fetch-site"              = "same-origin"
+        "sec-gpc"                     = "1"
     } `
         -ContentType "application/json" `
-        -Body "{`"fileId`":`"$Id`"}"
+        -Body "{`"fileId`":`"$Id`",`"preferredShortener`":`"ouo.io`"}"
     
     $body = $Result.Content | ConvertFrom-Json;
     if ($body.success) {
