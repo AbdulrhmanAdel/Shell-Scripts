@@ -10,7 +10,9 @@ param (
     # An archive inside the archive to unpack instead, e.g. electron-builder portables: '$PLUGINSDIR\app-64.7z'
     [string]$InnerArchive,
     # Only install this folder of the archive, wildcards allowed, e.g. 'podman-*\usr\bin'
-    [string]$SubPath
+    [string]$SubPath,
+    # Files the archive ships under another name, renamed before installing, e.g. @{ 'RTSSHooks.dll.copy' = 'RTSSHooks.dll' }
+    [hashtable]$Rename
 )
 
 function Expand-Archive7z {
@@ -64,6 +66,18 @@ if ($SubPath) {
         }
     }
     $extractPath = $sub.FullName;
+}
+
+# Not @($Rename.Keys): with no -Rename that is @($null), one pass with a null name
+foreach ($name in $Rename.Keys) {
+    $file = Join-Path $extractPath $name;
+    if (!(Test-Path -LiteralPath $file)) {
+        Write-Host "[ERROR] No '$name' inside $Path to rename." -ForegroundColor Red;
+        return @{
+            Success = $false
+        }
+    }
+    Move-Item -LiteralPath $file -Destination (Join-Path $extractPath $Rename[$name]) -Force;
 }
 
 return & "$PSScriptRoot\_Copy.ps1" -Source $extractPath `

@@ -39,11 +39,12 @@ try {
 
         return $true
     } | ForEach-Object {
-        if ($_ -is [System.IO.DirectoryInfo]) {
+        # Flatten unwraps a folder into the destination (e.g. a zip's wrapper folder); otherwise it stays a folder
+        if ($Flatten -and $_ -is [System.IO.DirectoryInfo]) {
             Copy-Item -Path "$($_.FullName)\*"  -Destination $Destination -Force -Recurse;
             return;
         }
-        Copy-Item -Path $_.FullName -Destination $Destination -Force;
+        Copy-Item -Path $_.FullName -Destination $Destination -Force -Recurse;
     }
 }
 catch {

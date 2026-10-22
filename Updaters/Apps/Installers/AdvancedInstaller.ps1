@@ -4,65 +4,58 @@ param (
     [string]$Path,
     [Parameter(Mandatory)]
     [string]$Destination,
-    # Folders of the setup whose contents go straight into $Destination, e.g. "x64" for the 64-bit dlls
-    [string[]]$Merge,
-    # Files and folders of the setup to leave out, wildcards allowed
-    [string[]]$Exclude
+    [string[]]$Include,
+    [string[]]$Exclude,
+    [bool]$Flatten = $false,
+    # Folders the MSI installs into the app folder itself (".:x64" in its Directory table), e.g. 'x64'
+    [string[]]$Merge
 )
 
-# Advanced Installer setups unpack themselves with /extract:"<folder>", without installing or asking for admin
+# /extract runs the setup exe itself, so only run one with a valid signature
+$signature = Get-AuthenticodeSignature -LiteralPath $Path;
+if ($signature.Status -ne 'Valid') {
+    Write-Host "[ERROR] $Path is not validly signed ($($signature.Status)), not running it." -ForegroundColor Red;
+    return @{
+        Success = $false
+    }
+}
+
 $extractPath = "$env:TEMP\App_Updaters\AdvancedInstaller\$(Split-Path -Leaf $Path)";
 if (Test-Path -LiteralPath $extractPath) {
     Remove-Item -LiteralPath $extractPath -Recurse -Force;
 }
 New-Item -ItemType Directory -Force $extractPath | Out-Null;
-$setup = Start-Process -FilePath $Path -ArgumentList "/extract:""$extractPath""" -Wait -PassThru;
-if ($setup.ExitCode -ne 0) {
-    Write-Host "[ERROR] $Path /extract exited with code $($setup.ExitCode)." -ForegroundColor Red;
+
+# Unpacks the MSI and the app files into a subfolder named after the package, e.g. 15E018F\
+$extractProcess = Start-Process -FilePath $Path -ArgumentList @(
+    "/extract",
+    """$extractPath"""
+) -WindowStyle Hidden -PassThru -Wait;
+$sourcePath = (Get-ChildItem -LiteralPath $extractPath -Directory -ErrorAction SilentlyContinue | Select-Object -First 1).FullName;
+if ($extractProcess.ExitCode -ne 0 -or !$sourcePath) {
+    Write-Host "[ERROR] Advanced Installer extraction failed for $Path." -ForegroundColor Red;
     return @{
         Success = $false
     }
 }
 
-# The files land in one folder with a generated name (e.g. 15E018F)
-$root = Get-Item -LiteralPath $extractPath;
-$items = @(Get-ChildItem -LiteralPath $root.FullName);
-if ($items.Count -eq 1 -and $items[0].PSIsContainer) {
-    $root = $items[0];
-}
-if (!(Get-ChildItem -LiteralPath $root.FullName)) {
-    Write-Host "[ERROR] $Path /extract unpacked nothing." -ForegroundColor Red;
-    return @{
-        Success = $false
-    }
-}
-
-function Test-Excluded($name) { [bool]($Exclude | Where-Object { $name -like $_ }) }
-
-New-Item -ItemType Directory -Force $Destination | Out-Null;
-try {
-    foreach ($item in Get-ChildItem -LiteralPath $root.FullName) {
-        if (Test-Excluded $item.Name) {
-            continue;
+foreach ($folder in $Merge) {
+    $mergePath = Join-Path $sourcePath $folder;
+    if (!(Test-Path -LiteralPath $mergePath -PathType Container)) {
+        Write-Host "[ERROR] No '$folder' folder inside $Path." -ForegroundColor Red;
+        return @{
+            Success = $false
         }
-        if ($item.PSIsContainer -and $Merge -contains $item.Name) {
-            Get-ChildItem -LiteralPath $item.FullName | Where-Object { !(Test-Excluded $_.Name) } |
-                Copy-Item -Destination $Destination -Recurse -Force -ErrorAction Stop;
-            continue;
-        }
-        Copy-Item -LiteralPath $item.FullName -Destination $Destination -Recurse -Force -ErrorAction Stop;
     }
-}
-catch {
-    Write-Host "[ERROR] Copying the setup's files failed: $_" -ForegroundColor Red;
-    return @{
-        Success = $false
-    }
-}
-finally {
-    Remove-Item -LiteralPath $extractPath -Recurse -Force -ErrorAction SilentlyContinue;
+    Copy-Item -Path "$mergePath\*" -Destination $sourcePath -Recurse -Force;
+    Remove-Item -LiteralPath $mergePath -Recurse -Force;
 }
 
-return @{
-    Success = $true
-}
+# The MSI packages are the installer, not app files
+Get-ChildItem -LiteralPath $sourcePath -Filter '*.msi' -File | Remove-Item -Force;
+
+return & "$PSScriptRoot\_Copy.ps1" -Source $sourcePath `
+    -Destination $Destination `
+    -Include $Include `
+    -Exclude $Exclude `
+    -Flatten:$Flatten;

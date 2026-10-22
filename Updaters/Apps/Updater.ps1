@@ -238,9 +238,9 @@ if ($Installer.Name -eq "Archive") {
 $exePath = $CurrentVersion.Name -eq "Properties" ? $CurrentVersion.Args.Path : $null;
 $destination = $Installer.Args.Destination;
 
-# Archive/Copy installs go to a staging folder first, so a wrong asset or archive layout is caught before cleaning
+# Archive/Copy/Inno/AdvancedInstaller installs go to a staging folder first, so a wrong asset or archive layout is caught before cleaning
 $stagingPath = $null;
-if ($Installer.Name -in 'Archive', 'Copy' -and $destination) {
+if ($Installer.Name -in 'Archive', 'Copy', 'Inno', 'AdvancedInstaller' -and $destination) {
     $stagingPath = "$env:TEMP\App_Updaters\Staging\$appName";
     Remove-Item -LiteralPath $stagingPath -Recurse -Force -ErrorAction SilentlyContinue;
     $stagingInstaller = @{ Name = $Installer.Name; Args = $Installer.Args.Clone() };
