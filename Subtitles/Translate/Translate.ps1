@@ -10,7 +10,7 @@ $ParserAndAssembler = @{
     ".ass" = "$PSScriptRoot\Modules\Ass.ps1"
 }
 
-$Files | Where-Object { & Is-Subtitle $_ } | ForEach-Object {
+$Files | Where-Object { & Is-Subtitle.ps1 $_ } | ForEach-Object {
     Write-Host "=====================================";
     $fileName = [System.IO.Path]::GetFileName($_);
     $extension = [System.IO.Path]::GetExtension($_);
