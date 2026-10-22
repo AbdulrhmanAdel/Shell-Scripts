@@ -50,12 +50,29 @@ function Save-WithProgress {
     $client.Timeout = [TimeSpan]::FromMinutes(30);
     [void]$client.DefaultRequestHeaders.UserAgent.TryParseAdd($UserAgent ? $UserAgent : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) PowerShell/$($PSVersionTable.PSVersion)");
     try {
-        $response = $client.GetAsync($Uri, [Net.Http.HttpCompletionOption]::ResponseHeadersRead).GetAwaiter().GetResult();
+        # Continue a .part left by a dropped connection, when the server supports ranges (206)
+        $existing = (Test-Path -LiteralPath $OutFile) ? (Get-Item -LiteralPath $OutFile).Length : 0;
+        $request = [Net.Http.HttpRequestMessage]::new([Net.Http.HttpMethod]::Get, $Uri);
+        if ($existing -gt 0) {
+            $request.Headers.Range = [Net.Http.Headers.RangeHeaderValue]::new($existing, $null);
+        }
+        $response = $client.SendAsync($request, [Net.Http.HttpCompletionOption]::ResponseHeadersRead).GetAwaiter().GetResult();
+        if ([int]$response.StatusCode -eq 416) {
+            # The .part does not fit the file anymore, start over on the next attempt
+            Remove-Item -LiteralPath $OutFile -Force -ErrorAction SilentlyContinue;
+        }
         [void]$response.EnsureSuccessStatusCode();
+        $resumed = $existing -gt 0 -and [int]$response.StatusCode -eq 206;
+        $done = $resumed ? $existing : 0;
         $total = $response.Content.Headers.ContentLength ?? 0;
+        if ($total -gt 0) {
+            $total += $done;
+        }
+        if ($resumed) {
+            Write-Host "[INFO] Resuming the download at $([Math]::Round($done / 1MB, 1)) MB" -ForegroundColor DarkGray;
+        }
         $source = $response.Content.ReadAsStream();
-        $target = [IO.File]::Create($OutFile);
-        $done = 0;
+        $target = $resumed ? [IO.File]::Open($OutFile, [IO.FileMode]::Append) : [IO.File]::Create($OutFile);
         try {
             $buffer = [byte[]]::new(81920);
             $clock = [Diagnostics.Stopwatch]::StartNew();
@@ -83,19 +100,29 @@ function Save-WithProgress {
     }
 }
 
-try {
-    if ($env:APP_UPDATER_PROGRESS_FILE) {
-        Save-WithProgress -Uri $Url -OutFile $partPath -UserAgent $UserAgent -ProgressFile $env:APP_UPDATER_PROGRESS_FILE;
+# A dropped connection on a big download (e.g. Brave's 250 MB) is retried, resuming from the .part
+$maxAttempts = 5;
+for ($attempt = 1; ; $attempt++) {
+    try {
+        if ($env:APP_UPDATER_PROGRESS_FILE) {
+            Save-WithProgress -Uri $Url -OutFile $partPath -UserAgent $UserAgent -ProgressFile $env:APP_UPDATER_PROGRESS_FILE;
+        }
+        else {
+            Invoke-WebRequest @requestArgs -Resume -ErrorAction Stop;
+        }
+        Move-Item -LiteralPath $partPath -Destination $OutPath -Force;
+        break;
     }
-    else {
-        Invoke-WebRequest @requestArgs -ErrorAction Stop;
+    catch {
+        if ($attempt -lt $maxAttempts) {
+            Write-Host "[WARN] Download interrupted ($($_.Exception.Message)), retrying ($($attempt + 1)/$maxAttempts)..." -ForegroundColor Yellow
+            Start-Sleep -Seconds (3 * $attempt);
+            continue;
+        }
+        # The .part is kept, so the next run resumes it
+        Write-Host "[ERROR] Download failed: $Url ($($_.Exception.Message))" -ForegroundColor Red
+        return $null;
     }
-    Move-Item -LiteralPath $partPath -Destination $OutPath -Force;
-}
-catch {
-    Remove-Item -LiteralPath $partPath -Force -ErrorAction SilentlyContinue;
-    Write-Host "[ERROR] Download failed: $Url ($($_.Exception.Message))" -ForegroundColor Red
-    return $null;
 }
 
 return $OutPath;

@@ -339,7 +339,8 @@ function Restore-Backup {
 Write-Host "";
 Write-Host "===================== Clean Old Version =====================" -ForegroundColor Gray;
 $cleanerArtifacts = ExecuteScript -Path "Cleaners" -Item $Cleaner ;
-if (!$cleanerArtifacts.Success) {
+# No cleaner means nothing to clean, e.g. a setup.exe that upgrades in place
+if ($Cleaner.Name -and !$cleanerArtifacts.Success) {
     Restore-Backup;
     return New-Result 'Failed' "Failed to clean old files for $appName, rolled back.";
 }

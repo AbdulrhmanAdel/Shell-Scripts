@@ -4,12 +4,13 @@ param (
     $Url,
     $VersionPattern = "v",
     $VersionPatternName = "Version",
+    # Regex for the download link on the page: its "Url" group, or the whole match. Without it only the version is detected
+    $DownloadPattern,
     $CurrentVersion,
     [switch]
     $CheckOnly
 )
 
-# Only detects the version for now, it has no way to find the download link yet
 $html = Invoke-WebRequest -Uri $Url;
 if (-not ($html.Content -match $VersionPattern)) {
     return @{
@@ -28,8 +29,33 @@ if (!$HasNewVersion) {
     }
 }
 
+if ($CheckOnly -or !$DownloadPattern) {
+    return @{
+        HasNewVersion = $true
+        LatestVersion = $newVersion
+        Message       = $CheckOnly ? $null : "The Website downloader has no DownloadPattern, download $newVersion manually from $Url"
+    }
+}
+
+if (-not ($html.Content -match $DownloadPattern)) {
+    return @{
+        HasNewVersion = $true
+        LatestVersion = $newVersion
+        Message       = "Can't find the download link of $newVersion on $Url"
+    }
+}
+
+$downloadLink = $Matches.ContainsKey('Url') ? $Matches.Url : $Matches[0];
+# Resolve relative URLs
+if (-not $downloadLink.StartsWith('http')) {
+    $downloadLink = [System.Uri]::new([System.Uri]$Url, $downloadLink).AbsoluteUri
+}
+
+$fileName = ([System.Uri]$downloadLink).Segments[-1]
+$downloadPath = & "$PSScriptRoot\_Downloader.ps1" -Url $downloadLink -FileName $fileName -Version $newVersion;
+
 return @{
     HasNewVersion = $true
     LatestVersion = $newVersion
-    Message       = $CheckOnly ? $null : "The Website downloader can only detect versions, download $newVersion manually from $Url"
+    DownloadPath  = $downloadPath
 }
