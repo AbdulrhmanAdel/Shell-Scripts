@@ -24,4 +24,4 @@ foreach ($file in $Files) {
     Write-Output "TakeDown finished for $file"
 }
 
-timeout.exe 5;
+Timeout.ps1 5;

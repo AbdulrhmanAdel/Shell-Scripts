@@ -22,11 +22,11 @@ $keepRenamingChapters = & Prompt.ps1 -message "Are you sure you want to keep ren
     Write-Host "Start Handling File: $file" -ForegroundColor $color;
     $fileInfo = Get-Item -LiteralPath $file;
     $chapterFileName = "$($fileInfo.Name)-$(Get-Random)_chapters.xml";
-    $chapterOutput = "$($env:TEMP)\$chapterFileName";
+    $chapterOutput = Join-Path ([IO.Path]::GetTempPath()) $chapterFileName;
     & mkvextract chapters $_ > $chapterOutput;
 
     # Backup Chapters File
-    $chaptersDirectory = $fileInfo.Directory.FullName + "\Chapters";
+    $chaptersDirectory = $fileInfo.Directory.FullName + "/Chapters";
     if (!(Test-Path -LiteralPath $chaptersDirectory)) {
         New-Item -ItemType Directory -Path $chaptersDirectory;
     }
@@ -57,7 +57,7 @@ $keepRenamingChapters = & Prompt.ps1 -message "Are you sure you want to keep ren
         $editionEntry.AppendChild($_) | Out-Null
     }
     $xml.OuterXml | Set-Content $chapterOutput;
-    $tempFileName = "$($fileInfo.Directory.FullName)\" + $fileInfo.Name -replace $fileInfo.Extension, "(TEMP)$($fileInfo.Extension)";
+    $tempFileName = "$($fileInfo.Directory.FullName)/" + $fileInfo.Name -replace $fileInfo.Extension, "(TEMP)$($fileInfo.Extension)";
     Rename-Item -LiteralPath $file -NewName $tempFileName -Force;
     if ($keepRenamingChapters) {
         & mkvmerge -o "$file" --chapters "$chapterOutput" --no-chapters "$tempFileName";
@@ -71,4 +71,4 @@ $keepRenamingChapters = & Prompt.ps1 -message "Are you sure you want to keep ren
     Write-Host "Done Handling File: $file" -ForegroundColor $color;
 }
 
-timeout 15;
+Timeout.ps1 15;

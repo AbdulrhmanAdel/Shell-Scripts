@@ -17,7 +17,7 @@ Extension-Communicator.ps1 -LogPath $logPath -MessageHandler {
                         `$fileName = `$fileName + '.url'
                     }
                     Create-Shortcut.ps1 -Target (`$saveLocation + '\' + `$fileName) -Source '$link';
-                    timeout 5;
+                    Timeout.ps1 5;
             }"
             Start-Process pwsh.exe -ArgumentList @(
                 "-Command", $command

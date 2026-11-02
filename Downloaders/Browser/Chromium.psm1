@@ -8,7 +8,7 @@ $script:Cdp = @{
 
 function Find-CdpBrowser {
     if ($env:DOWNLOADER_BROWSER -and (Test-Path -LiteralPath $env:DOWNLOADER_BROWSER)) { return $env:DOWNLOADER_BROWSER; }
-    foreach ($name in 'msedge.exe', 'brave.exe', 'chrome.exe') {
+    foreach ($name in 'msedge.exe', 'brave.exe', 'chrome.exe', 'microsoft-edge', 'brave', 'google-chrome', 'chromium') {
         foreach ($hive in 'HKCU:', 'HKLM:') {
             $value = (Get-ItemProperty -LiteralPath "$hive\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\$name" -ErrorAction SilentlyContinue).'(default)';
             if ($value -and (Test-Path -LiteralPath $value.Trim('"'))) { return $value.Trim('"'); }
@@ -21,7 +21,7 @@ function Find-CdpBrowser {
 function Start-CdpBrowser {
     param (
         [string]$Path = (Find-CdpBrowser),
-        [string]$ProfilePath = "$env:LOCALAPPDATA\Downloader\Browser",
+        [string]$ProfilePath = "$([Environment]::GetFolderPath('LocalApplicationData'))/Downloader/Browser",
         [string[]]$Arguments = @(
             '--no-first-run',
             '--no-default-browser-check',

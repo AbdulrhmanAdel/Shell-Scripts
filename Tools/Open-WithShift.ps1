@@ -14,4 +14,4 @@ $Files | ForEach-Object {
 }
 
 Write-Host $Files;
-timeout.exe 15;
+Timeout.ps1 15;

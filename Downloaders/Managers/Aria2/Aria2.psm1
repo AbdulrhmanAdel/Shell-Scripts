@@ -4,7 +4,7 @@ function Initialize-Aria2 {
     if ($script:Aria2) { return $script:Aria2; }
 
     $aria2Root = $env:ARIA2_HOME;
-    $exe = $aria2Root ? (Join-Path $aria2Root 'App\aria2c.exe') : $null;
+    $exe = $aria2Root ? (Join-Path $aria2Root ($IsWindows ? 'App\aria2c.exe' : 'App/aria2c')) : $null;
     if (!$aria2Root) {
         $command = Get-Command aria2c -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1;
         if ($command) {
@@ -23,7 +23,7 @@ function Initialize-Aria2 {
     if (!(Test-Path -LiteralPath $conf)) {
         $newSecret = -join ((48..57) + (97..122) | Get-Random -Count 32 | ForEach-Object { [char]$_ });
         Set-Content -LiteralPath $conf -Value @"
-dir=$HOME\Downloads\Aria2
+dir=$HOME/Downloads/Aria2
 enable-rpc=true
 rpc-listen-all=false
 rpc-listen-port=6800

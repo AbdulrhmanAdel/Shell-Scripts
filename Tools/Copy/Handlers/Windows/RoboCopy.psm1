@@ -1,4 +1,4 @@
-. "$PSScriptRoot\..\..\..\Shared\Inputs\Form-Style.ps1";
+. "$PSScriptRoot\..\..\..\..\Platforms\Windows\Commands\Inputs\Form-Style.ps1";
 
 $script:Excludes = @(
     "/XD", '$Recycle.bin', "System Volume Information", "node_modules",
@@ -148,7 +148,7 @@ function Invoke-Copy {
         [switch]$Mirror
     )
 
-    $checkFolderSync = "$PSScriptRoot\..\..\Check-FolderSync.ps1";
+    $checkFolderSync = "$PSScriptRoot\..\..\..\Check-FolderSync.ps1";
     foreach ($file in $Files) {
         $source = $file.TrimEnd('\');
         $target = $Destination.TrimEnd('\');

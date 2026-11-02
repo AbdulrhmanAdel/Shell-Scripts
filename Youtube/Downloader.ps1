@@ -55,7 +55,7 @@ function HandlePlaylist {
         $arguments += @("--playlist-end", $to);
     }
 
-    $arguments += @("-o", """$DestinationPath\%(playlist_index)s - %(title)s""", $url);
+    $arguments += @("-o", """$DestinationPath/%(playlist_index)s - %(title)s""", $url);
     Start-Process yt-dlp -ArgumentList $arguments  -Wait -NoNewWindow;
 }
 
@@ -70,7 +70,7 @@ function download {
         HandlePlaylist -url $url;
     }
     else {
-        $arguments = $selectedOptions + @("-o", """$DestinationPath\%(title)s.%(ext)s""", $url);
+        $arguments = $selectedOptions + @("-o", """$DestinationPath/%(title)s.%(ext)s""", $url);
         Start-Process yt-dlp -ArgumentList $arguments  -Wait -NoNewWindow;
     }
 }

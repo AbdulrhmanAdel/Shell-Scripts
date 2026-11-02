@@ -17,7 +17,7 @@ function Invoke-Copy {
         }
 
         if ($Verify) {
-            & "$PSScriptRoot\..\..\Check-FolderSync.ps1" -Source $file -Target "$Destination\$(Split-Path -Leaf $file)" -CheckHashes $true;
+            & "$PSScriptRoot\..\..\..\Check-FolderSync.ps1" -Source $file -Target "$Destination\$(Split-Path -Leaf $file)" -CheckHashes $true;
         }
     }
 

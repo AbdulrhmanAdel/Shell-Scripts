@@ -80,14 +80,14 @@ function HandleFile {
 
     $inputPath = $pathAsAFile.FullName;
     $newName = Remove-UnwantedText.ps1 -Text $pathAsAFile.Name;
-    $outputFilePath = "$outputPath\$newName";
+    $outputFilePath = "$outputPath/$newName";
     if (Test-Path -LiteralPath $outputFilePath) {
         $outputPathInfo = Get-Item -LiteralPath $outputFilePath;
         $newName = $outputPathInfo.Name -replace "$($outputPathInfo.Extension)", " - OLD - $(Get-Date  -f yyyy-MM-dd)$($outputPathInfo.Extension)";
         Write-Output "File Already Exists: RENAMING IT TO $newName";
         & Force-Rename.ps1 -path $outputFilePath -newName $newName;
         if ($inputPath -eq $outputFilePath) {
-            $inputPath = "$($outputPathInfo.DirectoryName)\$newName";
+            $inputPath = "$($outputPathInfo.DirectoryName)/$newName";
         }
     }
     return RemoveUnusedTracks -inputPath $inputPath -outputPath $outputFilePath;
@@ -95,7 +95,7 @@ function HandleFile {
 
 #endregion
 
-$temp = $env:TEMP;
+$temp = [IO.Path]::GetTempPath();
 $archiveExtensions = @('.rar', '.zip', '.7z');
 $Files | Where-Object { 
     return Test-Path -LiteralPath $_
@@ -141,4 +141,4 @@ $Files | Where-Object {
     & Remove-ToRecycleBin.ps1 $_ -Color ([System.ConsoleColor]::Green); ;
 }
 
-timeout.exe 5;
+Timeout.ps1 5;

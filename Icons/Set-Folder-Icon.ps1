@@ -164,4 +164,4 @@ if ($SkipTimeOut) {
     EXIT;
 }
 
-timeout.exe 15;
+Timeout.ps1 15;

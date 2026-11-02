@@ -24,7 +24,7 @@ function CopyTransformedToOriginalFolder {
     $files | ForEach-Object {
         $path = $_;
         $info = Get-Item -LiteralPath $path;
-        $originalFolder = "$($info.Directory.FullName)\Original";
+        $originalFolder = "$($info.Directory.FullName)/Original";
         if (Test-Path -LiteralPath $originalFolder) {
             return;
         }

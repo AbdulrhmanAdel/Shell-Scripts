@@ -18,10 +18,11 @@ param (
 )
 
 if ($Mirror) {
-    $Handler = 'RoboCopy';
+    $Handler = $IsWindows ? 'RoboCopy' : 'Rsync';
 }
 
-$Handlers = @(Get-ChildItem "$PSScriptRoot\Handlers" -Filter *.psm1 | ForEach-Object BaseName);
+$HandlersPath = "$PSScriptRoot/Handlers/$($IsWindows ? 'Windows' : 'Linux')";
+$Handlers = @(Get-ChildItem $HandlersPath -Filter *.psm1 | ForEach-Object BaseName);
 if ($Handler -and $Handler -notin $Handlers) {
     throw "Unknown copy handler '$Handler', available: $($Handlers -join ', ')";
 }
@@ -39,14 +40,14 @@ if ($MirrorToDrive) {
     $Destination = Get-SamePathOnOtherDrive;
 }
 elseif (!$Destination) {
-    $Destination = Folder-Picker.ps1 -InitialDirectory "D:\" -Required;
+    $Destination = Folder-Picker.ps1 -InitialDirectory ($IsWindows ? "D:\" : $HOME) -Required;
 }
 
 if (!$Handler) {
     $Handler = Single-Options-Selector.ps1 -Options $Handlers -Title "Please Select One Copy Mode" -Required;
 }
 
-Import-Module "$PSScriptRoot\Handlers\$Handler.psm1" -Force;
+Import-Module "$HandlersPath/$Handler.psm1" -Force;
 $options = @{ Files = $Files; Destination = $Destination; Move = $Move; Verify = $Verify };
 if ($Mirror) {
     $options.Mirror = $true;

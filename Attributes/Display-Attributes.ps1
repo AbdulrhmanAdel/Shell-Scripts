@@ -7,4 +7,4 @@ if ($item) {
     Write-Host $item.Attributes -ForegroundColor Green;
 }
 
-timeout.exe 15;
+Timeout.ps1 15;

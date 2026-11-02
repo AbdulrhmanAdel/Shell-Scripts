@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Shared look and layout for the dialogs in Shared/Inputs.
+    Shared look and layout for the dialogs in this folder.
 .DESCRIPTION
     Dot source this file, it only defines helpers and never shows anything by itself. Every dialog is
     built from the same skeleton: a header docked to the top, a footer docked to the bottom holding

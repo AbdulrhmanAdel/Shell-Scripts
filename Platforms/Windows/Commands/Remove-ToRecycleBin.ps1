@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param (
-    [Parameter(ValueFromRemainingArguments = $true)]
+    [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
     [string[]]
     $Paths,
     $Color = [System.ConsoleColor]::Red

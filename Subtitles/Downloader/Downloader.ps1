@@ -158,4 +158,4 @@ if ($subs.Length -gt 0) {
     HandleSeries -subs $subs;
 }
 
-timeout.exe 10;
+Timeout.ps1 10;

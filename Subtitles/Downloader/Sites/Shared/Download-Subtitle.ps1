@@ -8,6 +8,6 @@ if (!(Test-Path -LiteralPath $DownloadPath)) {
 }
 
 $DownloadFileName = Get-Date -Format "yyyy-MM-dd-HH-mm-ss";
-$DownloadFilePath = "$DownloadPath\$DownloadFileName"
+$DownloadFilePath = "$DownloadPath/$DownloadFileName"
 Invoke-WebRequest @DownloadRequestArgs -OutFile $DownloadFilePath;
 return $DownloadFilePath;

@@ -10,9 +10,14 @@ $script:ExcludedCommands = @(
 )
 
 function Get-ShellScriptCommandSource {
-    $sharedRoot = "$PSScriptRoot\Shared";
-    $shared = Get-ChildItem -Path $sharedRoot -Filter *.ps1 -Recurse -File `
-    | Where-Object { $_.FullName.Substring($sharedRoot.Length) -notmatch '\\(Ignore|Modules)\\' } `
+    $platform = $IsWindows ? 'Windows' : ($IsMacOS ? 'Mac' : 'Linux');
+    $shared = @("$PSScriptRoot/Shared", "$PSScriptRoot/Platforms/$platform/Commands") `
+    | Where-Object { Test-Path -LiteralPath $_ } `
+    | ForEach-Object {
+        $root = $_;
+        Get-ChildItem -Path $root -Filter *.ps1 -Recurse -File `
+        | Where-Object { $_.FullName.Substring($root.Length) -notmatch '[\\/](Ignore|Modules)[\\/]' };
+    } `
     | Where-Object { $_.Name -notin $script:ExcludedCommands } `
     | ForEach-Object { @{ Name = $_.Name; Path = $_.FullName } };
 

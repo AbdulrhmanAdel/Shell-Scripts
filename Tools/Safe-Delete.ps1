@@ -36,7 +36,7 @@ if ($Prompt) {
     $continue = & Prompt.ps1 -message "Are you sure you want to remove these files?";
     if (!$continue) {
         Write-Host "ABORTED" -ForegroundColor Red
-        timeout 5;
+        Timeout.ps1 5;
         EXIT;
     }
 }
@@ -81,4 +81,4 @@ $Files | ForEach-Object {
 }    
 
 
-timeout 5;
+Timeout.ps1 5;

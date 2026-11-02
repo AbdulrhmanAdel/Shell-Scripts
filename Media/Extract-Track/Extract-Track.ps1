@@ -40,7 +40,7 @@ function FfmpegExtract {
     $extension = "." + $trackInfo.Language + $trackInfo.Settings.Extension;
     $fileDirectoryName = $FileInfo.DirectoryName;
     $fileName = $FileInfo.Name.replace($FileInfo.Extension, "$extension");
-    $output = "$fileDirectoryName\$fileName";
+    $output = "$fileDirectoryName/$fileName";
     return Export-Track.ps1 -FileInfo $FileInfo -Index $index -OutputPath $output;
 }
 
@@ -57,7 +57,7 @@ function HandleTrack {
         $extension = "." + $trackInfo.Language + $trackInfo.Settings.Extension;
         $fileDirectoryName = $FileInfo.DirectoryName;
         $fileName = $FileInfo.Name.replace($FileInfo.Extension, "$extension");
-        $output = "$fileDirectoryName\$fileName";
+        $output = "$fileDirectoryName/$fileName";
 
         if ($trackInfo.CustomHandler) {
             $trackInfo.CustomHandler.Invoke($fileInfo, $trackInfo);
@@ -128,4 +128,4 @@ return $Files | Where-Object { Is-Video.ps1 $_; } | ForEach-Object {
 }
 
 
-timeout.exe 15;
+Timeout.ps1 15;

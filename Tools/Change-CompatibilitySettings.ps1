@@ -71,7 +71,7 @@ if ($ExePath.EndsWith('.lnk')) {
 
 if (!$ExePath -or !(Test-Path -LiteralPath $ExePath -PathType Leaf)) {
     Write-Host "Could not resolve an existing file from the given path: '$ExePath'" -ForegroundColor Red;
-    timeout.exe $Wait;
+    Timeout.ps1 $Wait;
     Exit 1;
 }
 
@@ -142,7 +142,7 @@ $before = @($appliedFlags | ForEach-Object { $_.Name } | Sort-Object) -join "|";
 $after = @($chosenFlags | ForEach-Object { $_.Name } | Sort-Object) -join "|";
 if ($before -eq $after) {
     Write-Host "Nothing changed" -ForegroundColor Green;
-    timeout.exe $Wait;
+    Timeout.ps1 $Wait;
     Exit;
 }
 
@@ -158,7 +158,7 @@ if ($newTokens.Count -eq 0 -and $regValue) {
 
     if ($confirmation -ne [System.Windows.Forms.DialogResult]::Yes) {
         Write-Host "Cancelled, settings left untouched" -ForegroundColor Yellow;
-        timeout.exe $Wait;
+        Timeout.ps1 $Wait;
         Exit;
     }
 }
@@ -170,7 +170,7 @@ if ($newTokens.Count -eq 0 -and $regValue) {
 if ($newTokens.Count -eq 0) {
     Remove-ItemProperty -LiteralPath $regPath -Name $ExePath;
     Write-Host "All compatibility settings removed" -ForegroundColor Green;
-    timeout.exe $Wait;
+    Timeout.ps1 $Wait;
     Exit;
 }
 
@@ -187,6 +187,6 @@ $appliedFlags | Where-Object { $chosenFlags -notcontains $_ } | ForEach-Object {
     Write-Host "  - $($_.Name)" -ForegroundColor DarkGray;
 }
 
-timeout.exe $Wait;
+Timeout.ps1 $Wait;
 
 #endregion

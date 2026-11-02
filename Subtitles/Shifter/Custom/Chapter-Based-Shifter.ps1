@@ -87,4 +87,4 @@ foreach ($file in $files) {
 }
 
 Read-Host "Press Any Key To Exit."
-timeout.exe 20;
+Timeout.ps1 20;

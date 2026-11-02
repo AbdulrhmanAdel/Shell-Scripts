@@ -106,4 +106,4 @@ function Edit {
 
 @($Files) | ForEach-Object { Edit -path $_ };
 
-timeout 15;
+Timeout.ps1 15;

@@ -11,4 +11,4 @@ $details.Keys | ForEach-Object {
     Write-Host ": $($details[$_])";
 }
 Set-Clipboard -Value $details.Title;
-timeout.exe 15;
+Timeout.ps1 15;

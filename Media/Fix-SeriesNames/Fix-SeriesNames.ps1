@@ -22,4 +22,4 @@ $Files | ForEach-Object {
     Rename-Item -Path $_ -NewName $newName;
 }
 
-timeout.exe 15;
+Timeout.ps1 15;

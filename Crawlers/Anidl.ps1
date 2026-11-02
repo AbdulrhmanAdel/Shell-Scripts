@@ -121,7 +121,7 @@ $responseBody = $Result.Content | ConvertFrom-Json;
 $data = $responseBody.files;
 if ($data.Length -eq 0) {
     Write-Host "No results found" -ForegroundColor Red;
-    timeout.exe 5;
+    Timeout.ps1 5;
 }
 
 $links = $data  | Where-Object { $_.filename -match "720p" } | ForEach-Object {
@@ -149,7 +149,7 @@ if ($DownloadedEpisodes.Length -gt 0) {
 
 if ($links.Length -eq 0) {
     Write-Host "No New Episode Found. Exiting"
-    timeout.exe 5;
+    Timeout.ps1 5;
     Exit;
 }
 
@@ -202,4 +202,4 @@ $DownloadLinks = $DownloadLinks | ForEach-Object {
     return $_.Link;
 };
 Set-Clipboard -Value ($DownloadLinks -join "`n")
-timeout.exe 5;
+Timeout.ps1 5;

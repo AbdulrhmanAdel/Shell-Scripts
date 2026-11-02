@@ -33,7 +33,7 @@ function CheckFiles {
     $TargetSource = GetTargetFromSource -SourcePath $FolderSource;
     Get-ChildItem -LiteralPath $FolderSource -File | ForEach-Object {
         $global:checkedFiles += 1;
-        $filePath = "$TargetSource\$($_.Name)";
+        $filePath = "$TargetSource/$($_.Name)";
         if (-not (Test-Path -LiteralPath $filePath)) {
             Write-Host "File not found: Source: $($_.FullName) => Target: $filePath" -ForegroundColor Green;
             $script:hasMismatch = $true;
@@ -104,7 +104,7 @@ if ($ReverseCheck) {
 }
 
 if ($Timeout) {
-    timeout.exe 10;
+    Timeout.ps1 10;
 }
 
 return @{

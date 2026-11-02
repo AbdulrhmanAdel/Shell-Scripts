@@ -27,4 +27,4 @@ if (!$Module) {
 $ModulePath = Resolve-Path -Path $Module.Path -ErrorAction Ignore;
 Write-Host "Selected Module: $($Module.Title)" -ForegroundColor Green;
 & $ModulePath.Path -Files $Files;
-timeout.exe 20
+Timeout.ps1 20

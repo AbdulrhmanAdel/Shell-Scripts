@@ -15,7 +15,7 @@ if ($null -eq $SymbolLinkPath -or $SymbolLinkPath -eq "") {
     $SymbolLinkPath = Folder-Picker.ps1 -InitialDirectory ([System.IO.Path]::GetDirectoryName($LinkToPath)) -Required;
 }
 
-if ($LinkToPath.StartsWith("c") -or $SymbolLinkPath.StartsWith("c")) {
+if ($IsWindows -and ($LinkToPath.StartsWith("c") -or $SymbolLinkPath.StartsWith("c"))) {
     Run-AsAdmin.ps1 -Arguments @(
         "-LinkToPath", $LinkToPath,
         "-SymbolLinkPath", $SymbolLinkPath,
@@ -34,7 +34,7 @@ if (
     $SymbolLinkPathInfo `
         -and $symbolLinkPathInfo -is [System.IO.DirectoryInfo] `
         -and $targetPathInfo -is [System.IO.FileInfo]) {
-    $SymbolLinkPath = "$SymbolLinkPath\$($targetPathInfo.Name)";                                           
+    $SymbolLinkPath = "$SymbolLinkPath/$($targetPathInfo.Name)";                                           
 }
 
 if (!$NoReplace -and (Test-Path -LiteralPath $SymbolLinkPath)) {

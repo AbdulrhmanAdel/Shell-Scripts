@@ -18,7 +18,7 @@ $files = @($subtitlePathInfo);
 try {
     $parent = Split-Path $SubtitlePath;
     $fileName = Split-Path -Leaf $SubtitlePath;
-    $extractLocation = "$parent\$fileName-Files"
+    $extractLocation = "$parent/$fileName-Files"
     & 7z x $SubtitlePath -aoa -bb0 -o"$extractLocation" | Out-Null;
     $files = @(Get-ChildItem -LiteralPath $extractLocation -Force -Include *.ass, *.srt, *.sub)
 }

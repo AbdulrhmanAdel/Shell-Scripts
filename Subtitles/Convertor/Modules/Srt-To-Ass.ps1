@@ -13,4 +13,4 @@ $args[0] | Where-Object { $_ -match "\.srt" } | ForEach-Object {
         -Wait -NoNewWindow -PassThru;
 };
 
-timeout.exe 15;
+Timeout.ps1 15;

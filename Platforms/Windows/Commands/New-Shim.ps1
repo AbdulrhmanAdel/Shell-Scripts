@@ -12,7 +12,7 @@ if (-not $Target) {
 $Target = (Resolve-Path -LiteralPath $Target).Path
 $Icon = $Icon ? (Resolve-Path -LiteralPath $Icon).Path : $Target
 
-$hubsFile = "$PSScriptRoot\Modules\Shim\hubs.local.json"
+$hubsFile = "$PSScriptRoot\..\..\..\Shared\Modules\Shim\hubs.local.json"
 $hubs = @()
 if (Test-Path -LiteralPath $hubsFile) {
     $hubs = @(Get-Content -LiteralPath $hubsFile -Raw | ConvertFrom-Json)
@@ -24,7 +24,7 @@ if (-not $match) {
 }
 $hub = $match.Hub
 
-$shimDir = "$PSScriptRoot\Modules\Shim"
+$shimDir = "$PSScriptRoot\..\..\..\Shared\Modules\Shim"
 
 if (-not ("ShimIcon" -as [type])) {
     Add-Type -Namespace "" -Name ShimIcon -MemberDefinition @'

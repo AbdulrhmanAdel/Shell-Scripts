@@ -13,6 +13,10 @@ $FilesExtensions = @($Files | Foreach-Object {
     })
 
 $options = $Options | Where-Object {
+    if ($_.WindowsOnly -and !$IsWindows) {
+        return $false;
+    }
+
     $extensions = $_.Extensions;
     if (!$extensions) {
         return $true

@@ -28,7 +28,7 @@ $Files | ForEach-Object {
     $fileInfo = Get-Item -LiteralPath $file;
     $currentDate = Get-Date;
     $newFileName = $fileInfo.Name.Replace($fileInfo.Extension, " - $($currentDate.Ticks).jpg")
-    $newFilePath = "$($fileInfo.Directory)\$newFileName";
+    $newFilePath = "$($fileInfo.Directory)/$newFileName";
     $arguments = @("""$file""") + @($sharedArgs) + @("""$newFilePath""");
     Start-Process magick -ArgumentList $arguments -Wait -NoNewWindow;
 }

@@ -14,7 +14,7 @@ else {
 
 if (!$driveLetter) {
     Write-Host "CAN'T RETRIEVED DRIVE LETTER" -ForegroundColor Red
-    timeout 5;
+    Timeout.ps1 5;
     EXIT;
 }
 

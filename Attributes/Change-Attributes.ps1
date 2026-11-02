@@ -70,4 +70,4 @@ $flags | ForEach-Object {
     RemoveFlagIfExits -flag $_;
 }
 
-timeout.exe 15;
+Timeout.ps1 15;

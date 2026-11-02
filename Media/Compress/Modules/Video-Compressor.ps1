@@ -19,14 +19,14 @@ function Compress {
     Write-Host "Start Compressing $file" -ForegroundColor Green;
     $fileInfo = Get-Item -LiteralPath $file;
     $newFileName = $fileInfo.Name.Replace($fileInfo.Extension, " - $($height)x$($width)-$($encoder)-$($encoderPreset)$($fileInfo.Extension)")
-    $newFilePath = "$($OutputPath ?? $fileInfo.Directory)\$newFileName";
+    $newFilePath = "$($OutputPath ?? $fileInfo.Directory)/$newFileName";
     if (Test-Path -LiteralPath $newFileName) {
         if (!(& Prompt.ps1 -message "File Already Exists. Do You Want To Override it?" -defaultValue $false)) {
             return;
         }
     }
     $arguments = @($sharedArgs) + @("-i", """$file""", "-o", """$newFilePath""");
-    Start-Process handbrake.exe -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
+    Start-Process handbrake -ArgumentList $arguments -NoNewWindow -PassThru -Wait;
     Write-Host "Finished Compressing $file" -ForegroundColor Green;
     Write-Host "======================" -ForegroundColor Green;
 }

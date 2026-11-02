@@ -93,11 +93,5 @@ if ($converted -and (Prompt.ps1 -Message "Remove the $($converted.Count) convert
 }
 
 if ($errors) {
-    Add-Type -AssemblyName System.Windows.Forms;
-    [System.Windows.Forms.MessageBox]::Show(
-        ($errors -join "`n`n"),
-        'Convert Torrent To Magnet',
-        [System.Windows.Forms.MessageBoxButtons]::OK,
-        [System.Windows.Forms.MessageBoxIcon]::Warning
-    ) | Out-Null;
+    Show-Message.ps1 -Message ($errors -join "`n`n") -Title 'Convert Torrent To Magnet';
 }

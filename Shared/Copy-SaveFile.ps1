@@ -39,7 +39,7 @@ $files | ForEach-Object {
         $TargetName = $fileInfo.Name;
     }
 
-    $targetPath = "$Destination\$TargetName";
+    $targetPath = "$Destination/$TargetName";
     if (Test-Path -LiteralPath $targetPath) {
         $Item = Get-Item -LiteralPath $targetPath;
         if ($Item.LinkType -eq "SymbolicLink") {
@@ -66,4 +66,4 @@ $files | ForEach-Object {
 }
 
 Invoke-Item $Destination;
-timeout.exe 5;
+Timeout.ps1 5;

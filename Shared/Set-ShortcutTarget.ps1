@@ -59,7 +59,7 @@ if (!$ShortcutPath) {
 
 if (!(Test-Path -LiteralPath $ShortcutPath -PathType Leaf) -or !$ShortcutPath.EndsWith('.lnk')) {
     Write-Host "Not an existing shortcut: '$ShortcutPath'" -ForegroundColor Red;
-    timeout.exe $Wait;
+    Timeout.ps1 $Wait;
     Exit 1;
 }
 
@@ -137,7 +137,7 @@ try {
 }
 catch {
     Write-Host "Failed to save the shortcut (it may need admin rights): $($_.Exception.Message)" -ForegroundColor Red;
-    timeout.exe $Wait;
+    Timeout.ps1 $Wait;
     Exit 1;
 }
 
@@ -153,6 +153,6 @@ if ($null -ne $newIconPath) {
     Write-Host "Icon: $oldIcon -> $($shortcut.IconLocation)" -ForegroundColor Green;
 }
 
-timeout.exe $Wait;
+Timeout.ps1 $Wait;
 
 #endregion

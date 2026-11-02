@@ -58,4 +58,4 @@ function HandleFiles {
 $files = $Files | Where-Object { Is-Subtitle.ps1 $_ };
 HandleFiles -files $Files;
 Write-Host "Subtitles adjusted."
-timeout.exe  20 /nobreak;
+Timeout.ps1 20 -NoBreak;

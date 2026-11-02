@@ -27,4 +27,4 @@ function Display {
 $info = Get-Item -LiteralPath $args[0];
 Display -info $info;
 Set-Clipboard -Value $finalContent.ToString();
-timeout.exe 30;
+Timeout.ps1 30;

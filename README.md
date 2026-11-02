@@ -20,8 +20,19 @@ A large collection of PowerShell scripts for automating and enhancing Windows wo
 - **Subtitles/**: Subtitle downloaders, translators, editors, converters, and renamers.
 - **Tools/**: General utilities (hashing, copying, syncing, ownership, etc.).
 - **Torrent/**: Torrent file utilities.
-- **Windows/**: Windows setup, tweaks, and package installation.
+- **Platforms/Windows/**: Windows setup, tweaks, and package installation, plus the Windows version of the commands in `Platforms/Windows/Commands`.
+- **Platforms/Linux/**: The Linux version of the commands in `Platforms/Linux/Commands`.
 - **Youtube/**: YouTube downloaders and helpers.
+
+---
+## Cross-platform commands
+
+Scripts call shared commands by name (`File-Picker.ps1`, `Run-AsAdmin.ps1`), and `ShellScripts.psm1` decides which file that name runs:
+
+- `Shared/`: one script that works on every OS.
+- `Platforms/Windows/Commands/`, `Platforms/Linux/Commands/`, `Platforms/Mac/Commands/`: only the folder of the current OS is loaded. A command that differs per OS has a file with the same name and parameters in each folder.
+
+Run `Setup-EnvironmentVariable.ps1` once on each machine to link the module. Mac has no commands yet.
 
 ---
 ## 🖼️ Folder Icon Converter: [`Icons/Convert-PngToIco.ps1`](Icons/Convert-PngToIco.ps1)

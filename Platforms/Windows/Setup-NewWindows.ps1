@@ -92,7 +92,7 @@ function RunProgram {
 
 #endregion
 # region Setup Personal Projects
-$ShellProjectPath = (Resolve-Path "$PSScriptRoot/..").ToString();
+$ShellProjectPath = (Resolve-Path "$PSScriptRoot/../..").ToString();
 if (!$ShellProjectPath -or -not (Test-Path -LiteralPath $ShellProjectPath)) {
     Write-Host "Please Select ShellProjectPath" -ForegroundColor Green
     $ShellProjectPath = Folder-Picker.ps1 -InitialDirectory "D:\" -ShowOnTop;
@@ -104,11 +104,11 @@ RunPowershell -Path "$ShellProjectPath\Setup-ContextMenu.ps1" -AdditionalArgs @(
 RunPowershell -Path "$ShellProjectPath\Setup-SendToMenu.ps1" -AdditionalArgs @("-NoTimeout")
 # #endregion
 
-# region Programs: each programs folder has a " Maintenance\Setup.ps1" for its own apps
-foreach ($setupPath in @("D:\Programs\ Maintenance\Setup.ps1", "D:\Programming\Programs\ Maintenance\Setup.ps1")) {
+# region Programs: each programs folder has a "00-Maintenance\Setup.ps1" for its own apps
+foreach ($setupPath in @("D:\Programs\00-Maintenance\Setup.ps1", "D:\Programming\Programs\00-Maintenance\Setup.ps1")) {
     if (!(Test-Path -LiteralPath $setupPath)) {
         Write-Host "Please select the programs folder for $setupPath" -ForegroundColor Green
-        $setupPath = Join-Path (Folder-Picker.ps1 -ShowOnTop) " Maintenance\Setup.ps1";
+        $setupPath = Join-Path (Folder-Picker.ps1 -ShowOnTop) "00-Maintenance\Setup.ps1";
     }
     RunPowershell -Path $setupPath;
 }

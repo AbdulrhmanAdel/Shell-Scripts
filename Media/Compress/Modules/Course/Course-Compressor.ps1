@@ -123,4 +123,4 @@ $Paths | ForEach-Object {
 }
 
 Read-Host "Press Any Key To Exit"
-timeout.exe 15;
+Timeout.ps1 15;

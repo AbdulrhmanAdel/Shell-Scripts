@@ -8,6 +8,7 @@ param (
 $Options = @(
     @{
         Key     = "Take Ownership";
+        WindowsOnly = $true;
         Handler = {
             $path = "$PSScriptRoot/Take-Ownership.ps1";
             &  $path -Files $Files;
@@ -22,6 +23,7 @@ $Options = @(
     }
     @{
         Key     = "Safe Delete";
+        WindowsOnly = $true;
         Handler = {
             $path = "$PSScriptRoot/Safe-Delete.ps1";
             & $path -Files $Files;
@@ -29,6 +31,7 @@ $Options = @(
     }
     @{
         Key     = "Validate Shortcuts";
+        WindowsOnly = $true;
         Handler = {
             $path = "$PSScriptRoot/Validate-Shortcut.ps1";
             & $path $Files;
@@ -66,12 +69,14 @@ $Options = @(
     }
     @{
         Key     = "Create PathShortcut";
+        WindowsOnly = $true;
         Handler = {
             & "$PSScriptRoot\Create-PathShortcut.ps1" -Files $Files
         };
     }
     @{
         Key     = "Pin To Start";
+        WindowsOnly = $true;
         Handler = {
             & "$PSScriptRoot\Pin-FileToStart.ps1" -Files $Files
         };

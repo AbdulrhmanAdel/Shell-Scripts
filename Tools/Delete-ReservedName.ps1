@@ -21,4 +21,4 @@ foreach ($file in $Files) {
     }
 }
 
-timeout.exe 5;
+Timeout.ps1 5;

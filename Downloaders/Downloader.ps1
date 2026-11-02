@@ -108,7 +108,7 @@ $managerPath = "$PSScriptRoot\Managers\$Manager\$Manager.psm1";
 if (!(Test-Path -LiteralPath $managerPath)) { throw "No manager '$Manager' in $PSScriptRoot\Managers."; }
 $managerApi = Import-Contract $managerPath $managerContract;
 $session = & $managerApi['Start-DownloadManager'];
-if (!$Destination) { $Destination = $session.Directory ?? "$HOME\Downloads"; }
+if (!$Destination) { $Destination = $session.Directory ?? "$HOME/Downloads"; }
 
 if (!$Folder) {
     $Folder = $items[0].FileName -replace '(\.part\d+)?\.(rar|zip|7z|\d{3})$', '' -replace '_--_fitgirl-repacks\.site_--_?', '' -replace '_', ' ';
