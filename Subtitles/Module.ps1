@@ -42,7 +42,7 @@ $Options = @(
         Key        = "Editor";
         Extensions = @("srt", "ass");
         Handler    = {
-            $path = "$PSScriptRoot/Editor/Editor.ps1";
+            $path = "$PSScriptRoot/Editors/Editor.ps1";
             &  $path -Files $Files;
         };
     }
