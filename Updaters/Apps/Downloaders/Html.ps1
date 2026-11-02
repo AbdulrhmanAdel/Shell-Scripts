@@ -34,7 +34,7 @@ $needsBrowser = -not $htmlContent -or ($htmlContent -match '<title>Just a moment
 if ($needsBrowser) {
     Write-Host "Cloudflare/blocked detected, launching browser..." -ForegroundColor Yellow
     # Use browser with querySelector directly (full CSS3 support, COM HTMLFile has limited selectors)
-    $downloadLink = & "$PSScriptRoot\_Browser.ps1" -Url $Url -QueryString $QueryString -Attribute $Attribute
+    $downloadLink = & "$PSScriptRoot/_Browser.ps1" -Url $Url -QueryString $QueryString -Attribute $Attribute
     if (-not $downloadLink) {
         Write-Error "Failed to extract link via browser for querySelector('$QueryString') on $Url"
         return
@@ -72,7 +72,7 @@ if (-not $downloadLink.StartsWith('http')) {
 
 # Download
 $fileName = ([System.Uri]$downloadLink).Segments[-1]
-$downloadPath = & "$PSScriptRoot\_Downloader.ps1" -Url $downloadLink -FileName $fileName
+$downloadPath = & "$PSScriptRoot/_Downloader.ps1" -Url $downloadLink -FileName $fileName
 
 return @{
     HasNewVersion = $true

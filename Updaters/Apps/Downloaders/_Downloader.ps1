@@ -16,11 +16,11 @@ param (
 )
 
 $FileName ??= Random-FileName.ps1;
-$parentPath = "$(Get-TempScriptPath.ps1)\App_Updaters"
+$parentPath = "$(Get-TempScriptPath.ps1)/App_Updaters"
 if ($Version) {
-    $parentPath = "$parentPath\$($Version -replace '[\\/:*?"<>|\s]', '_')";
+    $parentPath = "$parentPath/$($Version -replace '[\\/:*?"<>|\s]', '_')";
 }
-$OutPath = "$parentPath\$FileName";
+$OutPath = "$parentPath/$FileName";
 
 $cached = Test-Path -LiteralPath $OutPath;
 if ($cached -and $ExpectedSize -gt 0 -and (Get-Item -LiteralPath $OutPath).Length -ne $ExpectedSize) {

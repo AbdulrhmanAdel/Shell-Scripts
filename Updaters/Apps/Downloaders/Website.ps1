@@ -20,7 +20,7 @@ if (-not ($html.Content -match $VersionPattern)) {
 }
 
 $newVersion = $Matches[$VersionPatternName]
-$HasNewVersion = & "$PSScriptRoot\_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $newVersion;
+$HasNewVersion = & "$PSScriptRoot/_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $newVersion;
 if (!$HasNewVersion) {
     Write-Host "No new version found. Current version ($CurrentVersion) is up to date.";
     return @{
@@ -52,7 +52,7 @@ if (-not $downloadLink.StartsWith('http')) {
 }
 
 $fileName = ([System.Uri]$downloadLink).Segments[-1]
-$downloadPath = & "$PSScriptRoot\_Downloader.ps1" -Url $downloadLink -FileName $fileName -Version $newVersion;
+$downloadPath = & "$PSScriptRoot/_Downloader.ps1" -Url $downloadLink -FileName $fileName -Version $newVersion;
 
 return @{
     HasNewVersion = $true

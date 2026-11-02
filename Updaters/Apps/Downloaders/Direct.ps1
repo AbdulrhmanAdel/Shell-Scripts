@@ -12,7 +12,7 @@ param (
     $CheckOnly
 )
 
-$HasNewVersion = & "$PSScriptRoot\_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $Version;
+$HasNewVersion = & "$PSScriptRoot/_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $Version;
 if (!$HasNewVersion) {
     Write-Host "No new version found. Current version ($CurrentVersion) is up to date.";
     return @{
@@ -28,7 +28,7 @@ if ($CheckOnly) {
     }
 }
 
-$downloadPath = & "$PSScriptRoot\_Downloader.ps1" -Url $Url -FileName $FileName -Version $Version;
+$downloadPath = & "$PSScriptRoot/_Downloader.ps1" -Url $Url -FileName $FileName -Version $Version;
 
 return @{
     HasNewVersion = $HasNewVersion

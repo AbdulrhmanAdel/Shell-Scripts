@@ -22,6 +22,12 @@ function Expand-Archive7z {
     if (Test-Path -LiteralPath $Target) {
         Remove-Item -LiteralPath $Target -Recurse -Force;
     }
+    # 7z only unpacks the .gz of a .tar.gz, and tar keeps the executable bits
+    if ($IsLinux -and $Archive -match '\.(tar(\.\w+)?|tgz|txz|tbz2?)$') {
+        New-Item -ItemType Directory -Force $Target | Out-Null;
+        & tar -xf $Archive -C $Target;
+        return $LASTEXITCODE -eq 0;
+    }
     $archiveProcess = Start-Process 7z -ArgumentList @(
         "x",
         """$Archive""",
@@ -32,7 +38,8 @@ function Expand-Archive7z {
 }
 
 $fileName = Split-Path -Leaf $Path;
-$extractPath = "$env:TEMP\App_Updaters\Archive\$fileName"
+$extractRoot = "$(($env:TEMP ?? [IO.Path]::GetTempPath()).TrimEnd('\', '/'))/App_Updaters/Archive/$fileName";
+$extractPath = $extractRoot;
 if (!(Expand-Archive7z -Archive $Path -Target $extractPath)) {
     Write-Host "[ERROR] Archive extraction failed for $Path." -ForegroundColor Red;
     return @{
@@ -80,8 +87,14 @@ foreach ($name in $Rename.Keys) {
     Move-Item -LiteralPath $file -Destination (Join-Path $extractPath $Rename[$name]) -Force;
 }
 
-return & "$PSScriptRoot\_Copy.ps1" -Source $extractPath `
+$result = & "$PSScriptRoot/_Copy.ps1" -Source $extractPath `
     -Destination $Destination `
     -Include $Include `
     -Exclude $Exclude `
     -Flatten:$Flatten;
+
+# On Linux the temp folder is in RAM until the next reboot
+foreach ($folder in $extractRoot, "$extractRoot.inner") {
+    Remove-Item -LiteralPath $folder -Recurse -Force -ErrorAction SilentlyContinue;
+}
+return $result;

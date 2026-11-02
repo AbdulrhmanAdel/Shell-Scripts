@@ -55,7 +55,7 @@ $latest = $VersionPattern `
     : $files[0];
 Write-Host "Latest Release: $($latest.Path)";
 
-$HasNewVersion = & "$PSScriptRoot\_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $latest.Version;
+$HasNewVersion = & "$PSScriptRoot/_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $latest.Version;
 if (!$HasNewVersion) {
     Write-Host "No new version found. Current version ($CurrentVersion); Latest Version $($latest.Version)";
     return @{
@@ -72,7 +72,7 @@ if ($CheckOnly) {
 }
 
 # downloads.sourceforge.net picks a working mirror; a non-browser agent gets the file instead of the HTML page
-$downloadPath = & "$PSScriptRoot\_Downloader.ps1" `
+$downloadPath = & "$PSScriptRoot/_Downloader.ps1" `
     -Url "https://downloads.sourceforge.net/project/$Project$($latest.Path)" `
     -FileName (Split-Path $latest.Path -Leaf) `
     -Version $latest.Version `

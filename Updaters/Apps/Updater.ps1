@@ -14,6 +14,9 @@ param (
 
 $Silent = $Silent -or $env:APP_UPDATER_SILENT -eq '1';
 $CheckOnly = $CheckOnly -or $env:APP_UPDATER_CHECK_ONLY -eq '1';
+# Staging and backups. Linux has no %TEMP%, and its /tmp is in RAM while a backup holds the whole app folder
+# (with a portable app's personal files), so they go on the disk there.
+$tempRoot = $IsLinux ? ($env:XDG_CACHE_HOME ?? "$HOME/.cache") : $env:TEMP;
 
 #region Helpers
 
@@ -30,7 +33,7 @@ function ExecuteScript {
     }
 
     $finalArgs = $AdditionalArgs + $Item.Args;
-    return & "$PSScriptRoot\$Path\$($Item.Name)" @finalArgs;
+    return & "$PSScriptRoot/$Path/$($Item.Name)" @finalArgs;
 }
 
 # Status: Updated | UpToDate | UpdateAvailable | Skipped | Failed
@@ -80,10 +83,10 @@ function Get-MissingArgs {
         $AdditionalArgs = @{}
     )
 
-    $command = Get-Command "$PSScriptRoot\$Path\$($Item.Name).ps1" -ErrorAction SilentlyContinue;
-    $command ??= Get-Command "$PSScriptRoot\$Path\$($Item.Name)" -ErrorAction SilentlyContinue;
+    $command = Get-Command "$PSScriptRoot/$Path/$($Item.Name).ps1" -ErrorAction SilentlyContinue;
+    $command ??= Get-Command "$PSScriptRoot/$Path/$($Item.Name)" -ErrorAction SilentlyContinue;
     if (!$command) {
-        return @("<script $Path\$($Item.Name) not found>");
+        return @("<script $Path/$($Item.Name) not found>");
     }
 
     $supplied = @($AdditionalArgs.Keys) + @($Item.Args.Keys);
@@ -92,18 +95,64 @@ function Get-MissingArgs {
         } | Where-Object { $supplied -notcontains $_.Name } | ForEach-Object { $_.Name });
 }
 
+# Every process with the properties of Win32_Process: Name, ProcessId, ParentProcessId, ExecutablePath, CommandLine
+function Get-ProcessTable {
+    if (!$IsLinux) {
+        return @(Get-CimInstance Win32_Process);
+    }
+
+    return @([IO.Directory]::GetDirectories('/proc') | Where-Object { (Split-Path $_ -Leaf) -match '^\d+$' } | ForEach-Object {
+            try {
+                # pid (name) state ppid ...: the name can hold spaces and brackets, so split after the last ")"
+                $stat = [IO.File]::ReadAllText("$_/stat");
+                $nameEnd = $stat.LastIndexOf(')');
+                $parentId = [int]($stat.Substring($nameEnd + 2) -split ' ')[1];
+                $path = $null;
+                # Unreadable for other users' processes
+                try { $path = [IO.File]::ResolveLinkTarget("$_/exe", $false).FullName -replace ' \(deleted\)$', '' } catch {}
+
+                # An AppImage runs from a temporary mount, so its real path is only in the environment. Apps it starts
+                # (e.g. a browser opening a link) inherit that environment, hence the check that it runs from the mount.
+                if ($path) {
+                    try {
+                        $environment = [Text.Encoding]::UTF8.GetString([IO.File]::ReadAllBytes("$_/environ")) -split "`0";
+                        $appImage = $environment -match '^APPIMAGE=' | Select-Object -First 1;
+                        $appDir = $environment -match '^APPDIR=' | Select-Object -First 1;
+                        if ($appImage -and $appDir -and $path.StartsWith(($appDir -replace '^APPDIR=', '').TrimEnd('/') + '/')) {
+                            $path = $appImage -replace '^APPIMAGE=', '';
+                        }
+                    }
+                    catch {}
+                }
+
+                $arguments = @([Text.Encoding]::UTF8.GetString([IO.File]::ReadAllBytes("$_/cmdline")).TrimEnd("`0") -split "`0" | Select-Object -Skip 1);
+                [pscustomobject]@{
+                    Name            = $stat.Substring($stat.IndexOf('(') + 1, $nameEnd - $stat.IndexOf('(') - 1)
+                    ProcessId       = [int](Split-Path $_ -Leaf)
+                    ParentProcessId = $parentId
+                    ExecutablePath  = $path
+                    # Quoted like on Windows, so Get-ProcessArguments can read it
+                    CommandLine     = (@("""$path""") + @($arguments | ForEach-Object { $_ -match '\s' ? """$_""" : $_ })) -join ' '
+                }
+            }
+            catch {
+                # The process ended while it was being read
+            }
+        });
+}
+
 # Processes running from one of the folders
 function Get-AppProcesses {
     param ([string[]]$Folders)
 
-    $Folders = @($Folders | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | ForEach-Object { (Resolve-Path -LiteralPath $_).Path.TrimEnd('\') + '\' });
+    $Folders = @($Folders | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | ForEach-Object { (Resolve-Path -LiteralPath $_).Path.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar });
     if (!$Folders) {
         return @();
     }
 
     # Elevated processes hide their path from a normal shell, so also match by the exe names found in the folders
     $exeNames = @($Folders | ForEach-Object { Get-ChildItem -LiteralPath $_ -Filter *.exe -Recurse -Depth 2 -File -ErrorAction SilentlyContinue } | ForEach-Object { $_.Name }) | Sort-Object -Unique;
-    return @(Get-CimInstance Win32_Process | Where-Object {
+    return @(Get-ProcessTable | Where-Object {
             $path = $_.ExecutablePath;
             ($path -and ($Folders | Where-Object { $path.StartsWith($_, [StringComparison]::OrdinalIgnoreCase) })) -or
             (!$path -and $exeNames -contains $_.Name)
@@ -112,7 +161,7 @@ function Get-AppProcesses {
 
 # This updater and the shells that started it (e.g. updating PowerShell from PowerShell)
 function Get-OwnProcessIds {
-    $processes = @(Get-CimInstance Win32_Process);
+    $processes = @(Get-ProcessTable);
     $ids = @();
     $current = $processes | Where-Object ProcessId -eq $PID;
     while ($current -and $ids -notcontains $current.ProcessId) {
@@ -154,10 +203,40 @@ function Restart-ClosedApps {
         if ($app.Arguments) {
             $startArgs.ArgumentList = $app.Arguments;
         }
+        if ($IsLinux) {
+            # In its own session, so closing this terminal does not close the app too. Without its own output,
+            # or whoever reads the updater's output would wait until the app is closed.
+            $startArgs.ArgumentList = """$($app.Path)"" $($app.Arguments)".Trim();
+            $startArgs.FilePath = 'setsid';
+            $startArgs.RedirectStandardOutput = '/dev/null';
+            $startArgs.RedirectStandardError = '/dev/null';
+            $startArgs.RedirectStandardInput = '/dev/null';
+        }
         Start-Process @startArgs;
         $script:restarted += Split-Path $app.Path -Leaf;
         Write-Host "[INFO] Restarted $(Split-Path $app.Path -Leaf)" -ForegroundColor DarkGray;
     }
+}
+
+# Copies a folder's contents. -Mirror also removes what the source does not have.
+function Copy-FolderContent {
+    param (
+        [string]$Source,
+        [string]$Target,
+        [switch]$Mirror
+    )
+
+    if ($IsLinux) {
+        if ($Mirror) {
+            & find $Target -mindepth 1 -delete;
+        }
+        # -a keeps the executable bits and symlinks
+        & cp -a -- "$Source/." $Target;
+        return $LASTEXITCODE -eq 0;
+    }
+
+    robocopy $Source $Target ($Mirror ? '/MIR' : '/E') /R:1 /W:1 /NFL /NDL /NJH /NJS /NP | Out-Null;
+    return $LASTEXITCODE -lt 8;
 }
 
 #endregion
@@ -241,7 +320,7 @@ $destination = $Installer.Args.Destination;
 # Archive/Copy/Inno/AdvancedInstaller installs go to a staging folder first, so a wrong asset or archive layout is caught before cleaning
 $stagingPath = $null;
 if ($Installer.Name -in 'Archive', 'Copy', 'Inno', 'AdvancedInstaller' -and $destination) {
-    $stagingPath = "$env:TEMP\App_Updaters\Staging\$appName";
+    $stagingPath = "$tempRoot/App_Updaters/Staging/$appName";
     Remove-Item -LiteralPath $stagingPath -Recurse -Force -ErrorAction SilentlyContinue;
     $stagingInstaller = @{ Name = $Installer.Name; Args = $Installer.Args.Clone() };
     $stagingInstaller.Args.Destination = $stagingPath;
@@ -292,15 +371,14 @@ if ($running) {
 
 #region Backup, so a failed install can be rolled back
 
-$backupRoot = "$env:TEMP\App_Updaters\Backup\$appName-$(Get-Date -Format 'yyyyMMdd-HHmmss')";
+$backupRoot = "$tempRoot/App_Updaters/Backup/$appName-$(Get-Date -Format 'yyyyMMdd-HHmmss')";
 $backups = [System.Collections.Generic.List[hashtable]]::new();
 foreach ($source in @($Cleaner.Args.Paths | Where-Object { $_ -and (Test-Path -LiteralPath $_) })) {
-    $target = "$backupRoot\$($backups.Count)";
+    $target = "$backupRoot/$($backups.Count)";
     New-Item -ItemType Directory -Force $target | Out-Null;
     $isFolder = Test-Path -LiteralPath $source -PathType Container;
     if ($isFolder) {
-        robocopy $source $target /E /R:1 /W:1 /NFL /NDL /NJH /NJS /NP | Out-Null;
-        $ok = $LASTEXITCODE -lt 8;
+        $ok = Copy-FolderContent -Source $source -Target $target;
     }
     else {
         Copy-Item -LiteralPath $source -Destination $target -Force;
@@ -322,7 +400,8 @@ function Restore-Backup {
     Write-Host "[WARN] Rolling back to the previous version..." -ForegroundColor Yellow;
     foreach ($backup in $backups) {
         if ($backup.IsFolder) {
-            robocopy $backup.Backup $backup.Source /MIR /R:1 /W:1 /NFL /NDL /NJH /NJS /NP | Out-Null;
+            New-Item -ItemType Directory -Force $backup.Source | Out-Null;
+            Copy-FolderContent -Source $backup.Backup -Target $backup.Source -Mirror | Out-Null;
         }
         else {
             Copy-Item -LiteralPath (Join-Path $backup.Backup (Split-Path $backup.Source -Leaf)) -Destination $backup.Source -Force;
@@ -348,8 +427,7 @@ Write-Host "===================== End Clean Old Version =====================" -
 
 if ($stagingPath) {
     New-Item -ItemType Directory -Force $destination | Out-Null;
-    robocopy $stagingPath $destination /E /R:1 /W:1 /NFL /NDL /NJH /NJS /NP | Out-Null;
-    $installed = $LASTEXITCODE -lt 8;
+    $installed = Copy-FolderContent -Source $stagingPath -Target $destination;
 }
 else {
     $installerArtifacts = ExecuteScript -Path "Installers" -Item $Installer -AdditionalArgs @{
@@ -368,6 +446,11 @@ foreach ($file in $preserved) {
     New-Item -ItemType Directory -Force (Split-Path $file.Path) | Out-Null;
     [IO.File]::WriteAllBytes($file.Path, $file.Content);
     Write-Host "[INFO] Kept $(Split-Path $file.Path -Leaf)" -ForegroundColor DarkGray;
+}
+
+# Files without a version (every Linux binary) read it back from here on the next run
+if ($CurrentVersion.Args.VersionFile -and $newVersion) {
+    Set-Content -LiteralPath $CurrentVersion.Args.VersionFile -Value $newVersion;
 }
 
 Remove-Item -LiteralPath $backupRoot -Recurse -Force -ErrorAction SilentlyContinue;

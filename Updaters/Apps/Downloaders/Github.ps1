@@ -102,7 +102,7 @@ if (!$release) {
 
 $releaseVersion = Get-ReleaseVersion $release;
 Write-Host "Latest Release Version: $releaseVersion";
-$HasNewVersion = & "$PSScriptRoot\_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $releaseVersion;
+$HasNewVersion = & "$PSScriptRoot/_Version-Compare.ps1" -CurrentVersion $CurrentVersion -NewVersion $releaseVersion;
 if (!$HasNewVersion) {
     Write-Host "No new version found. Current version ($CurrentVersion); Latest Version $releaseVersion";
     return @{
@@ -127,7 +127,7 @@ if ($CheckOnly) {
     }
 }
 
-$downloadPath = & "$PSScriptRoot\_Downloader.ps1" `
+$downloadPath = & "$PSScriptRoot/_Downloader.ps1" `
     -Url $releaseAsset.browser_download_url `
     -FileName $releaseAsset.name `
     -Version $releaseVersion `

@@ -50,8 +50,11 @@ function HandleDirectory {
         return
     }
 
-    Get-ChildItem -Path $DirectoryInfo.FullName | ForEach-Object {
-        if ($_ -is [System.IO.DirectoryInfo]) { 
+    # -Force: Linux hides dotfiles, which would keep the folder from being emptied. Not on Windows, where it
+    # would also delete the hidden desktop.ini of a folder icon
+    Get-ChildItem -LiteralPath $DirectoryInfo.FullName -Force:$IsLinux | ForEach-Object {
+        # A link to a folder is removed as a link: following it would delete what it points to
+        if ($_ -is [System.IO.DirectoryInfo] -and !$_.LinkType) { 
             HandleDirectory -DirectoryInfo $_;
             return;
         }
@@ -59,7 +62,7 @@ function HandleDirectory {
         $RemoveItem.Invoke($_);
     }
 
-    if (Get-ChildItem -LiteralPath $DirectoryInfo.FullName -ErrorAction SilentlyContinue) {
+    if (Get-ChildItem -LiteralPath $DirectoryInfo.FullName -Force:$IsLinux -ErrorAction SilentlyContinue) {
         return;
     }
 
