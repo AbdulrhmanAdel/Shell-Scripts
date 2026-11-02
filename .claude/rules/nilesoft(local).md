@@ -1,2 +1,0 @@
-- I Used NileSoft "D:\Programs\OS\Windows\Apps\Shells\NileSoft"
-- Some script are used within the nile soft so any change in the script may cause the nile soft to not work properly so consider this.

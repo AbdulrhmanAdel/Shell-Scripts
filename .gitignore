@@ -18,4 +18,5 @@ Set-ShellApiKeys.ps1
 Shared/Modules/Shim/bin
 Shared/Modules/Shim/obj
 Shared/Modules/Shim/hubs.local.json
-*(local)*NativeHosts/**/*.sh
+*(local)*
+NativeHosts/**/*.sh
