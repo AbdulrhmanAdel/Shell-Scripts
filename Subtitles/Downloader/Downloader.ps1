@@ -32,8 +32,7 @@ function HandleMovies {
     $movies | Where-Object {
         $info = $_.Info;
         $details = $_.Details;
-        $imdb = $imdbCache[$details.Title];
-        Write-Host $details;
+        $imdb = $_.Imdb;
         $Show = @{
             Title    = $details.Title
             Type     = $details.Type
@@ -135,11 +134,12 @@ $Paths | ForEach-Object {
 $imdbCache = @{};
 $subs = $files | ForEach-Object {
     $details = & Get-ShowDetails.ps1 -Path $_.FullName;
-    if (!$imdbCache.Contains($details.Title)) {
-        $imdbCache[$details.Title] = Imdb-GetShow.ps1 -name $details.Title -FileInfo $_;
-    }
     if (!$details) { return $null; }
-    $imdb = $imdbCache[$details.Title];
+    $cacheKey = "$($details.Title)|$($details.Year)";
+    if (!$imdbCache.Contains($cacheKey)) {
+        $imdbCache[$cacheKey] = Imdb-GetShow.ps1 -name $details.Title -Year $details.Year -FileInfo $_;
+    }
+    $imdb = $imdbCache[$cacheKey];
     $details.Type = $imdb.type ? $imdb.type : $details.Type;
     $info = $details.Info;
     $name = $info.Name -replace $info.Extension, "";
@@ -147,7 +147,7 @@ $subs = $files | ForEach-Object {
         Name    = $name
         Info    = $info
         Details = $details
-        Imdb    = $imdbCache[$details.Title];
+        Imdb    = $imdb;
     }
 } | Where-Object {
     return $null -ne $_;

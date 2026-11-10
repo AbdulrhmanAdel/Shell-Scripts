@@ -35,10 +35,9 @@ function Invoke-SubtitleProvider {
     Write-Host "[INFO]: Candidate subtitles: $($candidates.Count)" -ForegroundColor Cyan;
 
     if ($Type -eq "Movie") {
-        Write-Host "[INFO]: Search Keywords: $($Keywords -join ' | ')" -ForegroundColor DarkGray;
         $matchResult = & "$PSScriptRoot\Match-Release.ps1" -Subtitles $candidates `
             -IgnoredVersions $IgnoredVersions `
-            -SearchKeywords $Keywords;
+            -FileName $RenameTo;
 
         if (-not $matchResult.HasMatch) {
             Write-Host "CAN'T FIND Subtitle FOR $Title" -ForegroundColor Red;
@@ -74,13 +73,13 @@ function Invoke-SubtitleProvider {
         Write-Host "-----" -ForegroundColor Yellow;
         Write-Host "Episode $($episode.Episode)" -ForegroundColor Yellow;
         $episodeNumber = $episode.Episode;
-        $qualityRegex = $episode.Quality;
         $episodeRegex = Get-EpisodeRegex -Title $Title -Season $Season -EpisodeNumber $episodeNumber;
         Write-Host "[INFO]: Episode Pattern: $episodeRegex" -ForegroundColor DarkGray;
 
         $episodeMatch = & "$PSScriptRoot\Match-Release.ps1" -Subtitles $candidates `
             -IgnoredVersions $episode.IgnoredVersions `
-            -SearchKeywords @($episodeRegex);
+            -SearchKeywords @($episodeRegex) `
+            -FileName $episode.RenameTo;
 
         if (-not $episodeMatch.HasMatch) {
             Write-Host "CAN'T FIND Subtitle FOR $Title => EPISODE $episodeNumber " -ForegroundColor Red -NoNewLine;
@@ -93,20 +92,8 @@ function Invoke-SubtitleProvider {
             return
         }
 
-        $episodeCandidates = @($episodeMatch.FirstMatch) + @($episodeMatch.Others);
-        $preferredKeywords = @(@($episode.Keywords) + @($qualityRegex) | Where-Object { $_ });
         $chosen = $episodeMatch.FirstMatch;
-
-        if ($preferredKeywords.Count -gt 0) {
-            Write-Host "[INFO]: Preferred Keywords: $($preferredKeywords -join ' | ')" -ForegroundColor DarkGray;
-            $refinedMatch = & "$PSScriptRoot\Match-Release.ps1" -Subtitles $episodeCandidates `
-                -SearchKeywords $preferredKeywords;
-            if ($refinedMatch.HasMatch) {
-                $chosen = $refinedMatch.FirstMatch;
-            }
-        }
-
-        Write-Host "[MATCH]: $($episodeCandidates.Count) episode candidate(s), using: " -ForegroundColor DarkGray -NoNewline;
+        Write-Host "[MATCH]: $($episodeMatch.Others.Count + 1) episode candidate(s), using: " -ForegroundColor DarkGray -NoNewline;
         Write-Host ($chosen.KeyWords -join " | ") -ForegroundColor DarkYellow;
 
         $subtitlePath = & "$PSScriptRoot\Download-Subtitle.ps1" `

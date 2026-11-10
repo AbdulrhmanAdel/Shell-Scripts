@@ -60,7 +60,8 @@ if ($files.Count -eq 1) {
 }
 
 if ($Filter) {
-    $files = @($files | Where-Object { $Filter.Invoke($_.Name) })
+    $filtered = @($files | Where-Object { $Filter.Invoke($_.Name) })
+    if ($filtered.Count -gt 0) { $files = $filtered }
 }
 
 $index = 0
