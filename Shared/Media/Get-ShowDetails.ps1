@@ -12,34 +12,31 @@ if (!$canHandle) {
     return;
 }
 
-$seriesRegex = "(?<Title>.*) *(S|Season) *(?<SeasonNumber>\d{1,2}) *( |Episode|Ep|E|-|\d+X) *(?<EpisodeNumber>\d+) *(?<Rest>.*)";
-$seriesRegexV2 = "(?<Title>.*?)(?<EpisodeNumber>(?!(?:720|480|1080)\b)\d{1,3})(?:\s*(?<Rest>.*))?";
-# Ensure we don't accidentally treat quality numbers as episode numbers. Capture movie quality into Rest when present.
-$moviesRegex = "(?<Title>.*?)(?:\s+(?<Rest>(?:720|480|1080)P?.*))?";
-$yearRegex = [regex]::new("(?<YEAR>\d{4})(?=\D*$)")
-function GetYear {
+$notYear = "(?!(?:(?:19|20)\d{2}|480|576|720|1080|2160)\b)";
+$seriesRegexes = @(
+    "^(?<Title>.*?)(?:^| )(?:S|Season) ?(?<Season>\d{1,2}) ?(?:E|Ep|Episode|X)? ?$notYear(?<Episode>\d{1,4})\b",
+    "^(?<Title>.*?)(?:^| )(?<Season>\d{1,2})X(?<Episode>\d{2,3})\b",
+    "^(?<Title>.*?)(?:^| )(?:E|Ep|Episode) ?$notYear(?<Episode>\d{1,4})\b",
+    "^(?<Title>.*?)(?:^| )(?:S|Season) ?(?<Season>\d{1,2})\b"
+);
+$animeRegex = "^(?<Title>.+?) - $notYear(?<Episode>\d{1,4})(?: |\.|$)";
+$groupedAnimeRegex = "^(?<Title>.+?) $notYear(?<Episode>\d{1,4})(?: |$)";
+$titleEndRegex = "^(?:(?:19|20)\d{2}|\d{3,4}p|4k|bluray|bdrip|brrip|webrip|webdl|hdrip|dvdrip|hdtv|x264|x265|h264|h265|hevc|\d+bit|remux|repack)$";
+
+function SplitTitleAndYear {
     param (
-        $name
+        [string]$Title
     )
 
-    $result = $yearRegex.Match($name);
-
-    return $result.Success `
-        ? $result.ToString() `
-        : $null
-}
-
-function GetShowVersion {
-    param (
-        $name,
-        $Year
-    )
-
-    if ($name -match "$year(?<Version>.*)") {
-        return $Matches["Version"]
+    $words = @($Title -split " " | Where-Object { $_ });
+    for ($i = 1; $i -lt $words.Count; $i++) {
+        if ($words[$i] -match $titleEndRegex) {
+            $year = $words[$i] -match "^(19|20)\d{2}$" ? $words[$i] : $null;
+            return @{ Title = $words[0..($i - 1)] -join " "; Year = $year }
+        }
     }
 
-    return $null;
+    return @{ Title = $words -join " "; Year = $null }
 }
 
 # Allowed special characters in NTFS filenames
@@ -97,7 +94,8 @@ function GetSeriesOrMovieDetails {
     param (
         $name
     )
-    $name = NormalizeName -name $name;
+    $rawName = $name.Trim();
+    $name = NormalizeName -name $rawName;
     if (!$onlyBasicInfo) {
         $quality = GetQuality -name $name;
         $matchedKeywords = @($keywords | Where-Object { $name -match $_ }) ?? @();
@@ -111,39 +109,33 @@ function GetSeriesOrMovieDetails {
         Keywords        = $matchedKeywords
     };
 
-    $showName = $null;
-    if ($name -match $seriesRegex -or $name -match $seriesRegexV2) {
-        $showName = $Matches["Title"].Trim();
-        $details.Type = "Series"
-        $details.Season = $Matches["SeasonNumber"] ? [Int32]::Parse( $Matches["SeasonNumber"]) : $null;
-        $details.Episode = $Matches["EpisodeNumber"] ? [Int32]::Parse( $Matches["EpisodeNumber"]) : $null;
+    $series = $null;
+    foreach ($regex in $seriesRegexes) {
+        if ($name -match $regex) { $series = $Matches; break }
     }
-    elseif ($name -match $moviesRegex) {
-        $showName = $Matches["Title"].Trim();
+    if (!$series -and ($rawName -replace "^\[.*?\]\s*", "") -match $animeRegex) {
+        $series = $Matches;
+        $series["Title"] = NormalizeName -name $series["Title"];
+    }
+    if (!$series -and $rawName -match "^\[" -and $name -match $groupedAnimeRegex) {
+        $series = $Matches;
     }
 
-    $imdbInfo = $null;
+    $split = SplitTitleAndYear -Title ($series ? $series["Title"] : $name);
+    if ($series) {
+        $details.Type = "Series";
+        $details.Season = $series["Season"] ? [Int32]::Parse($series["Season"]) : 1;
+        $details.Episode = $series["Episode"] ? [Int32]::Parse($series["Episode"]) : $null;
+    }
+
     if ($UseImdb) {
-        $imdbInfo = & Imdb-GetShow.ps1 -Name $showName;
+        $imdbInfo = & Imdb-GetShow.ps1 -Name $split.Title -Year $split.Year;
         $details.Type = $imdbInfo.Type;
         $details.ImdbInfo = $imdbInfo;
     }
 
-    $showName ??= $name;
-    $year = GetYear -name $showName;
-    if ($year) {
-        if (!$onlyBasicInfo) {
-            $version = GetShowVersion -name $showName -year $year;
-            if ($version) {
-                $details['Keywords'] = $details['Keywords'] + $version.Trim();
-            }
-        }
-
-        $showName = $showName -replace "$year.*", "";
-    }
-
-    $details.Year = $year;
-    $details.Title = $showName.Trim();
+    $details.Year = $split.Year;
+    $details.Title = $split.Title ? $split.Title : $name;
     return $details;
 }
 
