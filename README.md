@@ -6,6 +6,7 @@ A large collection of PowerShell scripts for automating and enhancing Windows wo
 
 ## 📁 Repository Structure
 
+- **Android/**: Copy user apps (install or update) and storage folders from one Android phone to another over USB with adb.
 - **Attributes/**: View and change file/folder attributes.
 - **Courses/**: Scripts for organizing and fixing course video files.
 - **Crawlers/**: Download and scrape from various sources.
