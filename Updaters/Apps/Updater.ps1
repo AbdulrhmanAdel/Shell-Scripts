@@ -239,6 +239,43 @@ function Copy-FolderContent {
     return $LASTEXITCODE -lt 8;
 }
 
+# After the new files are in place: puts back the -Preserve files and records the version
+function Complete-Install {
+    foreach ($file in $preserved) {
+        # The new version may not ship the file's folder at all (e.g. Node's etc\npmrc)
+        New-Item -ItemType Directory -Force (Split-Path $file.Path) | Out-Null;
+        [IO.File]::WriteAllBytes($file.Path, $file.Content);
+        Write-Host "[INFO] Kept $(Split-Path $file.Path -Leaf)" -ForegroundColor DarkGray;
+    }
+
+    # Files without a version (every Linux binary) read it back from here on the next run
+    if ($CurrentVersion.Args.VersionFile -and $newVersion) {
+        Set-Content -LiteralPath $CurrentVersion.Args.VersionFile -Value $newVersion;
+    }
+}
+
+# Deletes the "<folder>.old-<time>" copies a self-update moved aside, once no process runs from them
+# (deleting while one does would remove files it may still load)
+function Remove-SwappedOutVersions {
+    param ([string[]]$Folders)
+
+    foreach ($folder in @($Folders | Where-Object { $_ })) {
+        $parent = Split-Path $folder;
+        if (!$parent -or !(Test-Path -LiteralPath $parent)) {
+            continue;
+        }
+        foreach ($old in @(Get-ChildItem -LiteralPath $parent -Directory -Filter "$(Split-Path $folder -Leaf).old-*" -ErrorAction SilentlyContinue)) {
+            if (Get-AppProcesses -Folders $old.FullName) {
+                continue;
+            }
+            Remove-Item -LiteralPath $old.FullName -Recurse -Force -ErrorAction SilentlyContinue;
+            if (!(Test-Path -LiteralPath $old.FullName)) {
+                Write-Host "[INFO] Deleted the previous version left by a self-update: $($old.FullName)" -ForegroundColor DarkGray;
+            }
+        }
+    }
+}
+
 #endregion
 
 $script:runningNames = @();
@@ -255,6 +292,7 @@ $stagingPath = $null;
 $appFolders = @(@($Cleaner.Args.Paths) + @($Installer.Args.Destination) | Where-Object { $_ } | ForEach-Object {
         (Test-Path -LiteralPath $_ -PathType Leaf) ? (Split-Path $_) : $_
     });
+Remove-SwappedOutVersions -Folders $appFolders;
 
 #region Check
 
@@ -337,11 +375,60 @@ if ($Installer.Name -in 'Archive', 'Copy', 'Inno', 'AdvancedInstaller' -and $des
     }
 }
 
+$preserved = @(@($Preserve) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) } | ForEach-Object {
+        @{ Path = $_; Content = [IO.File]::ReadAllBytes($_) }
+    });
+
 $ownProcessIds = Get-OwnProcessIds;
 $running = @(Get-AppProcesses -Folders $appFolders);
 $script:runningNames = @($running | ForEach-Object { $_.Name } | Sort-Object -Unique);
 if ($running | Where-Object { $ownProcessIds -contains $_.ProcessId }) {
-    return New-Result 'Failed' "$appName is running this updater, update it from another shell. Nothing was cleaned.";
+    # The app runs this updater (PowerShell updating itself). Its files cannot be overwritten while it runs,
+    # but Windows lets a running exe/dll be moved on the same drive: the old version moves aside and keeps
+    # running from there, and the staged new version goes in its place. Nothing has to be closed.
+    # The contents move, not the folder itself: a shell whose working directory is in it locks the folder.
+    $cleanPaths = @($Cleaner.Args.Paths | Where-Object { $_ });
+    $destinationPath = $destination -and (Test-Path -LiteralPath $destination -PathType Container) ? (Resolve-Path -LiteralPath $destination).Path.TrimEnd('\') : $null;
+    $canSwap = !$IsLinux -and $stagingPath -and $destinationPath -and $cleanPaths.Count -eq 1 -and
+        (Resolve-Path -LiteralPath $cleanPaths[0] -ErrorAction SilentlyContinue).Path.TrimEnd('\') -eq $destinationPath;
+    if (!$canSwap) {
+        return New-Result 'Failed' "$appName is running this updater, update it from another shell. Nothing was cleaned.";
+    }
+
+    Write-Host "===================== Swap In New Version =====================" -ForegroundColor Gray;
+    $oldPath = "$destinationPath.old-$(Get-Date -Format 'yyyyMMdd-HHmmss')";
+    New-Item -ItemType Directory -Force $oldPath | Out-Null;
+    $moved = [System.Collections.Generic.List[string]]::new();
+    function Undo-Swap {
+        foreach ($name in $moved) {
+            Move-Item -LiteralPath (Join-Path $oldPath $name) -Destination (Join-Path $destinationPath $name) -Force -ErrorAction SilentlyContinue;
+        }
+        if (!(Get-ChildItem -LiteralPath $oldPath -Force -ErrorAction SilentlyContinue)) {
+            Remove-Item -LiteralPath $oldPath -Force -ErrorAction SilentlyContinue;
+        }
+    }
+    try {
+        foreach ($item in @(Get-ChildItem -LiteralPath $destinationPath -Force)) {
+            Move-Item -LiteralPath $item.FullName -Destination (Join-Path $oldPath $item.Name) -ErrorAction Stop;
+            $moved.Add($item.Name);
+        }
+    }
+    catch {
+        Undo-Swap;
+        return New-Result 'Failed' "$appName is running this updater and '$($item.Name)' could not be moved aside ($($_.Exception.Message)). Close the other $appName windows or update it from another shell. Nothing was changed.";
+    }
+    Write-Host "[INFO] Moved the running $appName aside to $oldPath" -ForegroundColor DarkGray;
+
+    $installed = Copy-FolderContent -Source $stagingPath -Target $destinationPath;
+    if (!$installed -or ($exePath -and !(Test-Path -LiteralPath $exePath))) {
+        # Only the new version's files are in the folder now
+        Get-ChildItem -LiteralPath $destinationPath -Force | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue;
+        Undo-Swap;
+        return New-Result 'Failed' "Failed to install $appName $newVersion, put the previous version back.";
+    }
+    Complete-Install;
+    Write-Host "[INFO] Open $appName windows keep running $oldVersion until restarted. $oldPath is deleted on a later run, once nothing uses it." -ForegroundColor Yellow;
+    return New-Result 'Updated' "$appName updated $oldVersion -> $newVersion (restart open $appName windows)";
 }
 if ($running) {
     if (!(Confirm-Step "$appName is running ($($script:runningNames -join ', ')). Close it to update?")) {
@@ -392,10 +479,6 @@ foreach ($source in @($Cleaner.Args.Paths | Where-Object { $_ -and (Test-Path -L
     $backups.Add(@{ Source = $source; Backup = $target; IsFolder = $isFolder });
 }
 
-$preserved = @(@($Preserve) | Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Leaf) } | ForEach-Object {
-        @{ Path = $_; Content = [IO.File]::ReadAllBytes($_) }
-    });
-
 function Restore-Backup {
     Write-Host "[WARN] Rolling back to the previous version..." -ForegroundColor Yellow;
     foreach ($backup in $backups) {
@@ -441,17 +524,7 @@ if (!$installed -or ($exePath -and !(Test-Path -LiteralPath $exePath))) {
     return New-Result 'Failed' "Failed to install $appName $newVersion$($exePath ? " ($exePath missing after install)" : ''), rolled back.";
 }
 
-foreach ($file in $preserved) {
-    # The new version may not ship the file's folder at all (e.g. Node's etc\npmrc)
-    New-Item -ItemType Directory -Force (Split-Path $file.Path) | Out-Null;
-    [IO.File]::WriteAllBytes($file.Path, $file.Content);
-    Write-Host "[INFO] Kept $(Split-Path $file.Path -Leaf)" -ForegroundColor DarkGray;
-}
-
-# Files without a version (every Linux binary) read it back from here on the next run
-if ($CurrentVersion.Args.VersionFile -and $newVersion) {
-    Set-Content -LiteralPath $CurrentVersion.Args.VersionFile -Value $newVersion;
-}
+Complete-Install;
 
 Remove-Item -LiteralPath $backupRoot -Recurse -Force -ErrorAction SilentlyContinue;
 if ($stagingPath) {
