@@ -38,9 +38,15 @@ $headers = @{
     "Accept"               = "application/vnd.github+json"
     "X-GitHub-Api-Version" = "2022-11-28"
 };
-# Without a token GitHub allows 60 requests an hour
-if ($env:GITHUB_TOKEN) {
-    $headers.Authorization = "Bearer $env:GITHUB_TOKEN";
+# Without a token GitHub allows 60 requests an hour, with one 5000. $env:GITHUB_TOKEN wins, otherwise the
+# "GitHub:Token" secret from the shell vault (Set-ShellSecret.ps1 -Name "GitHub:Token" -secret <PAT>)
+$githubToken = $env:GITHUB_TOKEN;
+if (!$githubToken) {
+    try { $githubToken = & "$PSScriptRoot/../../../Shared/Secrets/Get-ShellSecret.ps1" -Name "GitHub:Token" -ErrorAction Stop; }
+    catch { Write-Host "[INFO] No GitHub token in the vault ($_), using the 60 requests/hour limit." -ForegroundColor DarkGray; }
+}
+if ($githubToken) {
+    $headers.Authorization = "Bearer $githubToken";
 }
 
 # The latest release read from the github.com pages, which have no hourly limit. Only the tag and the
