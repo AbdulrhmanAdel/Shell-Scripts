@@ -22,8 +22,13 @@ A large collection of PowerShell scripts for automating and enhancing Windows wo
 - **Tools/**: General utilities (hashing, copying, syncing, ownership, etc.).
 - **Torrent/**: Torrent file utilities.
 - **Platforms/Windows/**: Windows setup, tweaks, and package installation, plus the Windows version of the commands in `Platforms/Windows/Commands`.
-- **Platforms/Linux/**: The Linux version of the commands in `Platforms/Linux/Commands`.
+- **Platforms/Linux/**: The Linux version of the commands in `Platforms/Linux/Commands`. Also `Scripts/` (bash for VM disks, Wine prefixes and exe icons) and `pwsh/` (`Run-With-Pwsh.sh`, which runs a script in a Konsole).
 - **Youtube/**: YouTube downloaders and helpers.
+
+---
+## Menus
+
+The right-click and Send To menus are in the separate `Context` project, which calls the scripts here through the `Shell-Scripts` environment variable. `Shared/Module-Picker.ps1` and the `Module.ps1` files stay here because they are the menu at run time.
 
 ---
 ## Cross-platform commands
