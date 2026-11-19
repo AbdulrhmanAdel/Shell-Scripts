@@ -5,6 +5,15 @@ param (
     $Files
 )
 
+if (!$IsWindows) {
+    $owner = "$(id -un):$(id -gn)";
+    Write-Host "Taking ownership as ${owner}:";
+    $Files | ForEach-Object { Write-Host "  $_"; };
+    & sudo chown -R -- $owner @Files;
+    Write-Host ($LASTEXITCODE -eq 0 ? "Done." : "Failed.");
+    return;
+}
+
 & Run-AsAdmin.ps1 -Arguments ($Files | ForEach-Object {return """$_"""});
 Write-Host $Files;
 $takeOwn = "TakeOwn";

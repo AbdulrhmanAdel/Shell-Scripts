@@ -8,14 +8,48 @@
 # -z	Zero free space (good for virtual disk optimization).
 # -nobanner	Do not display the startup banner and copyright message.
 
-[CmdletBinding()]
+[CmdletBinding(PositionalBinding = $false)]
 param (
     [switch]$Prompt,
     [switch]$PromptPasses,
+    [int]$Passes = 1,
+    [switch]$ZeroFill,
     [switch]$RunAsAdmin,
     [Parameter(ValueFromRemainingArguments = $true)]
     $Files
 )
+
+if (!$IsWindows) {
+    $shredArguments = $ZeroFill ? @('-n', '0', '-z') : @('-n', $Passes);
+    Write-Host "These Files Are going to be deleted:" -ForegroundColor Green;
+    $Files | ForEach-Object { Write-Host $_ -ForegroundColor Red; };
+    if ($Prompt -and !(Prompt.ps1 -Message "This cannot be undone. Continue?")) {
+        Write-Host "ABORTED" -ForegroundColor Red;
+        return;
+    }
+
+    foreach ($file in $Files) {
+        $item = Get-Item -LiteralPath $file -Force -ErrorAction SilentlyContinue;
+        if (!$item) {
+            Write-Host "Not found: $file" -ForegroundColor Red;
+        }
+        elseif ($item.LinkType) {
+            & rm -- $file;
+        }
+        elseif ($item.PSIsContainer) {
+            & find $file -not -type l -exec chmod u+w -- '{}' + 2>$null;
+            & find $file -type f -exec shred -u -v @shredArguments -- '{}' +;
+            & rm -rf -- $file;
+        }
+        else {
+            & chmod u+w -- $file 2>$null;
+            & shred -u -v @shredArguments -- $file;
+        }
+    }
+
+    Write-Host "Done.";
+    return;
+}
 
 if ($RunAsAdmin) {
     Run-AsAdmin.ps1 -Arguments (@(
