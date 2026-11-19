@@ -60,6 +60,7 @@ function New-Result {
         Message    = $Message
         Running    = @($script:runningNames)
         Restarted  = @($script:restarted)
+        DownloadPath = $downloaderArtifacts.DownloadPath
     }
 }
 
@@ -73,6 +74,52 @@ function Confirm-Step {
         return $Default;
     }
     return Prompt.ps1 -Title "App Updater - $appName" -Message $Message -DefaultValue $Default;
+}
+
+# This app's package in a folder brought from another device (software updater -ExportTo, then its Download.ps1).
+# Goes by what is in the folder and never online, so a release that came out since then cannot start a download.
+function Get-TransferredPackage {
+    $root = $env:APP_UPDATER_PACKAGES;
+    $manifest = Join-Path $root 'manifest.json';
+    if (!(Test-Path -LiteralPath $manifest)) {
+        return @{ NotHere = "No manifest.json in $root." };
+    }
+    $entries = @(Get-Content -LiteralPath $manifest -Raw | ConvertFrom-Json);
+    $entry = $entries | Where-Object App -eq $appName | Select-Object -First 1;
+    if (!$entry) {
+        return @{ NotHere = "$appName is not in $root." };
+    }
+    if (!(& "$PSScriptRoot/Downloaders/_Version-Compare.ps1" -CurrentVersion $oldVersion -NewVersion $entry.Version)) {
+        return @{ HasNewVersion = $false; LatestVersion = $entry.Version };
+    }
+
+    $path = Join-Path $root $entry.Path;
+    if (!(Test-Path -LiteralPath $path -PathType Leaf)) {
+        # Saved by hand or by a phone's download manager (1DM+ sorts into subfolders): anywhere in the folder, by its
+        # name or the link's, but never another entry's file. The one with the expected size first, then the shallowest.
+        $names = @($entry.FileName, [uri]::UnescapeDataString(([uri]$entry.Url).Segments[-1]));
+        $taken = @($entries | Where-Object Path -ne $entry.Path | ForEach-Object { [IO.Path]::GetFullPath((Join-Path $root $_.Path)) });
+        $path = Get-ChildItem -LiteralPath $root -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -in $names -and $_.FullName -notin $taken } |
+            Sort-Object { $entry.ExpectedSize -gt 0 -and $_.Length -ne $entry.ExpectedSize }, { $_.FullName.Length } |
+            Select-Object -First 1 -ExpandProperty FullName;
+    }
+    if (!$path) {
+        return @{ NotHere = "$appName $($entry.Version) is not downloaded yet, expected $($entry.Path)." };
+    }
+    if ($entry.ExpectedSize -gt 0 -and (Get-Item -LiteralPath $path).Length -ne $entry.ExpectedSize) {
+        return @{ HasNewVersion = $true; LatestVersion = $entry.Version; Message = "$path has the wrong size, expected $($entry.ExpectedSize) bytes" };
+    }
+    if ($CheckOnly) {
+        return @{ HasNewVersion = $true; LatestVersion = $entry.Version };
+    }
+
+    # Into the same cache as a download. The folder may be on a USB drive (no executable bit), installers may work beside
+    # the package, and a corrupt archive gets deleted, which should not cost the only copy.
+    $cached = "$(Get-TempScriptPath.ps1)/App_Updaters/$("$($entry.Version)" -replace '[\\/:*?"<>|\s]', '_')/$($entry.FileName)";
+    New-Item -ItemType Directory -Force (Split-Path $cached) | Out-Null;
+    Copy-Item -LiteralPath $path -Destination $cached -Force;
+    return @{ HasNewVersion = $true; LatestVersion = $entry.Version; DownloadPath = $cached };
 }
 
 # Mandatory parameters of a step script that are not supplied, so it fails here instead of prompting mid-update
@@ -298,12 +345,25 @@ Remove-SwappedOutVersions -Folders $appFolders;
 
 Write-Host "Starting update process for $appName" -ForegroundColor Green;
 Write-Host "===================== Download =====================" -ForegroundColor Green;
-$downloaderArtifacts = ExecuteScript -Path "Downloaders" -AdditionalArgs @{
-    CurrentVersion = $oldVersion
-    CheckOnly      = $CheckOnly
-} -Item $Downloader;
+if ($env:APP_UPDATER_PACKAGES) {
+    $downloaderArtifacts = Get-TransferredPackage;
+}
+else {
+    # APP_UPDATER_PLAN_FILE: the downloader goes as far as the final link, and _Downloader records it instead of downloading
+    if ($env:APP_UPDATER_PLAN_FILE) {
+        $env:APP_UPDATER_APP_NAME = $appName;
+    }
+    $downloaderArtifacts = ExecuteScript -Path "Downloaders" -AdditionalArgs @{
+        CurrentVersion = $oldVersion
+        CheckOnly      = $CheckOnly -and !$env:APP_UPDATER_PLAN_FILE
+    } -Item $Downloader;
+}
 Write-Host "===================== End Download =====================" -ForegroundColor Green;
 $newVersion = $downloaderArtifacts.LatestVersion;
+
+if ($downloaderArtifacts.NotHere) {
+    return New-Result 'Skipped' $downloaderArtifacts.NotHere;
+}
 
 if (!$downloaderArtifacts.HasNewVersion) {
     if ($downloaderArtifacts.Message) {

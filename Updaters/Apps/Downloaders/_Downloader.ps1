@@ -15,6 +15,41 @@ param (
     $UserAgent
 )
 
+# Software updater -ExportTo: only record the final link, another device downloads it. Nothing is downloaded here.
+if ($env:APP_UPDATER_PLAN_FILE) {
+    $size = $ExpectedSize;
+    $name = $FileName ? "$FileName" : [uri]::UnescapeDataString(([uri]$Url).Segments[-1]);
+    if ($size -le 0 -or $UserAgent) {
+        try {
+            $headArgs = @{ Uri = $Url; Method = 'Head'; TimeoutSec = 15; UseBasicParsing = $true; ErrorAction = 'Stop' };
+            if ($UserAgent) {
+                $headArgs.UserAgent = $UserAgent;
+            }
+            $head = Invoke-WebRequest @headArgs;
+            if ($size -le 0) {
+                # Only to show the size of the whole download. Not exact enough to reject a file later, unlike ExpectedSize.
+                $size = [long]($head.Headers['Content-Length'] | Select-Object -First 1);
+            }
+            # A phone's download manager (1DM+) or browser cannot send this agent, so record where it leads instead
+            # (SourceForge: the mirror's file, which any agent gets; it expires after about a day)
+            if ($UserAgent -and $head.BaseResponse.RequestMessage.RequestUri) {
+                $Url = "$($head.BaseResponse.RequestMessage.RequestUri.AbsoluteUri)";
+            }
+        }
+        catch {}
+    }
+    @{
+        App          = $env:APP_UPDATER_APP_NAME
+        Url          = $Url
+        FileName     = $name
+        Version      = $Version
+        ExpectedSize = $ExpectedSize
+        Size         = $size
+        UserAgent    = $UserAgent
+    } | ConvertTo-Json -Compress | Add-Content -LiteralPath $env:APP_UPDATER_PLAN_FILE;
+    return $null;
+}
+
 $FileName ??= Random-FileName.ps1;
 $parentPath = "$(Get-TempScriptPath.ps1)/App_Updaters"
 if ($Version) {
