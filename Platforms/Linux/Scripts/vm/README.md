@@ -15,9 +15,9 @@ The mount is owned by the user who ran it (through `PKEXEC_UID` or the current u
 It refuses to run while a running VM uses the image. Shut the VM down first.
 
 `raw-open.sh <image.raw>` runs `raw-mount.sh mount` through pkexec, opens the mount point, and shows any error in a dialog.
-Double-clicking a `.raw` file runs it: `desktop/kde/mime/vm-raw-disk.xml` makes `.raw` its own file type (VM raw disk
-image, instead of Panasonic RAW photo) and `desktop/kde/apps/vm-raw-mount.desktop` is the default app for it.
+Double-clicking a `.raw` file runs it: `linux/kde/mime/vm-raw-disk.xml` makes `.raw` its own file type (VM raw disk
+image, instead of Panasonic RAW photo) and `linux/kde/apps/vm-raw-mount.desktop` is the default app for it.
 
-The right-click entries (Tools > Mount VM Disk And Open, Unmount VM Disk) live in `desktop/kde/menus/1-tools/50-vm.desktop`. Install all of it with `desktop/kde/install.sh`.
+The right-click entries (Tools > Mount VM Disk And Open, Unmount VM Disk) live in `linux/kde/menus/1-tools/50-vm.desktop`. Install all of it with `linux/kde/install.sh`.
 
 Requires `ntfs-3g`, `pkexec`, and `virsh`.

@@ -100,7 +100,7 @@ if (!$ShellProjectPath -or -not (Test-Path -LiteralPath $ShellProjectPath)) {
 
 RunPowershell "$ShellProjectPath\Setup-EnvironmentVariable.ps1" -NoTimeout;
 $env:Path += ";" + [System.Environment]::GetEnvironmentVariable("Path", "User");
-$ContextWindowsPath = "$ShellProjectPath\..\Context\desktop\windows";
+$ContextWindowsPath = "$ShellProjectPath\..\Context\windows";
 RunPowershell -Path "$ContextWindowsPath\Setup-ContextMenu.ps1" -AdditionalArgs @("-NoTimeout")
 RunPowershell -Path "$ContextWindowsPath\Setup-SendToMenu.ps1" -AdditionalArgs @("-NoTimeout")
 # #endregion
