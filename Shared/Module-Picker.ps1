@@ -11,6 +11,10 @@ $Module = Single-Options-Selector.ps1 -Options @(
         Value = @{ Title = "Media"; Path = "$PSScriptRoot/../Media/Module.ps1" };
     }
     @{
+        Key   = "Notion";
+        Value = @{ Title = "Notion"; Path = "$PSScriptRoot/../Notion/Module.ps1" };
+    }
+    @{
         Key   = "Subtitles";
         Value = @{ Title = "Subtitles"; Path = "$PSScriptRoot/../Subtitles/Module.ps1" };
     }

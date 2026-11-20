@@ -15,6 +15,7 @@ A large collection of PowerShell scripts for automating and enhancing Windows wo
 - **Icons/**: Icon conversion, cache refresh, and folder icon management.
 - **Media/**: Video/audio/image compression, chapter handling, file renaming, and more.
 - **NativeHosts/**: Native messaging hosts for browser extensions (Integrate with my extensions' project).
+- **Notion/**: Send things to Notion. `Add-Movie` adds a movie file to the Movies database (needs the `Notion:ApiKey` secret, set with `Set-ShellSecret.ps1`).
 - **Playground/**: Experimental scripts.
 - **Shared/**: Common utilities (encoding, renaming, extension communication, etc.).
 - **Socials/**: Social media-related scripts.

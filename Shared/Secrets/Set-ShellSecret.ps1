@@ -8,5 +8,5 @@ param (
     $secret
 )
 
-$SecureString = ConvertTo-SecureString -String $secret -AsPlainText -Force;
+$SecureString = [System.Net.NetworkCredential]::new("", $secret).SecurePassword;
 Set-Secret -Name $Name -Vault ShellScriptVault -SecureStringSecret $SecureString;
